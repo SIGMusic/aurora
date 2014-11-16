@@ -3,7 +3,10 @@
  * Arduino receiver firmware
  */
 
-#define HEADER_LENGTH       6
+#include "Arduino.h"
+#include "bluetooth.h"
+
+#define HEADER_LENGTH       4
 #define DATA_LENGTH         3
 #define CHECKSUM_LENGTH     1
 #define PACKET_LENGTH       (HEADER_LENGTH + DATA_LENGTH + CHECKSUM_LENGTH)
@@ -12,14 +15,28 @@
 #define DATA_INDEX          (HEADER_LENGTH)
 #define CHECKSUM_INDEX      (HEADER_LENGTH + DATA_LENGTH)
 
-const uint8_t validHeader[] = {'S','I','G','M','U','S'};
+//The pins that each switch is attached to
+#define SWITCH_0            2
+#define SWITCH_1            3
+#define SWITCH_2            4
+#define SWITCH_3            5
+#define SWITCH_4            6
+#define SWITCH_5            7
+#define SWITCH_6            8
+#define SWITCH_7            9
+
+const uint8_t validHeader[] = {'S','I','G','M'};
+uint8_t myChannel = 0xFF; //The address of the current light, set by DIP switch
 
 void setup() {
-    //Initialize serial over Bluetooth
-    Serial.begin(9600);
-
     //Initialize the built-in LED to output (for debugging)
     pinMode(LED_BUILTIN, OUTPUT);
+
+    initSwitches();
+    myChannel = readChannel();
+    Bluetooth.begin(19200, myChannel);
+    Serial.print("Channel ");
+    Serial.println(myChannel);
 }
 
 void loop() {
@@ -33,51 +50,80 @@ void loop() {
         if (currentIndex < HEADER_LENGTH) {
             //We haven't yet received a valid header
             if (receivedByte == validHeader[currentIndex]) {
-                Serial.print("Received valid header byte ");
-                Serial.print(receivedByte);
-                Serial.print(" at index ");
-                Serial.println(currentIndex);
                 //The received byte matches the header. Move to the next index.
                 currentIndex++;
             } else {
-                Serial.print("Received INVALID header byte ");
-                Serial.print(receivedByte);
-                Serial.print(" at index ");
-                Serial.println(currentIndex);
                 //The received byte doesn't match. Restart the state machine.
                 currentIndex = 0;
+                Serial.println("NAK");
             }
         } else {
             //We have received a valid header
              if (currentIndex < CHECKSUM_INDEX) {
-                Serial.print("Received data byte ");
-                Serial.print(receivedByte, HEX);
-                Serial.print(" at index ");
-                Serial.println(currentIndex);
                 //Store the temporary RGB values until we validate the checksum
                 tempRGB[currentIndex - DATA_INDEX] = receivedByte;
                 currentIndex++;
              } else {
-                Serial.print("Received checksum ");
-                Serial.print(receivedByte, HEX);
-                Serial.print(" at index ");
-                Serial.println(currentIndex);
                 //Validate the checksum
                 if (calculateChecksum(tempRGB) == receivedByte) {
-                    Serial.println("Checksum was valid");
                     /* It's valid. Set the new RGB values and restart the state
                      * machine.
                      */
                     setRGB(tempRGB[0], tempRGB[1], tempRGB[2]);
                     currentIndex = 0;
+                    Serial.println("OK");
                 } else {
-                    Serial.println("Checksum was INVALID");
                     //The checksum is invalid. Restart the state machine.
                     currentIndex = 0;
+                    Serial.println("NAK");
                 }
              }
         }
     }
+}
+
+/**
+ * Sets up the DIP switches as inputs with internal pullup resistors.
+ */
+void initSwitches() {
+    pinMode(SWITCH_0, INPUT_PULLUP);
+    pinMode(SWITCH_1, INPUT_PULLUP);
+    pinMode(SWITCH_2, INPUT_PULLUP);
+    pinMode(SWITCH_3, INPUT_PULLUP);
+    pinMode(SWITCH_4, INPUT_PULLUP);
+    pinMode(SWITCH_5, INPUT_PULLUP);
+    pinMode(SWITCH_6, INPUT_PULLUP);
+    pinMode(SWITCH_7, INPUT_PULLUP);
+}
+
+/**
+ * Updates this node's channel from the DIP switches.
+ * @return The channel read from the DIP switches
+ */
+uint8_t readChannel() {
+    /* Read the switch values. Since we're using the internal pullup resistor,
+     * the bits are inverted. A HIGH signal means the switch is open.
+     */
+    int bit0 = (digitalRead(SWITCH_0) == HIGH ? 0 : 1);
+    int bit1 = (digitalRead(SWITCH_1) == HIGH ? 0 : 1);
+    int bit2 = (digitalRead(SWITCH_2) == HIGH ? 0 : 1);
+    int bit3 = (digitalRead(SWITCH_3) == HIGH ? 0 : 1);
+    int bit4 = (digitalRead(SWITCH_4) == HIGH ? 0 : 1);
+    int bit5 = (digitalRead(SWITCH_5) == HIGH ? 0 : 1);
+    int bit6 = (digitalRead(SWITCH_6) == HIGH ? 0 : 1);
+    int bit7 = (digitalRead(SWITCH_7) == HIGH ? 0 : 1);
+
+    //Build the channel from the bits
+    uint8_t myChannel = bit0;
+    myChannel |= bit1 << 1;
+    myChannel |= bit2 << 2;
+    myChannel |= bit3 << 3;
+    myChannel |= bit4 << 4;
+    myChannel |= bit5 << 5;
+    myChannel |= bit6 << 6;
+    myChannel |= bit7 << 7;
+
+    return myChannel;
 }
 
 /**
