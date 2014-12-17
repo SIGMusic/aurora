@@ -55,7 +55,7 @@ void loop() {
             } else {
                 //The received byte doesn't match. Restart the state machine.
                 currentIndex = 0;
-                Serial.println("NAK");
+                Serial.println("ERR");
             }
         } else {
             //We have received a valid header
@@ -75,7 +75,7 @@ void loop() {
                 } else {
                     //The checksum is invalid. Restart the state machine.
                     currentIndex = 0;
-                    Serial.println("NAK");
+                    Serial.println("ERR");
                 }
              }
         }
