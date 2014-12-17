@@ -25,7 +25,7 @@
 #define SWITCH_6            8
 #define SWITCH_7            9
 
-const uint8_t validHeader[] = {'S','I','G','M'};
+const uint8_t validHeader[HEADER_LENGTH] = {'S','I','G','M'};
 uint8_t myChannel = 0xFF; //The address of the current light, set by DIP switch
 
 void setup() {
