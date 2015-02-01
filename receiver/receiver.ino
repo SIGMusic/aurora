@@ -23,9 +23,6 @@ const uint8_t validHeader[HEADER_LENGTH] = {'S','I','G','M'};
 uint8_t myChannel = 0xFF; //The address of the current light, set by DIP switch
 
 void setup() {
-    //Initialize the built-in LED to output (for debugging)
-    pinMode(LED_BUILTIN, OUTPUT);
-
     Serial.begin(19200);
     Serial.println("Ready");
 }
@@ -96,4 +93,10 @@ void setRGB(uint8_t red, uint8_t green, uint8_t blue) {
     analogWrite(RED_PIN, red);
     analogWrite(GREEN_PIN, green);
     analogWrite(BLUE_PIN, blue);
+
+    //Debug
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, LOW);
 }
