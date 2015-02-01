@@ -4,7 +4,6 @@
  */
 
 #include "Arduino.h"
-#include "bluetooth.h"
 
 #define HEADER_LENGTH       4
 #define DATA_LENGTH         3
