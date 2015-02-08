@@ -23,7 +23,7 @@ const uint8_t validHeader[HEADER_LENGTH] = {'S','I','G','M'};
 uint8_t myChannel = 0xFF; //The address of the current light, set by DIP switch
 
 void setup() {
-    Serial.begin(19200);
+    Serial.begin(19200); //sends data at 19200 bits per second
     Serial.println("Ready");
 }
 
