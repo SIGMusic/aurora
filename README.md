@@ -1,4 +1,4 @@
-Lights2015
+tonal-lightfield
 ==========
 
 Lights for the SIGMusic EOH 2015 project
