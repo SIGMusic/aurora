@@ -4,7 +4,7 @@ from light import Light
 # Stores each light
 lights = {}
 
-def find_lights:
+def find_lights():
     """ Finds nearby lights and adds them to the dictionary """
     nearby_devices = bt.discover_devices()
 
