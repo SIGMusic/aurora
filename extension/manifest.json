@@ -20,7 +20,8 @@
   },
   "externally_connectable": {
     "matches": [
-      "http://tonal-starfield.herokuapp.com/*"
+      "http://tonal-starfield.herokuapp.com/*",
+      "http://localhost/*"
     ]
   }
 }
