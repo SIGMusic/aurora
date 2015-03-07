@@ -1,0 +1,21 @@
+{
+  // Required
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "manifest_version": 2,
+  "name": "tonal-lightfield",
+  "version": "0.1",
+
+  // Recommended
+  "description": "A driver for the 2015 SIGMusic Bluetooth lights",
+
+  // Optional
+  "author": "SIGMusic, ACM@UIUC",
+  "bluetooth": {
+    "uuids": ["1105", "1106"],
+    "socket": true
+  }
+}
