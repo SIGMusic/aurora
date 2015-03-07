@@ -132,3 +132,22 @@ function setRGB(num, red, green, blue) {
         }
     });
 }
+
+chrome.runtime.onMessageExternal.addListener(
+    function(request, sender, sendResponse) {
+        var num = request.light;
+        var red = request.red;
+        var green = request.green;
+        var blue = request.blue;
+        setRGB(num, red, green, blue);
+});
+
+/**
+ *  External messaging API sample usage:
+ */
+// // The ID of the extension we want to talk to.
+// var extensionId = "abcdefghijklmnoabcdefhijklmnoabc";
+
+// // Make a simple request:
+// chrome.runtime.sendMessage(extensionId, {num: 1, red: 255, green: 0, blue: 0},
+//   function(response) { /* No response */ });
