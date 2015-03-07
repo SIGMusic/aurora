@@ -119,6 +119,15 @@ function onConnectedCallback() {
  *  @param blue     The new blue value of the light
  */
 function setRGB(num, red, green, blue) {
+    if (red == undefined) {
+        red = 0;
+    }
+    if (green == undefined) {
+        green = 0;
+    }
+    if (blue == undefined) {
+        blue = 0;
+    }
     var buffer = new ArrayBuffer(8);
     var byteView = new Uint8Array(buffer);
     var checksum = (red + green + blue) % 256;
@@ -139,7 +148,9 @@ chrome.runtime.onMessageExternal.addListener(
         var red = request.red;
         var green = request.green;
         var blue = request.blue;
-        setRGB(num, red, green, blue);
+        if (num != undefined) {
+            setRGB(num, red, green, blue);
+        }
 });
 
 /**
@@ -149,5 +160,5 @@ chrome.runtime.onMessageExternal.addListener(
 // var extensionId = "abcdefghijklmnoabcdefhijklmnoabc";
 
 // // Make a simple request:
-// chrome.runtime.sendMessage(extensionId, {num: 1, red: 255, green: 0, blue: 0},
+// chrome.runtime.sendMessage(extensionId, {light: 1, red: 255, green: 0, blue: 0},
 //   function(response) { /* No response */ });
