@@ -1,5 +1,6 @@
 import bluetooth as bt
 from light import Light
+import colorsys
 
 # Stores each light
 lights = {}
@@ -34,6 +35,9 @@ def find_lights():
 while not find_lights():
     pass
 
-for light in lights:
-    # Test all lights by setting them to red
-    lights[light].send_rgb(0, 255, 0)
+while True:
+    for light in lights:
+        # Test all lights by cycling the hue
+        for hue in [x/256 for x in range(0, 255)]:
+            rgb = colorsys.hsv_to_rgb(hue, 1, 1)
+            lights[light].send_rgb(int(255*rgb[0]), int(255*rgb[1]), int(255*rgb[2]))
