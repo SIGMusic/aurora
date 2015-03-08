@@ -10,6 +10,7 @@ def find_lights():
 
     for address in nearby_devices:
         name = bt.lookup_name(address)
+        print("Found device", name)
         # Ignore non-lights
         if name.startswith("Light"):
             # Get the light number from the Bluetooth name
@@ -22,10 +23,10 @@ def find_lights():
                 # print "Found light", num
 
     if lights:
-        print "Found lights: ", lights.keys()
+        print("Found lights: ", lights.keys())
         return len(lights)
     else:
-        print "Couldn't find any lights!"
+        print("Couldn't find any lights!")
         return 0
 
 
@@ -33,6 +34,6 @@ def find_lights():
 while not find_lights():
     pass
 
-for light in endpoints:
+for light in lights:
     # Test all lights by setting them to red
-    lights[light].send_rgb(255, 0, 0)
+    lights[light].send_rgb(0, 255, 0)
