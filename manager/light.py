@@ -35,7 +35,7 @@ class Light:
         except:
             print("Could not connect to light", self.num)
             return
-        self.is_connected = true
+        self.is_connected = True
 
         return sock
 
