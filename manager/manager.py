@@ -1,6 +1,7 @@
 import bluetooth as bt
 from light import Light
 import websocket
+import json
 import colorsys
 
 # Stores each light
@@ -47,6 +48,8 @@ def cycle_hue():
 
 def on_message(ws, message):
     print("Websocket:", message)
+    json_dict = json.loads(message)
+    print("RGB:", (json_dict.color.r, json_dict.color.g, json_dict.color.b))
 
 def on_error(ws, error):
     print("Websocket error:", error)
