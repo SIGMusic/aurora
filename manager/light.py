@@ -41,8 +41,9 @@ class Light:
 
     def disconnect_light(self):
         """ Closes the socket connection """
-        # Close the socket gracefully
-        self.socket.close()
+        if self.is_connected:
+            # Close the socket gracefully
+            self.socket.close()
         
         # Don't try to use the socket again
         self.socket = None
