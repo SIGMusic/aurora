@@ -24,7 +24,7 @@ class Light:
         # but it's only available on Linux. We want it to transmit RGB
         # data in real time, dropping packets if necessary. Order matters.
         # port = bt.get_available_port(bt.L2CAP) # Deprecated
-        port = bt.PORT_ANY
+        port = 1
 
         # Create the socket
         sock = bt.BluetoothSocket(bt.RFCOMM)
