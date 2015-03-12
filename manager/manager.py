@@ -1,5 +1,6 @@
 import bluetooth as bt
 from light import Light
+import websocket
 import colorsys
 
 # Stores each light
@@ -11,20 +12,17 @@ def find_lights():
 
     for address in nearby_devices:
         name = bt.lookup_name(address)
-        print("Found device", name)
         # Ignore non-lights
         if name.startswith("Light"):
             # Get the light number from the Bluetooth name
             num = int(name[-2:])
-
             # Check to see if we already found the light
             if not num in lights:
                 # Create a light object
-                lights[num] = Light(address)
-                # print "Found light", num
+                print("Found light", num)
+                lights[num] = Light(address, num)
 
     if lights:
-        print("Found lights: ", lights.keys())
         return len(lights)
     else:
         print("Couldn't find any lights!")
