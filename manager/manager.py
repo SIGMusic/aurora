@@ -45,17 +45,31 @@ def cycle_hue():
                 rgb = colorsys.hsv_to_rgb(hue, 1, 1)
                 lights[light].send_rgb(int(255*rgb[0]), int(255*rgb[1]), int(255*rgb[2]))
 
+def on_message(ws, message):
+    print("Websocket:", message)
+
+def on_error(ws, error):
+    print("Websocket error:", error)
+    print("Falling back to cycling hue")
+    cycle_hue()
+
+def on_close(ws):
+    print("Websocket closed")
+
+def on_open(ws):
+    print("Websocket connected")
+
 # Wait until at least one light has been discovered
-while not find_lights():
-    pass
+# while not find_lights():
+    # pass
 
 # Connect to websocket from simulation
 LIGHTS_PORT = 7445
 ws_url = "ws://tonal-starfield.herokuapp.com:%s" % LIGHTS_PORT
 print("Connecting to websocket (%s)..." % ws_url)
-try:
-    ws = websocket.create_connection(ws_url)
-except:
-    print("Error connecting websocket! Falling back to cycling hue")
-    cycle_hue()
-print("Connected!")
+ws = websocket.WebSocketApp(ws_url,
+                          on_open = on_open,
+                          on_message = on_message,
+                          on_error = on_error,
+                          on_close = on_close)
+ws.run_forever()
