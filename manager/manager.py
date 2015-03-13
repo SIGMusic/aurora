@@ -144,9 +144,18 @@ def frame_update():
             red += color[light][0]
             green += color[light][1]
             blue += color[light][2]
-        red = min(red*255, 255)
-        green = min(green*255, 255)
-        blue = min(blue*255, 255)
+        red = min(red*255/len(lights), 255)
+        green = min(green*255/len(lights), 255)
+        blue = min(blue*255/len(lights), 255)
+
+        # Extremely "robust" error handling (read: weird bug avoidance)
+        if red != red:
+            red = 0
+        if green != green:
+            green = 0
+        if blue != blue:
+            blue = 0
+
         print("Light", light, "RGB:", red, green, blue)
         lights[light].send_rgb(int(red), int(green), int(blue))
 

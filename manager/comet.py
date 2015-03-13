@@ -1,6 +1,6 @@
 import colorsys
 import time
-from math import sqrt
+from math import sqrt, log
 
 class Comet:
     """A class to represent a Comet and calculate color components for lights"""
@@ -20,14 +20,23 @@ class Comet:
     def get_position(self):
         """ Returns the current position of the comet """
         age = self.get_age()
-        new_pos = (self.initial_position[0] + age*self.velocity[0]/10,
-                   self.initial_position[1] + age*self.velocity[1]/10,
-                   self.initial_position[2] + age*self.velocity[2]/10)
+        new_pos = (self.initial_position[0],# + age*self.velocity[0]/10,
+                   self.initial_position[1],# + age*self.velocity[1]/10,
+                   self.initial_position[2] + age*-200)#self.velocity[2]/10)
         return new_pos
 
     def get_colors(self, lights):
         """ Returns a dictionary containing the HSL color the comet contributes
             to each light at the current time """
+        # age = self.get_age()
+        # color = {}
+        # for light in lights:
+        #     hsl = self.hsl.copy()
+        #     hsl["l"] = hsl["l"] /age
+        #     color[light] = colorsys.hsv_to_rgb(hsl["h"], hsl["s"], hsl["l"])
+        # return color
+
+
         pos = self.get_position()
         print(pos)
         color = {}
@@ -40,8 +49,8 @@ class Comet:
             print("Distance:", distance)
 
             # Calculate the color contribution from each light
-            hsl = self.hsl
-            hsl["l"] = hsl["l"] * 1000 / distance**0.75 # Intensity falls as distance^2
+            hsl = self.hsl.copy()
+            hsl["l"] = hsl["l"] * 1000000 / distance**2 # Intensity falls as distance^2
             color[light] = colorsys.hsv_to_rgb(hsl["h"], hsl["s"], hsl["l"])
 
         return color
