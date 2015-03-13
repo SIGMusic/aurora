@@ -169,6 +169,6 @@ while not find_lights():
 
 print("Starting websocket IO loop")
 application.listen(7445)
-timer = tornado.ioloop.PeriodicCallback(frame_update, 5)
+timer = tornado.ioloop.PeriodicCallback(frame_update, 50)
 timer.start()
 tornado.ioloop.IOLoop.instance().start()

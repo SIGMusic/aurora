@@ -11,11 +11,11 @@ def calculate_light_pos(num):
     elif num == 4:
         return (500, -500, 500)
     elif num == 5:
-        return (500, 0, 1000)
+        return (500, 0, 750)
     elif num == 6:
-        return (500, 0, 2000)
+        return (500, 0, 1000)
     elif num == 7:
-        return (500, 0, 3000)
+        return (500, 0, 2000)
     # elif num == 8:
     #     return (0, 0, 0)
     else:

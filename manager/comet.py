@@ -20,9 +20,9 @@ class Comet:
     def get_position(self):
         """ Returns the current position of the comet """
         age = self.get_age()
-        new_pos = (self.initial_position[0],# + age*self.velocity[0]/10,
-                   self.initial_position[1],# + age*self.velocity[1]/10,
-                   self.initial_position[2] + age*-200)#self.velocity[2]/10)
+        new_pos = (self.initial_position[0] + age*self.velocity[0]/10,
+                   self.initial_position[1] + age*self.velocity[1]/10,
+                   self.initial_position[2] + age*self.velocity[2]/10)
         return new_pos
 
     def get_colors(self, lights):
