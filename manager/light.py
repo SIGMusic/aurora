@@ -23,7 +23,7 @@ def calculate_light_pos(num):
 
 class Light:
     """A class to interact with Bluetooth SIGMusic lights"""
-    self.rgb = (0,0,0)
+
     def __init__(self, address, num):
         """ Constructor """
         self.num = num
@@ -36,6 +36,7 @@ class Light:
             raise ValueError("invalid Bluetooth address")
             return
         self.socket = self.connect_light()
+        self.rgb = (0,0,0)
 
     def __del__(self):
         """ Destructor """
