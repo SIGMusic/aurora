@@ -95,13 +95,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         hsl = json_dict["colorHSL"]
         pos = json_dict["position"]
         lifespan = json_dict["lifespan"]
+        velocity = json_dict["velocity"]
+        far = json_dict["far"]
 
         print("RGB:", (rgb["r"], rgb["g"], rgb["b"]))
         print("HSL:", (hsl["h"], hsl["s"], hsl["l"]))
         print("Position:", (pos["x"], pos["y"], pos["z"]))
+        print("Velocity:", (velocity["x"], velocity["y"], velocity["z"]))
         print("Lifespan:", lifespan)
+        print("Far:", far)
+        # sleep(5)
 
-        comet = Comet(pos, hsl, lifespan)
+        comet = Comet(pos, velocity, hsl, lifespan, far)
         comets.append(comet)
 
     def on_close(self):
@@ -122,21 +127,28 @@ def frame_update():
     for comet in comets:
         if comet.get_age() < comet.lifespan:
             colors.append(comet.get_colors(lights))
+            # sleep(1)
         else:
             print("Comet too old:", comet)
             comets.remove(comet)
 
     # print(colors)
+    # print(len(colors))
     # sleep(1)
     # Get the average of the hues
-    mixed_colors = {}
     for light in lights:
-        rgb = {}
-        rgb["r"] = max(sum(colors[:][light]["r"]), 255)
-        rgb["g"] = max(sum(colors[:][light]["g"]), 255)
-        rgb["b"] = max(sum(colors[:][light]["b"]), 255)
-
-        mixed_colors[light] = rgb
+        red = 0
+        green = 0
+        blue = 0
+        for color in colors:
+            red += color[light][0]
+            green += color[light][1]
+            blue += color[light][2]
+        red = min(red*255, 255)
+        green = min(green*255, 255)
+        blue = min(blue*255, 255)
+        print("Light", light, "RGB:", red, green, blue)
+        lights[light].send_rgb(int(red), int(green), int(blue))
 
 
 # Wait until at least one light has been discovered

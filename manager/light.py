@@ -1,8 +1,25 @@
 import bluetooth as bt
 
 def calculate_light_pos(num):
-    pos = (0, 0, 0)
-    return pos
+    # TODO
+    if num == 1:
+        return (-1000, 500, 2000)
+    elif num == 2:
+        return (-1000, 500, 1000)
+    elif num == 3:
+        return (-500, -500, 500)
+    elif num == 4:
+        return (500, -500, 500)
+    elif num == 5:
+        return (500, 0, 1000)
+    elif num == 6:
+        return (500, 0, 2000)
+    elif num == 7:
+        return (500, 0, 3000)
+    # elif num == 8:
+    #     return (0, 0, 0)
+    else:
+        return (0, 0, 0)
 
 class Light:
     """A class to interact with Bluetooth SIGMusic lights"""
