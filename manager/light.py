@@ -1,5 +1,9 @@
 import bluetooth as bt
 
+def calculate_light_pos(num):
+    pos = (0, 0, 0)
+    return pos
+
 class Light:
     """A class to interact with Bluetooth SIGMusic lights"""
 
@@ -7,6 +11,8 @@ class Light:
         """ Constructor """
         self.num = num
         self.is_connected = False
+        self.pos = calculate_light_pos(num)
+
         if bt.is_valid_address(address):
             self.endpoint = address
         else:
