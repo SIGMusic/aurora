@@ -123,7 +123,7 @@ def frame_update():
     if len(comets) == 0:
         # twinkle twinkle
         for light in lights:
-            cur = light.rgb
+            cur = lights[light].rgb
             w = 0.9
             val = w*cur[1] + (1-w)*min(0,(10-randint(1,20)))
             lights[light].send_rgb(int(val), int(val), int(val))
