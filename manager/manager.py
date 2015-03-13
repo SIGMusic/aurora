@@ -8,6 +8,7 @@ import tornado.web
 import tornado.websocket
 import tornado.template
 import json
+from random import randint
 
 # Stores each light
 lights = {}
@@ -120,12 +121,18 @@ def frame_update():
     # Update the lights based on each comet
     colors = []
     if len(comets) == 0:
-        # Nothing to update
+        # twinkle twinkle
+        for light in lights:
+            cur = light.rgb
+            w = 0.9
+            val = w*cur[1] + (1-w)*(10-randint(1,20))
+            lights[light].send_rgb(int(val), int(val), int(val))
+        
         return
 
     # Get the colors from each comet
     for comet in comets:
-        if comet.get_age() < comet.lifespan:
+        if comet.get_age() < comet.lifespan * 2:
             colors.append(comet.get_colors(lights))
             # sleep(1)
         else:
@@ -155,6 +162,11 @@ def frame_update():
             green = 0
         if blue != blue:
             blue = 0
+        
+
+        #twinkling
+        
+        
 
         print("Light", light, "RGB:", red, green, blue)
         lights[light].send_rgb(int(red), int(green), int(blue))

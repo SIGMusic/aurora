@@ -77,3 +77,4 @@ class Light:
             checksum = (red + green + blue) % 256
             message = bytes([ord("S"), ord("I"), ord("G"), ord("M"), red, green, blue, checksum])
             self.socket.send(message)
+            self.rgb = (red, green, blue)
