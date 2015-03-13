@@ -1,11 +1,13 @@
 import bluetooth as bt
 from light import Light
 from comet import Comet
-# from SimpleWebSocketServer import WebSocket, SimpleWebSocketServer
-import json
 import colorsys
 from time import sleep
-
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import tornado.template
+import json
 
 # Stores each light
 lights = {}
@@ -77,54 +79,55 @@ def test_rgb():
                 lights[light].send_rgb(0, 0, 0)
 
 
-# class TonalLightfieldSocket(WebSocket):
 
-#     def handleMessage(self):
-#         # A comet was created
-#         if self.data is None:
-#             self.data = ''
+class WSHandler(tornado.websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True
 
-#         print("Websocket:", str(self.data))
-#         json_dict = json.loads(str(self.data))
-#         rgb = json_dict.color
-#         hsl = json_dict.colorHSL
-#         pos = json_dict.position
-#         lifespan = json_dict.lifespan
+    def open(self):
+        print("Websocket connection opened")
 
-#         print("RGB:", (rgb["r"], rgb["g"], rgb["b"]))
-#         print("HSL:", (hsl["h"], hsl["s"], hsl["l"]))
-#         print("Position:", (pos["x"], pos["y"], pos["z"]))
-#         print("Lifespan:", lifespan)
+    def on_message(self, message):
+        print("Websocket message received:", message)
 
-#         comet = Comet(pos, hsl, lifespan)
-#         comets.append(comet)
+        json_dict = json.loads(message)
+        rgb = json_dict["color"]
+        hsl = json_dict["colorHSL"]
+        pos = json_dict["position"]
+        lifespan = json_dict["lifespan"]
 
-#     def handleConnected(self):
-#         print("Websocket connected:", self.address)
+        print("RGB:", (rgb["r"], rgb["g"], rgb["b"]))
+        print("HSL:", (hsl["h"], hsl["s"], hsl["l"]))
+        print("Position:", (pos["x"], pos["y"], pos["z"]))
+        print("Lifespan:", lifespan)
 
-#     def handleClose(self):
-#         print("Websocket closed:", self.address)
+        comet = Comet(pos, hsl, lifespan)
+        comets.append(comet)
 
-# LIGHTS_PORT = 7445
-# server = SimpleWebSocketServer('', LIGHTS_PORT, TonalLightfieldSocket)
-# server.serveforever()
+    def on_close(self):
+        print("Websocket connection closed")
 
-# Wait until at least one light has been discovered
-while not find_lights():
-    pass
+application = tornado.web.Application([
+    (r'/', WSHandler),
+])
 
-test_rgb()
-
-# Update the lights based on each comet
-while True:
-    # Get the colors from each comet
+def frame_update():
+    # Update the lights based on each comet
     colors = []
-    for comet in comets:
-        if comets[comet].get_age() > comets[comet].lifespan:
-            comets.remove(comet)
-        else:
-            colors.append(comets[comet].get_colors())
+    if len(comets) == 0:
+        # Nothing to update
+        return
 
+    # Get the colors from each comet
+    for comet in comets:
+        if comet.get_age() < comet.lifespan:
+            colors.append(comet.get_colors(lights))
+        else:
+            print("Comet too old:", comet)
+            comets.remove(comet)
+
+    # print(colors)
+    # sleep(1)
     # Get the average of the hues
     mixed_colors = {}
     for light in lights:
@@ -134,3 +137,17 @@ while True:
         rgb["b"] = max(sum(colors[:][light]["b"]), 255)
 
         mixed_colors[light] = rgb
+
+
+# Wait until at least one light has been discovered
+while not find_lights():
+    pass
+
+# test_rgb()
+# cycle_hue()
+
+print("Starting websocket IO loop")
+application.listen(7445)
+timer = tornado.ioloop.PeriodicCallback(frame_update, 5)
+timer.start()
+tornado.ioloop.IOLoop.instance().start()
