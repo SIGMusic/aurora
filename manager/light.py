@@ -1,7 +1,6 @@
 import bluetooth as bt
 
 def calculate_light_pos(num):
-    # TODO
     if num == 1:
         return (-1000, 500, 2000)
     elif num == 2:
@@ -35,7 +34,7 @@ class Light:
         else:
             raise ValueError("invalid Bluetooth address")
             return
-        self.socket = self.connect_light()
+        self.connect_light()
         self.rgb = (0,0,0)
 
     def __del__(self):
@@ -64,10 +63,11 @@ class Light:
             sock.connect((self.endpoint, port))
         except:
             print("Could not connect to light", self.num)
-            return
+            return False
         self.is_connected = True
 
-        return sock
+        self.socket = sock
+        return True
 
     def disconnect_light(self):
         """ Closes the socket connection """
