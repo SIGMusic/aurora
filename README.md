@@ -20,4 +20,5 @@ Setup
     * Note that PyBluez only supports Windows and Linux.
 5. Plug in all the lights to mains power.
 6. Turn on your computer's Bluetooth and ensure each light has been paired before. The default passcode is `1234`.
-7. Run `python manager/manager.py` from the source directory.
+7. Run `python manager.py discover` from the manager directory.
+8. In the future, simply run `python manager.py` to use the previously discovered lights.
