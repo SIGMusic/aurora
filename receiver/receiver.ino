@@ -10,18 +10,20 @@
 
 
 //RGB pins
-#define RED_PIN             9
-#define GREEN_PIN           10
-#define BLUE_PIN            11
+//Note: pins 5 and 6 use the fast, inaccurate PWM timer. If this becomes
+//an issue, look into software PWM implementations.
+#define RED_PIN             3
+#define GREEN_PIN           5
+#define BLUE_PIN            6
 
 //Radio pins
-#define CE_PIN              2 //Radio chip enable pin
-#define CSN_PIN             3 //Radio chip select pin
+#define CE_PIN              9 //Radio chip enable pin
+#define CSN_PIN             10 //Radio chip select pin
 
 //Wireless protocol
-#define NODE_RF_ADDRESS         ((uint64_t)'SIGMUSIC')
-#define HEADER                  7446
-#define BASE_STATION_ID         0x00
+#define NODE_RF_ADDRESS         ((uint64_t)'SIGM!') //The 40-bit nRF address
+#define HEADER                  7446 //Must prefix every message
+#define BASE_STATION_ID         0x00 //The endpoint ID of the base station
 
 enum COMMANDS {
     CMD_SET_RGB       = 0x10,
@@ -30,14 +32,6 @@ enum COMMANDS {
     CMD_PING_RESPONSE = 0x21,
 };
 
-//Serial protocol
-#define MAX_SERIAL_LINE_LEN 20
-
-
-#define VERSION                 0 //The firmware version number
-#define ENDPOINT_ID_LOCATION    0x00 //The address in EEPROM to store the ID
-
-
 typedef struct packet_tag {
     uint16_t header;
     uint8_t command;
@@ -45,15 +39,22 @@ typedef struct packet_tag {
     uint8_t rgb[3];
 } packet_t;
 
+//Serial protocol
+#define MAX_SERIAL_LINE_LEN 20
+
+//Firmware information
+#define VERSION                 0 //The firmware version number
+#define ENDPOINT_ID_LOCATION    0x000 //The address in EEPROM to store the ID
+
 
 void networkRead(void);
-void processPacket(packet_t packet);
+void processNetworkPacket(packet_t packet);
 void serialRead(void);
-void processCommand(char message[]);
+void processSerialCommand(char message[]);
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
 void setEndpointID(uint8_t id);
-void welcomeMessage(void);
-void helpMessage(void);
+void printWelcomeMessage(void);
+void printHelpMessage(void);
 
 
 RF24 radio(CE_PIN, CSN_PIN);
@@ -67,24 +68,21 @@ unsigned long lastPingTime;
  * Initialize SPI, radio, and serial.
  */
 void setup() {
-    SPI.begin();
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setClockDivider(16); // Set SPI clock to 16 MHz / 16 = 1 MHz
-
-    // nRF24L01+ radio initialization
+    // Initialize the radio
     radio.begin();
-    radio.setDataRate(RF24_250KBPS);
+    radio.setDataRate(RF24_250KBPS); // 250kbps is good enough
     radio.setChannel(80); // Channel center frequency = 2.4005 GHz + (Channel# * 1 MHz)
-    radio.setPALevel(RF24_PA_MAX);
-    radio.setRetries(0, 0);
-    radio.setAutoAck(false);
-    radio.setCRCLength(RF24_CRC_8);
+    radio.setPALevel(RF24_PA_MAX); // Range is important, not low power consumption
+    radio.setRetries(0, 0); // Real-time is critical - not retransmission
+    radio.setAutoAck(false); // It doesn't matter if packets don't get through
+    radio.setCRCLength(RF24_CRC_8); // Minimal error detection is fine
     radio.setPayloadSize(sizeof(packet_t));
     radio.openReadingPipe(0, NODE_RF_ADDRESS);
     radio.startListening();
 
+    // Initialize serial console
     Serial.begin(9600);
-    welcomeMessage();
+    printWelcomeMessage();
 }
 
 /**
@@ -102,7 +100,7 @@ void networkRead(void) {
     if (radio.available()) {
         packet_t packet;
         radio.read(&packet, sizeof(packet_t));
-        processPacket(packet);
+        processNetworkPacket(packet);
     }
 }
 
@@ -110,31 +108,47 @@ void networkRead(void) {
  * Takes action on a packet received over the network.
  * @param packet The packet received
  */
-void processPacket(packet_t packet) {
+void processNetworkPacket(packet_t packet) {
     if (packet.header != HEADER) {
-        //Invalid packet
+        // Invalid packet
         return;
     }
 
-    if ((packet.command == CMD_SET_RGB && packet.endpoint == endpointID) ||
-        packet.command == CMD_BROADCAST_RGB) {
+    if (packet.endpoint != endpointID &&
+        packet.command != CMD_BROADCAST_RGB) {
+        // Packet was not meant for this endpoint
+        return;
+    }
 
-        setRGB(packet.rgb[0], packet.rgb[1], packet.rgb[2]);
-    } else if (packet.command == CMD_PING && packet.endpoint == endpointID) {
-        //Received a ping request. Respond with the endpoint ID and version.
-        packet_t response = {
-            HEADER,
-            CMD_PING_RESPONSE,
-            BASE_STATION_ID,
-            {endpointID, VERSION, 0}
-        };
+    switch (packet.command) {
 
-        radio.stopListening();
-        radio.openWritingPipe(NODE_RF_ADDRESS);
-        radio.write(&response, sizeof(response));
-        radio.openReadingPipe(0, NODE_RF_ADDRESS);
-    } else {
-        //Ignore packet
+        case CMD_SET_RGB:
+        case CMD_BROADCAST_RGB: {
+            // The packet is intended for this endpoint, so update the color.
+            setRGB(packet.rgb[0], packet.rgb[1], packet.rgb[2]);
+            break;
+        }
+
+        case CMD_PING: {
+            // Received a ping request. Respond with the endpoint ID and version.
+            packet_t response = {
+                HEADER,
+                CMD_PING_RESPONSE,
+                BASE_STATION_ID,
+                {endpointID, VERSION, 0}
+            };
+
+            radio.stopListening();
+            radio.openWritingPipe(NODE_RF_ADDRESS);
+            radio.write(&response, sizeof(response));
+            radio.openReadingPipe(0, NODE_RF_ADDRESS);
+
+            break;
+        }
+
+        default:
+            // Ignore the packet
+            break;
     }
 }
 
@@ -151,9 +165,9 @@ void serialRead(void) {
         buffer[index] = Serial.read();
 
         if (buffer[index] == '\r' ||  index == MAX_SERIAL_LINE_LEN) {
-            buffer[index] = '\0'; //Terminate the message
-            index = 0; //Reset to the beginning of the buffer
-            processCommand(buffer);
+            buffer[index] = '\0'; // Terminate the message
+            index = 0; // Reset to the beginning of the buffer
+            processSerialCommand(buffer);
         } else {
             index++;
         }
@@ -164,10 +178,10 @@ void serialRead(void) {
  * Takes action on a command received over serial.
  * @param message The message received
  */
-void processCommand(char message[]) {
+void processSerialCommand(char message[]) {
     uint8_t id;
     if (!strcmp(message, "help")) {
-        helpMessage();
+        printHelpMessage();
     } else if (!strcmp(message, "version")) {
         Serial.println(VERSION);
     } else if (!strcmp(message, "getid")) {
@@ -202,9 +216,9 @@ void setEndpointID(uint8_t id) {
 }
 
 /**
- * Prints the welcome message for serial debugging.
+ * Prints the welcome message for the serial console.
  */
-void welcomeMessage(void) {
+void printWelcomeMessage(void) {
     Serial.println(F("-------------------------------------"));
     Serial.println(F("SIGMusic@UIUC Lights Serial Interface"));
     Serial.print(F("Version "));
@@ -217,9 +231,9 @@ void welcomeMessage(void) {
 }
 
 /**
- * Prints the help message for serial debugging.
+ * Prints the help message for the serial console.
  */
-void helpMessage(void) {
+void printHelpMessage(void) {
     Serial.println(F("Available commands:"));
     Serial.println(F("  help - displays this help message"));
     Serial.println(F("  version - displays the firmware version number"));
