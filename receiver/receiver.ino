@@ -9,25 +9,31 @@
 #include <EEPROM.h>
 
 
-//RGB pins
-//Note: pins 5 and 6 use the fast, inaccurate PWM timer. If this becomes
-//an issue, look into software PWM implementations.
+// RGB pins
+// Note: pins 5 and 6 use the fast, inaccurate PWM timer. If this becomes
+// an issue, look into software PWM implementations.
 #define RED_PIN             3
 #define GREEN_PIN           5
 #define BLUE_PIN            6
 
-//Radio pins
-#define CE_PIN              9 //Radio chip enable pin
-#define CSN_PIN             10 //Radio chip select pin
+// Radio pins
+#define CE_PIN              9 // Radio chip enable pin
+#define CSN_PIN             10 // Radio chip select pin
 
-//Wireless protocol
-#define NODE_RF_ADDRESS         ((uint64_t)'SIGM!') //The 40-bit nRF address
-#define HEADER                  7446 //Must prefix every message
-#define BASE_STATION_ID         0x00 //The endpoint ID of the base station
+// Wireless protocol
+#define RF_ADDRESS(endpoint)         (0x5349474D00LL | (endpoint & 0xFF)) // Generates a 40-bit nRF address
+#define HEADER                  7446 // Must prefix every message
+#define BASE_STATION_ID         0x00 // The endpoint ID of the base station
+#define MULTICAST_ID            0xFF // The endpoint ID that all lights listen to
+
+#define ENDPOINT_PIPE           1 // The pipe for messages for this endpoint
+#define MULTICAST_PIPE          2 // The pipe for multicast messages
+
+#define CHANNEL                 80 // Channel center frequency = 2.4005 GHz + (Channel# * 1 MHz)
+#define NUM_RETRIES             5
 
 enum COMMANDS {
     CMD_SET_RGB       = 0x10,
-    CMD_BROADCAST_RGB = 0x11,
     CMD_PING          = 0x20,
     CMD_PING_RESPONSE = 0x21,
 };
@@ -35,16 +41,15 @@ enum COMMANDS {
 typedef struct packet_tag {
     uint16_t header;
     uint8_t command;
-    uint8_t endpoint;
-    uint8_t rgb[3];
+    uint8_t data[3];
 } packet_t;
 
-//Serial protocol
+// Serial protocol
 #define MAX_SERIAL_LINE_LEN 20
 
-//Firmware information
-#define VERSION                 0 //The firmware version number
-#define ENDPOINT_ID_LOCATION    0x000 //The address in EEPROM to store the ID
+// Firmware information
+#define VERSION                 0 // The firmware version number
+#define ENDPOINT_ID_LOCATION    0x000 // The address in EEPROM to store the ID
 
 
 void networkRead(void);
@@ -65,19 +70,22 @@ uint8_t lastPingEndpoint;
 unsigned long lastPingTime;
 
 /**
- * Initialize SPI, radio, and serial.
+ * Initialize radio and serial.
  */
 void setup() {
     // Initialize the radio
     radio.begin();
-    radio.setDataRate(RF24_250KBPS); // 250kbps is good enough
-    radio.setChannel(80); // Channel center frequency = 2.4005 GHz + (Channel# * 1 MHz)
-    radio.setPALevel(RF24_PA_MAX); // Range is important, not low power consumption
-    radio.setRetries(0, 0); // Real-time is critical - not retransmission
-    radio.setAutoAck(false); // It doesn't matter if packets don't get through
+    radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
+    radio.setChannel(CHANNEL);
+    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
+    radio.setRetries(0, NUM_RETRIES);
     radio.setCRCLength(RF24_CRC_8); // Minimal error detection is fine
     radio.setPayloadSize(sizeof(packet_t));
-    radio.openReadingPipe(0, NODE_RF_ADDRESS);
+
+    radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
+    radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID));
+    radio.openReadingPipe(MULTICAST_PIPE, RF_ADDRESS(MULTICAST_ID));
+    radio.setAutoAck(MULTICAST_PIPE, false); // Prevent ACK collisions on the multicast pipe
     radio.startListening();
 
     // Initialize serial console
@@ -114,34 +122,25 @@ void processNetworkPacket(packet_t packet) {
         return;
     }
 
-    if (packet.endpoint != endpointID &&
-        packet.command != CMD_BROADCAST_RGB) {
-        // Packet was not meant for this endpoint
-        return;
-    }
-
     switch (packet.command) {
 
-        case CMD_SET_RGB:
-        case CMD_BROADCAST_RGB: {
-            // The packet is intended for this endpoint, so update the color.
-            setRGB(packet.rgb[0], packet.rgb[1], packet.rgb[2]);
+        case CMD_SET_RGB: {
+            // Update the color
+            setRGB(packet.data[0], packet.data[1], packet.data[2]);
             break;
         }
 
         case CMD_PING: {
-            // Received a ping request. Respond with the endpoint ID and version.
+            // Respond to the ping with the endpoint ID and version
             packet_t response = {
                 HEADER,
                 CMD_PING_RESPONSE,
-                BASE_STATION_ID,
                 {endpointID, VERSION, 0}
             };
 
             radio.stopListening();
-            radio.openWritingPipe(NODE_RF_ADDRESS);
             radio.write(&response, sizeof(response));
-            radio.openReadingPipe(0, NODE_RF_ADDRESS);
+            radio.startListening();
 
             break;
         }
