@@ -38,14 +38,14 @@ def parse_packet(raw):
     }
 
 def build_packet(command = 0, data = (0, 0, 0)):
-        return bytearray([
+        return str(bytearray([
             HEADER & 0x00ff, # Arduino is little-endian, so adjust accordingly
             (HEADER & 0xff00) >> 8,
             command,
             data[0],
             data[1],
             data[2]
-        ])
+        ]))
 
 # Software information
 VERSION               = 0 # The software version number
