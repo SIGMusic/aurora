@@ -12,16 +12,17 @@
 // RGB pins
 // Note: pins 5 and 6 use the fast, inaccurate PWM timer. If this becomes
 // an issue, look into software PWM implementations.
-#define RED_PIN             3
-#define GREEN_PIN           5
-#define BLUE_PIN            6
+#define RED_PIN                 3
+#define GREEN_PIN               5
+#define BLUE_PIN                6
 
 // Radio pins
-#define CE_PIN              9 // Radio chip enable pin
-#define CSN_PIN             10 // Radio chip select pin
+#define CE_PIN                  9 // Radio chip enable pin
+#define CSN_PIN                 10 // Radio chip select pin
 
 // Wireless protocol
-#define RF_ADDRESS(endpoint)         (0x5349474D00LL | (endpoint & 0xFF)) // Generates a 40-bit nRF address
+#define HASH(a)                 ((a) ^ 73) // Simple 1:1 single byte hash to minimize repeating bit patterns in address
+#define RF_ADDRESS(endpoint)    (0x5349474D00LL | HASH(endpoint & 0xFF)) // Generates a 40-bit nRF address
 #define HEADER                  7446 // Must prefix every message
 #define BASE_STATION_ID         0x00 // The endpoint ID of the base station
 #define MULTICAST_ID            0xFF // The endpoint ID that all lights listen to
@@ -66,9 +67,6 @@ RF24 radio(CE_PIN, CSN_PIN);
 
 uint8_t endpointID = EEPROM.read(ENDPOINT_ID_LOCATION);
 
-uint8_t lastPingEndpoint;
-unsigned long lastPingTime;
-
 /**
  * Initialize radio and serial.
  */
@@ -79,7 +77,7 @@ void setup() {
     radio.setChannel(CHANNEL);
     radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
     radio.setRetries(0, NUM_RETRIES);
-    radio.setCRCLength(RF24_CRC_8); // Minimal error detection is fine
+    radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
     radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
