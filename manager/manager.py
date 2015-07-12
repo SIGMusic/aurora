@@ -1,5 +1,6 @@
 from RF24 import *
 import time
+import struct
 
 # Radio pins
 CE_PIN  = RPI_BPLUS_GPIO_J8_22 # Radio chip enable pin
@@ -28,24 +29,38 @@ CMD_SET_RGB           = 0x10
 CMD_PING              = 0x20
 CMD_PING_RESPONSE     = 0x21
 
-PACKET_SIZE           = 6
+packet_t = struct.Struct("!HB3B")
 
-def parse_packet(raw):
+'''
+Parsed a packet struct.
+@param p A packet struct
+@return A dictionary of the header, command, and the array of 3 data bytes
+'''
+def parsePacket(p):
+    header, command, data0, data1, data2 = packet_t.unpack(p)
+
     return {
-        "header": (raw[1] << 8) | raw[0],
-        "command": raw[2],
-        "data": [raw[3], raw[4], raw[5]]
+        "header": header,
+        "command": command,
+        "data": [data0, data1, data2]
     }
 
-def build_packet(command = 0, data = (0, 0, 0)):
-        return str(bytearray([
-            HEADER & 0x00ff, # Arduino is little-endian, so adjust accordingly
-            (HEADER & 0xff00) >> 8,
-            command,
-            data[0],
-            data[1],
-            data[2]
-        ]))
+'''
+Builds a packet struct.
+@param p A dictionary of a command and an optional array of 3 data bytes
+@return The packed structure
+'''
+def buildPacket(p):
+    if not data in p:
+        p["data"] = [0, 0, 0]
+
+    return packet_t.pack(
+        HEADER,
+        p["command"],
+        p["data"][0],
+        p["data"][1],
+        p["data"][2]
+    )
 
 # Software information
 VERSION               = 0 # The software version number
@@ -69,9 +84,9 @@ def printWelcomeMessage():
 '''
 Pings every endpoint and records the ones that respond.
 '''
-def ping_all_lights():
+def pingAllLights():
     # Generate the ping packet
-    ping = build_packet(CMD_PING)
+    ping = buildPacket({"command": CMD_PING})
 
     for i in range(1, 0xff):
         radio.stopListening()
@@ -95,9 +110,9 @@ def ping_all_lights():
             continue
 
         # Get the response
-        response = build_packet()
+        response = buildPacket()
         radio.read(response, len(response))
-        parsed = parse_packet(response)
+        parsed = parsePacket(response)
 
         # Make sure the response checks out
         if (parsed["header"] != HEADER or
@@ -108,7 +123,8 @@ def ping_all_lights():
         print "Found light", format(i, '#04x')
 
         # Add the endpoint to the list
-        lights.append(i)
+        if (not i in lights):
+            lights.append(i)
 
 
 
@@ -120,7 +136,7 @@ radio.setChannel(CHANNEL)
 radio.setPALevel(RF24_PA_MAX); # Range is important, not power consumption
 radio.setRetries(0, NUM_RETRIES)
 radio.setCRCLength(RF24_CRC_16)
-radio.payload_size = PACKET_SIZE
+radio.payloadSize = packet_t.size
 
 radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID))
 radio.startListening()
@@ -131,14 +147,13 @@ radio.printDetails()
 
 
 print "Scanning for lights..."
-ping_all_lights()
+pingAllLights()
 print "Done scanning."
 
 
 # Broadcast red to all lights as a test
-packet = build_packet(CMD_SET_RGB, [255, 0, 0])
 radio.stopListening()
 radio.openWritingPipe(RF_ADDRESS(MULTICAST_ID))
-radio.write(packet)
+radio.write(buildPacket({"command": CMD_SET_RGB, "data": [255, 0, 0]}))
 radio.startListening()
 
