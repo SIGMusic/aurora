@@ -64,7 +64,7 @@ int main(int argc, char** argv){
     };
     radio.stopListening();
     radio.openWritingPipe(RF_ADDRESS(MULTICAST_ID));
-    radio.write(red, sizeof(packet_t));
+    radio.write(&red, sizeof(packet_t));
     radio.startListening();
 
     /**
@@ -91,7 +91,7 @@ void pingAllLights(void) {
     for (int i = 0; i < 0xff; i++) {
         radio.stopListening();
         radio.openWritingPipe(RF_ADDRESS(i));
-        bool success = radio.write(ping, sizeof(packet_t));
+        bool success = radio.write(&ping, sizeof(packet_t));
         radio.startListening();
 
         // If the packet wasn't delivered after several attempts, move on
