@@ -8,6 +8,8 @@
 #include <chrono>
 #include <arpa/inet.h>
 #include <RF24/RF24.h>
+#include <websocketpp/config/core.hpp>
+#include <websocketpp/server.hpp>
 #include "../network.h"
 
 

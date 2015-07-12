@@ -18,13 +18,13 @@ BCMLOC=/opt/vc/include/bcm_host.h
 
 ifneq ("$(wildcard $(BCMLOC))","")
 # The recommended compiler flags for the Raspberry Pi
-CCFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11
+CCFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s
 endif
 
 all: manager
 
 manager: manager.cpp
-	g++ ${CCFLAGS} -Wall -lrf24-bcm $@.cpp -o bin/$@
+	g++ ${CCFLAGS} -std=c++11 -Wall -I../lib -lrf24-bcm $@.cpp -o bin/$@
 
 clean:
 	rm -rf manager
