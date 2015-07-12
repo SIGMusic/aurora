@@ -1,4 +1,4 @@
-import RF24
+from RF24 import *
 import time
 
 # Radio pins
@@ -28,6 +28,8 @@ CMD_SET_RGB           = 0x10
 CMD_PING              = 0x20
 CMD_PING_RESPONSE     = 0x21
 
+PACKET_SIZE           = 6
+
 def parse_packet(raw):
     return {
         "header": (raw[1] << 8) | raw[0],
@@ -46,7 +48,7 @@ def build_packet(command = 0, data = (0, 0, 0)):
         ])
 
 # Software information
-VERSION                 0 # The software version number
+VERSION               = 0 # The software version number
 
 
 radio = RF24(CE_PIN, CSN_PIN, BCM2835_SPI_SPEED_8MHZ)
@@ -62,7 +64,7 @@ radio.setChannel(CHANNEL)
 radio.setPALevel(RF24_PA_MAX); # Range is important, not power consumption
 radio.setRetries(0, NUM_RETRIES)
 radio.setCRCLength(RF24_CRC_16)
-radio.setPayloadSize(sizeof(packet_t))
+radio.payload_size = PACKET_SIZE
 
 radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID))
 radio.startListening()
