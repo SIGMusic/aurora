@@ -62,7 +62,7 @@ Prints the welcome message.
 def printWelcomeMessage():
     print "-------------------------------------"
     print "SIGMusic@UIUC Lights Base Station"
-    print "Version ", VERSION
+    print "Version", VERSION
     print "This base station is endpoint 0x00"
     print "-------------------------------------"
 
