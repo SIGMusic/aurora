@@ -8,12 +8,9 @@
 #include <iostream>
 #include <chrono>
 #include <arpa/inet.h>
-#include <RF24.h>
+#include <RF24/RF24.h>
 #include "../network.h"
 
-
-// Nicer way to get system time
-#define millis()                (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())
 
 // Radio pins
 #define CE_PIN                  RPI_BPLUS_GPIO_J8_22 // Radio chip enable pin
@@ -67,7 +64,7 @@ int main(int argc, char** argv){
     };
     radio.stopListening();
     radio.openWritingPipe(RF_ADDRESS(MULTICAST_ID));
-    radio.write(red);
+    radio.write(red, sizeof(packet_t));
     radio.startListening();
 
     /**
@@ -94,7 +91,7 @@ void pingAllLights(void) {
     for (int i = 0; i < 0xff; i++) {
         radio.stopListening();
         radio.openWritingPipe(RF_ADDRESS(i));
-        bool success = radio.write(ping);
+        bool success = radio.write(ping, sizeof(packet_t));
         radio.startListening();
 
         // If the packet wasn't delivered after several attempts, move on
@@ -103,7 +100,7 @@ void pingAllLights(void) {
         }
         
         // Wait here until we get a response or timeout
-        uint64_t started_waiting_at = millis();
+        unsigned int started_waiting_at = millis();
         bool timeout = false;
         while (!radio.available() && !timeout) {
             if ((millis() - started_waiting_at) > PING_TIMEOUT) {
@@ -118,7 +115,7 @@ void pingAllLights(void) {
 
         // Get the response
         packet_t response;
-        radio.read(response, sizeof(packet_t));
+        radio.read(&response, sizeof(packet_t));
 
         // Make sure the response checks out
         if (response.header != HEADER ||
