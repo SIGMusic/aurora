@@ -51,7 +51,7 @@ Builds a packet struct.
 @return The packed structure
 '''
 def buildPacket(p):
-    if not data in p:
+    if not "data" in p:
         p["data"] = [0, 0, 0]
 
     return packet_t.pack(
