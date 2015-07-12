@@ -28,10 +28,3 @@ manager: manager.cpp
 
 clean:
 	rm -rf manager
-
-install: all
-	test -d $(prefix) || mkdir $(prefix)
-	test -d $(prefix)/bin || mkdir $(prefix)/bin
-	install -m 0755 manager $(prefix)/bin
-
-.PHONY: install
