@@ -56,38 +56,19 @@ lights = []
 
 endpointID = BASE_STATION_ID
 
+'''
+Prints the welcome message.
+'''
+def printWelcomeMessage():
+    print "-------------------------------------"
+    print "SIGMusic@UIUC Lights Base Station"
+    print "Version ", VERSION
+    print "This base station is endpoint 0x00"
+    print "-------------------------------------"
 
-# Initialize the radio
-radio.begin()
-radio.setDataRate(RF24_250KBPS); # 250kbps should be plenty
-radio.setChannel(CHANNEL)
-radio.setPALevel(RF24_PA_MAX); # Range is important, not power consumption
-radio.setRetries(0, NUM_RETRIES)
-radio.setCRCLength(RF24_CRC_16)
-radio.payload_size = PACKET_SIZE
-
-radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID))
-radio.startListening()
-
-printWelcomeMessage()
-
-radio.printDetails()
-
-
-print "Scanning for lights..."
-ping_all_lights()
-print "Done scanning."
-
-
-# Broadcast red to all lights as a test
-packet = build_packet(CMD_SET_RGB, [255, 0, 0])
-radio.stopListening()
-radio.openWritingPipe(RF_ADDRESS(MULTICAST_ID))
-radio.write(packet)
-radio.startListening()
-
-
-
+'''
+Pings every endpoint and records the ones that respond.
+'''
 def ping_all_lights():
     # Generate the ping packet
     ping = build_packet(CMD_PING)
@@ -129,12 +110,35 @@ def ping_all_lights():
         # Add the endpoint to the list
         lights.append(i)
 
-'''
-Prints the welcome message.
-'''
-def printWelcomeMessage():
-    print "-------------------------------------"
-    print "SIGMusic@UIUC Lights Base Station"
-    print "Version ", VERSION
-    print "This base station is endpoint 0x00"
-    print "-------------------------------------"
+
+
+
+# Initialize the radio
+radio.begin()
+radio.setDataRate(RF24_250KBPS); # 250kbps should be plenty
+radio.setChannel(CHANNEL)
+radio.setPALevel(RF24_PA_MAX); # Range is important, not power consumption
+radio.setRetries(0, NUM_RETRIES)
+radio.setCRCLength(RF24_CRC_16)
+radio.payload_size = PACKET_SIZE
+
+radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID))
+radio.startListening()
+
+printWelcomeMessage()
+
+radio.printDetails()
+
+
+print "Scanning for lights..."
+ping_all_lights()
+print "Done scanning."
+
+
+# Broadcast red to all lights as a test
+packet = build_packet(CMD_SET_RGB, [255, 0, 0])
+radio.stopListening()
+radio.openWritingPipe(RF_ADDRESS(MULTICAST_ID))
+radio.write(packet)
+radio.startListening()
+
