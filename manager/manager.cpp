@@ -4,7 +4,6 @@
  */
 
 #include <cstdlib>
-#include <cstdint>
 #include <iostream>
 #include <chrono>
 #include <arpa/inet.h>
@@ -84,8 +83,7 @@ void pingAllLights(void) {
     // Generate the ping packet
     packet_t ping = {
         HEADER,
-        CMD_PING,
-        {0, 0, 0}
+        CMD_PING
     };
 
     for (int i = 0; i < 0xff; i++) {
