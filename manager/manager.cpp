@@ -47,7 +47,7 @@ bool shouldConnect(connection_hdl hdl);
 RF24 radio(CE_PIN, CSN_PIN);
 
 uint8_t endpointID = BASE_STATION_ID;
-bool lights[255] = {0};
+vector<bool> lights(256, false);
 server ws;
 
 
