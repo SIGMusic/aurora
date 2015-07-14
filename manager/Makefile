@@ -24,7 +24,7 @@ endif
 all: manager
 
 manager: manager.cpp
-	g++ ${CCFLAGS} -std=c++11 -Wall -I../lib -lrf24-bcm $@.cpp -o bin/$@
+	g++ ${CCFLAGS} -std=c++11 -Wall -I../lib -lrf24-bcm -lboost_system -lpthread $@.cpp -o bin/$@
 
 clean:
 	rm -rf manager

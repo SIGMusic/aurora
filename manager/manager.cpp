@@ -5,10 +5,9 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <chrono>
 #include <arpa/inet.h>
 #include <RF24/RF24.h>
-#include <websocketpp/config/core.hpp>
+#include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include "../network.h"
 
@@ -25,8 +24,12 @@
 #define VERSION                 0 // The software version number
 
 
+typedef websocketpp::server<websocketpp::config::asio> server;
+
+
 void pingAllLights(void);
 void printWelcomeMessage(void);
+void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg);
 
 
 RF24 radio(CE_PIN, CSN_PIN);
@@ -36,6 +39,23 @@ bool lights[255] = {0};
 
 
 int main(int argc, char** argv){
+    // Setup the websocket
+    server light_server;
+
+    light_server.set_message_handler(&onMessage);
+
+    std::cout << "Setting up websocket" << std::endl;
+    light_server.init_asio();
+    std::cout << "Listening" << std::endl;
+    light_server.listen(7446);
+    std::cout << "Starting to accept" << std::endl;
+    light_server.start_accept();
+
+    std::cout << "Running" << std::endl;
+    light_server.run();
+
+    std::cout << "Initializing radio" << std::endl;
+
     // Initialize the radio
     radio.begin();
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
@@ -141,3 +161,11 @@ void printWelcomeMessage(void) {
     puts("This base station is endpoint 0x00");
     puts("-------------------------------------");
 }
+
+/**
+ * Handles incoming WebSocket messages.
+ */
+void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
+    std::cout << msg->get_payload() << std::endl;
+}
+
