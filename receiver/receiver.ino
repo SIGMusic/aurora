@@ -171,10 +171,10 @@ void processSerialCommand(char message[]) {
     } else if (!strcmp(message, "getid")) {
         Serial.println(endpointID, HEX);
         Serial.println(F("OK"));
-    } else if (sscanf(message, "setid %hhui", &id) == 1) {
+    } else if (sscanf(message, "setid %hhu", &id) == 1) {
         setEndpointID(id);
         Serial.println(F("OK"));
-    } else if (sscanf(message, "setrgb %hhui %hhui %hhui", &r, &g, &b) == 3) {
+    } else if (sscanf(message, "setrgb %hhu %hhu %hhu", &r, &g, &b) == 3) {
         setRGB(r, g, b);
         Serial.println(F("OK"));
     } else {
