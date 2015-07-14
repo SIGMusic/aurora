@@ -128,7 +128,7 @@ void pingAllLights(void) {
         CMD_PING
     };
 
-    for (int i = 0; i < 0xff; i++) {
+    for (int i = 1; i <= 0xff; i++) {
         radio.stopListening();
         radio.openWritingPipe(RF_ADDRESS(i));
         bool success = radio.write(&ping, sizeof(packet_t));
@@ -186,24 +186,32 @@ void printWelcomeMessage(void) {
  * Handles incoming WebSocket messages.
  */
 void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
-    cout << msg->get_payload() << endl;
-
     uint8_t id, r, g, b;
 
     const string message = msg->get_payload();
     if (!message.compare("list")) {
         // List
-        ws.send(hdl, "TODO", opcode::text);
+        string list = "";
+        for (int i = 1; i <= 0xff; i++) {
+            if (lights[i]) {
+                char num[5];
+                sprintf(num, "%d,", i);
+                list.append(num);
+            }
+        }
+        ws.send(list, opcode::text);
 
     } else if (!message.compare("discover")) {
         // Discover
-        ws.send(hdl, "TODO", opcode::text);
+        pingAllLights();
+        ws.send(hdl, "OK", opcode::text);
 
     } else if (!message.compare(0, 7, "setrgb ")) {
         // Set RGB
         if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
             // Arguments are valid
             printf("Setting light %u to %u, %u, %u\n", id, r, g, b);
+            setRGB(id, r, g, b);
             ws.send(hdl, "OK", opcode::text);
 
         } else {
