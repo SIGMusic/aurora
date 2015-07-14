@@ -190,24 +190,29 @@ void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
 
     uint8_t id, r, g, b;
 
-    const char* message = msg->get_payload().c_str();
-    if (!strcmp(message, "list")) {
+    const string message = msg->get_payload();
+    if (!message.compare("list")) {
         // List
         ws.send(hdl, "TODO", opcode::text);
 
-    } else if (!strcmp(message, "discover")) {
+    } else if (!message.compare("discover")) {
         // Discover
         ws.send(hdl, "TODO", opcode::text);
 
-    } else if (sscanf(message, "setrgb %hhui %hhui %hhui %hhui", &id, &r, &g, &b) == 4) {
+    } else if (!message.compare(0, 7, "setrgb ")) {
         // Set RGB
-        cout << "Setting light " << id << " to ";
-        cout << r << ", " << g << ", " << b << endl;
-        ws.send(hdl, "OK", opcode::text);
+        if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
+            // Arguments are valid
+            printf("Setting light %u to %u, %u, %u\n", id, r, g, b);
+            ws.send(hdl, "OK", opcode::text);
 
+        } else {
+            // One or more arguments were invalid
+            ws.send(hdl, "Error: invalid arguments", opcode::text);
+        }
     } else {
         // Error
-        ws.send(hdl, "Error: unrecognized command or invalid arguments", opcode::text);
+        ws.send(hdl, "Error: unrecognized command", opcode::text);
     }
 }
 
