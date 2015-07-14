@@ -38,6 +38,7 @@ typedef websocketpp::server<websocketpp::config::asio> server;
 void initRadio(void);
 void initWebSocket(void);
 void pingAllLights(void);
+bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue);
 void printWelcomeMessage(void);
 void onMessage(connection_hdl hdl, server::message_ptr msg);
 bool shouldConnect(connection_hdl hdl);
@@ -172,6 +173,21 @@ void pingAllLights(void) {
 }
 
 /**
+ * Sets the RGB value of the given light.
+ * @param endpoint The endpoint to change
+ * @param red The new red value
+ * @param green The new green value
+ * @param blue The new blue value
+ *
+ * @return Whether the light acknowledged or not.
+ */
+bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
+    // TODO
+    printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
+    return false;
+}
+
+/**
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
@@ -199,7 +215,7 @@ void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
                 list.append(num);
             }
         }
-        ws.send(list, opcode::text);
+        ws.send(hdl, list, opcode::text);
 
     } else if (!message.compare("discover")) {
         // Discover
@@ -210,9 +226,13 @@ void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
         // Set RGB
         if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
             // Arguments are valid
-            printf("Setting light %u to %u, %u, %u\n", id, r, g, b);
-            setRGB(id, r, g, b);
-            ws.send(hdl, "OK", opcode::text);
+            if (setRGB(id, r, g, b)) {
+                // The light acknowledged
+                ws.send(hdl, "OK", opcode::text);
+            } else {
+                // The light did not acknowledge
+                ws.send(hdl, "Error: light not responding", opcode::text);
+            }
 
         } else {
             // One or more arguments were invalid
