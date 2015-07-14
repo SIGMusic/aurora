@@ -17,7 +17,6 @@
 #define CSN_PIN                 RPI_BPLUS_GPIO_J8_24 // Radio chip select pin
 
 // Wireless protocol
-#define ENDPOINT_PIPE           1 // The pipe for messages for this endpoint
 #define PING_TIMEOUT            10 // Time to wait for a ping response in milliseconds
 
 // Software information
@@ -44,17 +43,13 @@ int main(int argc, char** argv){
 
     light_server.set_message_handler(&onMessage);
 
-    std::cout << "Setting up websocket" << std::endl;
     light_server.init_asio();
-    std::cout << "Listening" << std::endl;
     light_server.listen(7446);
-    std::cout << "Starting to accept" << std::endl;
     light_server.start_accept();
 
-    std::cout << "Running" << std::endl;
+    std::cout << "Running websocket event loop" << std::endl;
     light_server.run();
 
-    std::cout << "Initializing radio" << std::endl;
 
     // Initialize the radio
     radio.begin();
@@ -65,16 +60,16 @@ int main(int argc, char** argv){
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID));
+    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
     radio.startListening();
 
     printWelcomeMessage();
 
     radio.printDetails();
 
-    puts("Scanning for lights...");
+    std::cout << "Scanning for lights..." << std::endl;
     pingAllLights();
-    puts("Done scanning.");
+    std::cout << "Done scanning." << std::endl;
 
 
     // Broadcast red to all lights as a test
@@ -84,8 +79,10 @@ int main(int argc, char** argv){
         {255, 0, 0}
     };
     radio.stopListening();
-    radio.openWritingPipe(RF_ADDRESS(MULTICAST_ID));
-    radio.write(&red, sizeof(packet_t));
+    for (int i = 1; i <= 0xff; i++) {
+        radio.openWritingPipe(RF_ADDRESS(i));
+        radio.write(&red, sizeof(packet_t));
+    }
     radio.startListening();
 
     /**

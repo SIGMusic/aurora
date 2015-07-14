@@ -25,10 +25,6 @@
 #define CE_PIN                  9 // Radio chip enable pin
 #define CSN_PIN                 10 // Radio chip select pin
 
-// Wireless protocol
-#define ENDPOINT_PIPE           1 // The pipe for messages for this endpoint
-#define MULTICAST_PIPE          2 // The pipe for multicast messages
-
 // Serial protocol
 #define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
 
@@ -65,9 +61,7 @@ void setup() {
     radio.setPayloadSize(sizeof(packet_t));
 
     radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
-    radio.openReadingPipe(ENDPOINT_PIPE, RF_ADDRESS(endpointID));
-    radio.openReadingPipe(MULTICAST_PIPE, RF_ADDRESS(MULTICAST_ID));
-    radio.setAutoAck(MULTICAST_PIPE, false); // Prevent ACK collisions on the multicast pipe
+    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
     radio.startListening();
 
     // Initialize serial console
@@ -160,18 +154,23 @@ void serialRead(void) {
  * @param message The message received
  */
 void processSerialCommand(char message[]) {
-    uint8_t id;
+    uint8_t id, r, g, b;
     if (!strcmp(message, "help")) {
         printHelpMessage();
     } else if (!strcmp(message, "version")) {
         Serial.println(VERSION);
+        Serial.println(F("OK"));
     } else if (!strcmp(message, "getid")) {
         Serial.println(endpointID, HEX);
-    } else if (sscanf(message, "setid %2x", &id) == 1) {
+        Serial.println(F("OK"));
+    } else if (sscanf(message, "setid %hhui", &id) == 1) {
         setEndpointID(id);
-        Serial.println("OK");
+        Serial.println(F("OK"));
+    } else if (sscanf(message, "setrgb %hhui %hhui %hhui", &r, &g, &b) == 3) {
+        setRGB(r, g, b);
+        Serial.println(F("OK"));
     } else {
-        Serial.println("Error: unrecognized command");
+        Serial.println(F("Error: unrecognized command or invalid arguments"));
     }
 }
 
@@ -200,7 +199,7 @@ void setEndpointID(uint8_t id) {
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
-    Serial.println(F("-------------------------------------"));
+    Serial.println(F("----------------------------------------"));
     Serial.println(F("SIGMusic@UIUC Lights Serial Interface"));
     Serial.print(F("Version "));
     Serial.println(VERSION);
@@ -208,7 +207,7 @@ void printWelcomeMessage(void) {
     Serial.println(endpointID, HEX);
     Serial.println(F("End all commands with a carriage return."));
     Serial.println(F("Type 'help' for a list of commands."));
-    Serial.println(F("-------------------------------------"));
+    Serial.println(F("----------------------------------------"));
 }
 
 /**
@@ -218,7 +217,9 @@ void printHelpMessage(void) {
     Serial.println(F("Available commands:"));
     Serial.println(F("  help - displays this help message"));
     Serial.println(F("  version - displays the firmware version number"));
+    Serial.println(F("  setrgb [red] [green] [blue] - sets the color"));
+    Serial.println(F("      [red], [green], [blue] - the value of each channel (0 to 255)"));
     Serial.println(F("  setid [id] - sets the endpoint ID"));
-    Serial.println(F("      [id] - the new ID (in hexadecimal)"));
-    Serial.println(F("  getid - displays the endpoint ID"));
+    Serial.println(F("      [id] - the new ID"));
+    Serial.println(F("  getid - displays the endpoint ID in hex"));
 }
