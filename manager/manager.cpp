@@ -13,7 +13,7 @@
 #include "../network.h"
 
 using websocketpp::connection_hdl;
-using websocketpp::frame::opcode;
+using namespace websocketpp::frame;
 using std::cout;
 using std::endl;
 using std::vector;
@@ -190,7 +190,7 @@ void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
 
     uint8_t id, r, g, b;
 
-    char* message = msg->get_payload().c_str();
+    const char* message = msg->get_payload().c_str();
     if (!strcmp(message, "list")) {
         // List
         ws.send(hdl, "TODO", opcode::text);
