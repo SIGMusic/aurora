@@ -39,6 +39,7 @@ void initWebSocket(void);
 void pingAllLights(void);
 void printWelcomeMessage(void);
 void onMessage(connection_hdl hdl, server::message_ptr msg);
+bool shouldConnect(server &s, connection_hdl hdl);
 
 
 RF24 radio(CE_PIN, CSN_PIN);
@@ -190,7 +191,7 @@ void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
 /**
  * Decides whether to connect to a client or not.
  */
-bool shouldConnect(server & s, connection_hdl hdl) {
+bool shouldConnect(server &s, connection_hdl hdl) {
     // Get the connection so we can get info about it
     server::connection_ptr con = s.get_con_from_hdl(hdl);
 
