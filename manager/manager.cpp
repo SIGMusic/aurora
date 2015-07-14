@@ -5,12 +5,18 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <algorithm>
 #include <arpa/inet.h>
 #include <RF24/RF24.h>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include "../network.h"
 
+using websocketpp::connection_hdl;
+using std::cout;
+using std::endl;
+using std::vector;
+using std::string;
 
 // Radio pins
 #define CE_PIN                  RPI_BPLUS_GPIO_J8_22 // Radio chip enable pin
@@ -19,57 +25,51 @@
 // Wireless protocol
 #define PING_TIMEOUT            10 // Time to wait for a ping response in milliseconds
 
+// WebSocket protocol
+#define WS_PROTOCOL_NAME        "nlcp" // Networked Lights Control Protocol
+
 // Software information
 #define VERSION                 0 // The software version number
 
 
 typedef websocketpp::server<websocketpp::config::asio> server;
 
-
+void initRadio(void);
+void initWebSocket(void);
 void pingAllLights(void);
 void printWelcomeMessage(void);
-void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg);
+void onMessage(connection_hdl hdl, server::message_ptr msg);
 
 
 RF24 radio(CE_PIN, CSN_PIN);
 
 uint8_t endpointID = BASE_STATION_ID;
 bool lights[255] = {0};
+server ws;
 
 
 int main(int argc, char** argv){
-    // Setup the websocket
-    server light_server;
+    // Start the websocket
+    initWebSocket();
 
-    light_server.set_message_handler(&onMessage);
-
-    light_server.init_asio();
-    light_server.listen(7446);
-    light_server.start_accept();
-
-    std::cout << "Running websocket event loop" << std::endl;
-    light_server.run();
+    cout << "Running websocket event loop" << endl;
+    // TODO: this I/O loop runs forever. Move to the bottom when done testing.
+    ws.run();
 
 
-    // Initialize the radio
-    radio.begin();
-    radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
-    radio.setChannel(CHANNEL);
-    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
-    radio.setRetries(0, NUM_RETRIES);
-    radio.setCRCLength(RF24_CRC_16);
-    radio.setPayloadSize(sizeof(packet_t));
 
-    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
-    radio.startListening();
+    // Start the radio
+    initRadio();
 
     printWelcomeMessage();
 
     radio.printDetails();
 
-    std::cout << "Scanning for lights..." << std::endl;
+
+
+    cout << "Scanning for lights..." << endl;
     pingAllLights();
-    std::cout << "Done scanning." << std::endl;
+    cout << "Done scanning." << endl;
 
 
     // Broadcast red to all lights as a test
@@ -85,14 +85,35 @@ int main(int argc, char** argv){
     }
     radio.startListening();
 
-    /**
-     * Main loop
-     */
-    // for (;;) {
-    //     // TODO
-    // }
-
     return 0;
+}
+
+/**
+ * Initializes the radio.
+ */
+void initRadio(void) {
+    radio.begin();
+    radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
+    radio.setChannel(CHANNEL);
+    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
+    radio.setRetries(0, NUM_RETRIES);
+    radio.setCRCLength(RF24_CRC_16);
+    radio.setPayloadSize(sizeof(packet_t));
+
+    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+    radio.startListening();
+}
+
+/**
+ * Initializes the websocket.
+ */
+void initWebSocket(void) {
+    ws.set_message_handler(&onMessage);
+    ws.set_validate_handler(&shouldConnect);
+
+    ws.init_asio();
+    ws.listen(7446);
+    ws.start_accept();
 }
 
 /**
@@ -163,6 +184,24 @@ void printWelcomeMessage(void) {
  * Handles incoming WebSocket messages.
  */
 void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
-    std::cout << msg->get_payload() << std::endl;
+    cout << msg->get_payload() << endl;
+}
+
+/**
+ * Decides whether to connect to a client or not.
+ */
+bool shouldConnect(server & s, connection_hdl hdl) {
+    // Get the connection so we can get info about it
+    server::connection_ptr con = s.get_con_from_hdl(hdl);
+
+    // Figure out if the client knows the protocol.
+    vector<string> p = con->get_requested_subprotocols();
+    if (std::find(p.begin(), p.end(), WS_PROTOCOL_NAME) != p.end()) {
+        // Tell the client we're going to use this protocol
+        con->select_subprotocol(WS_PROTOCOL_NAME);
+        return true;
+    } else {
+        return false;
+    }
 }
 

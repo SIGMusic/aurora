@@ -33,6 +33,7 @@
 #define ENDPOINT_ID_LOCATION    0x000 // The address in EEPROM to store the ID
 
 
+void initRadio(void);
 void networkRead(void);
 void processNetworkPacket(packet_t packet);
 void serialRead(void);
@@ -51,18 +52,8 @@ uint8_t endpointID = EEPROM.read(ENDPOINT_ID_LOCATION);
  * Initialize radio and serial.
  */
 void setup() {
-    // Initialize the radio
-    radio.begin();
-    radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
-    radio.setChannel(CHANNEL);
-    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
-    radio.setRetries(0, NUM_RETRIES);
-    radio.setCRCLength(RF24_CRC_16);
-    radio.setPayloadSize(sizeof(packet_t));
-
-    radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
-    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
-    radio.startListening();
+    // Start the radio
+    initRadio();
 
     // Initialize serial console
     Serial.begin(9600);
@@ -75,6 +66,23 @@ void setup() {
 void loop() {
     networkRead();
     serialRead();
+}
+
+/**
+ * Initializes the radio.
+ */
+void initRadio(void) {
+    radio.begin();
+    radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
+    radio.setChannel(CHANNEL);
+    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
+    radio.setRetries(0, NUM_RETRIES);
+    radio.setCRCLength(RF24_CRC_16);
+    radio.setPayloadSize(sizeof(packet_t));
+
+    radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
+    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+    radio.startListening();
 }
 
 /**
