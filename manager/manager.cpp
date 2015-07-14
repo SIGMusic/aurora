@@ -13,6 +13,7 @@
 #include "../network.h"
 
 using websocketpp::connection_hdl;
+using websocketpp::frame::opcode;
 using std::cout;
 using std::endl;
 using std::vector;
@@ -186,6 +187,28 @@ void printWelcomeMessage(void) {
  */
 void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
     cout << msg->get_payload() << endl;
+
+    uint8_t id, r, g, b;
+
+    char* message = msg->get_payload().c_str();
+    if (!strcmp(message, "list")) {
+        // List
+        ws.send(hdl, "TODO", opcode::text);
+
+    } else if (!strcmp(message, "discover")) {
+        // Discover
+        ws.send(hdl, "TODO", opcode::text);
+
+    } else if (sscanf(message, "setrgb %hhui %hhui %hhui %hhui", &id, &r, &g, &b) == 4) {
+        // Set RGB
+        cout << "Setting light " << id << " to ";
+        cout << r << ", " << g << ", " << b << endl;
+        ws.send(hdl, "OK", opcode::text);
+
+    } else {
+        // Error
+        ws.send(hdl, "Error: unrecognized command or invalid arguments", opcode::text);
+    }
 }
 
 /**
