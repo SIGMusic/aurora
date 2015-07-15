@@ -123,8 +123,6 @@ void initWebSocket(void) {
     ws.set_message_handler(&onMessage);
     ws.set_validate_handler(&shouldConnect);
 
-    // Disable verbose console output
-    ws.clear_access_channels(websocketpp::log::alevel::frame_header | websocketpp::log::alevel::frame_payload);
     ws.init_asio();
     ws.listen(WS_PORT);
     ws.start_accept();
