@@ -141,13 +141,13 @@ void initWebSocket(void) {
  */
 bool waitForResponse(unsigned int timeout) {
     unsigned int started_waiting_at = millis();
-    bool timeout = false;
-    while (!radio.available() && !timeout) {
+    bool wasTimeout = false;
+    while (!radio.available() && !wasTimeout) {
         if ((millis() - started_waiting_at) > timeout) {
-            timeout = true;
+            wasTimeout = true;
         }
     }
-    return !timeout;
+    return !wasTimeout;
 }
 
 /**
@@ -217,7 +217,7 @@ bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
     };
 
     radio.stopListening();
-    radio.openWritingPipe(RF_ADDRESS(id));
+    radio.openWritingPipe(RF_ADDRESS(endpoint));
     bool worked = radio.write(&packet, sizeof(packet));
     radio.startListening();
     return worked;
@@ -231,7 +231,6 @@ bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
  * @return Whether the light acknowledged or not.
  */
 bool getTemperature(uint8_t endpoint, int16_t * temp) {
-    printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
     packet_t request = {
         HEADER,
         CMD_GET_TEMP,
@@ -239,7 +238,7 @@ bool getTemperature(uint8_t endpoint, int16_t * temp) {
     };
 
     radio.stopListening();
-    radio.openWritingPipe(RF_ADDRESS(id));
+    radio.openWritingPipe(RF_ADDRESS(endpoint));
     bool worked = radio.write(&request, sizeof(request));
     radio.startListening();
 
@@ -276,7 +275,6 @@ bool getTemperature(uint8_t endpoint, int16_t * temp) {
  * @return Whether the light acknowledged or not.
  */
 bool getUptime(uint8_t endpoint, uint16_t * uptime) {
-    printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
     packet_t request = {
         HEADER,
         CMD_GET_UPTIME,
@@ -284,7 +282,7 @@ bool getUptime(uint8_t endpoint, uint16_t * uptime) {
     };
 
     radio.stopListening();
-    radio.openWritingPipe(RF_ADDRESS(id));
+    radio.openWritingPipe(RF_ADDRESS(endpoint));
     bool worked = radio.write(&request, sizeof(request));
     radio.startListening();
 
