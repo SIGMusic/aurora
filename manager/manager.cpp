@@ -25,21 +25,30 @@ using std::string;
 
 // Wireless protocol
 #define PING_TIMEOUT            10 // Time to wait for a ping response in milliseconds
+#define GET_TEMP_TIMEOUT        10 // Time to wait for a temperature response in milliseconds
+#define GET_UPTIME_TIMEOUT      10 // Time to wait for an uptime response in milliseconds
 
 // WebSocket protocol
 #define WS_PROTOCOL_NAME        "nlcp" // Networked Lights Control Protocol
+#define WS_PORT                 7446
+
+typedef websocketpp::server<websocketpp::config::asio> server;
 
 // Software information
 #define VERSION                 0 // The software version number
 
 
-typedef websocketpp::server<websocketpp::config::asio> server;
-
 void initRadio(void);
 void initWebSocket(void);
+
+bool waitForResponse(unsigned int timeout);
 void pingAllLights(void);
+bool getTemperature(uint8_t endpoint, int16_t * temp);
+bool getUptime(uint8_t endpoint, uint16_t * uptime);
 bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue);
+
 void printWelcomeMessage(void);
+
 void onMessage(connection_hdl hdl, server::message_ptr msg);
 bool shouldConnect(connection_hdl hdl);
 
@@ -114,9 +123,31 @@ void initWebSocket(void) {
     ws.set_message_handler(&onMessage);
     ws.set_validate_handler(&shouldConnect);
 
+    // Disable verbose console output
+    ws.clear_access_channels(websocketpp::log::alevel::frame_header | websocketpp::log::alevel::frame_payload);
     ws.init_asio();
-    ws.listen(7446);
+    ws.listen(WS_PORT);
     ws.start_accept();
+}
+
+/**
+ * Blocks until a message is received or the timeout has passed.
+ * @param timeout The time in milliseconds to wait for a response
+ *
+ * @return False if the timeout occurred, else true
+ *
+ * @todo Wait for a specific message format and allow others to be serviced
+ *       in the mean time.
+ */
+bool waitForResponse(unsigned int timeout) {
+    unsigned int started_waiting_at = millis();
+    bool timeout = false;
+    while (!radio.available() && !timeout) {
+        if ((millis() - started_waiting_at) > timeout) {
+            timeout = true;
+        }
+    }
+    return !timeout;
 }
 
 /**
@@ -137,20 +168,14 @@ void pingAllLights(void) {
 
         // If the packet wasn't delivered after several attempts, move on
         if (!success) {
+            lights[i] = false;
             continue;
         }
         
         // Wait here until we get a response or timeout
-        unsigned int started_waiting_at = millis();
-        bool timeout = false;
-        while (!radio.available() && !timeout) {
-            if ((millis() - started_waiting_at) > PING_TIMEOUT) {
-                timeout = true;
-            }
-        }
-
-        // Skip endpoints that timed out
-        if (timeout) {
+        if (!waitForResponse(PING_TIMEOUT)) {
+            // Skip endpoints that timed out
+            lights[i] = false;
             continue;
         }
 
@@ -162,6 +187,8 @@ void pingAllLights(void) {
         if (response.header != HEADER ||
             response.command != CMD_PING_RESPONSE ||
             response.data[0] != i) {
+
+            lights[i] = false;
             continue;
         }
 
@@ -182,9 +209,108 @@ void pingAllLights(void) {
  * @return Whether the light acknowledged or not.
  */
 bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
-    // TODO
     printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
-    return false;
+    packet_t packet = {
+        HEADER,
+        CMD_SET_RGB,
+        {red, green, blue}
+    };
+
+    radio.stopListening();
+    radio.openWritingPipe(RF_ADDRESS(id));
+    bool worked = radio.write(&packet, sizeof(packet));
+    radio.startListening();
+    return worked;
+}
+
+/**
+ * Gets the temperature of the given light.
+ * @param endpoint The endpoint to change
+ * @param temp The place to store the temperature in millidegrees Celsius
+ *
+ * @return Whether the light acknowledged or not.
+ */
+bool getTemperature(uint8_t endpoint, int16_t * temp) {
+    printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
+    packet_t request = {
+        HEADER,
+        CMD_GET_TEMP,
+        {0, 0, 0}
+    };
+
+    radio.stopListening();
+    radio.openWritingPipe(RF_ADDRESS(id));
+    bool worked = radio.write(&request, sizeof(request));
+    radio.startListening();
+
+    if (!worked) {
+        // The light did not acknowledge
+        return false;
+    }
+
+    if (!waitForResponse(GET_TEMP_TIMEOUT)) {
+        // Did not get a response in time
+        return false;
+    }
+
+    // Get the response
+    packet_t response;
+    radio.read(&response, sizeof(packet_t));
+
+    // Make sure the response checks out
+    if (response.header != HEADER ||
+        response.command != CMD_TEMP_RESPONSE) {
+        return false;
+    }
+
+    *temp = (response.data[0] << 8) | response.data[1];
+
+    return true;
+}
+
+/**
+ * Gets the uptime of the given light.
+ * @param endpoint The endpoint to change
+ * @param uptime The place to store the uptime in milliseconds
+ *
+ * @return Whether the light acknowledged or not.
+ */
+bool getUptime(uint8_t endpoint, uint16_t * uptime) {
+    printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
+    packet_t request = {
+        HEADER,
+        CMD_GET_UPTIME,
+        {0, 0, 0}
+    };
+
+    radio.stopListening();
+    radio.openWritingPipe(RF_ADDRESS(id));
+    bool worked = radio.write(&request, sizeof(request));
+    radio.startListening();
+
+    if (!worked) {
+        // The light did not acknowledge
+        return false;
+    }
+
+    if (!waitForResponse(GET_UPTIME_TIMEOUT)) {
+        // Did not get a response in time
+        return false;
+    }
+
+    // Get the response
+    packet_t response;
+    radio.read(&response, sizeof(packet_t));
+
+    // Make sure the response checks out
+    if (response.header != HEADER ||
+        response.command != CMD_UPTIME_RESPONSE) {
+        return false;
+    }
+
+    *uptime = (response.data[0] << 8) | response.data[1];
+
+    return true;
 }
 
 /**
@@ -221,6 +347,42 @@ void onMessage(websocketpp::connection_hdl hdl, server::message_ptr msg) {
         // Discover
         pingAllLights();
         ws.send(hdl, "OK", opcode::text);
+
+    } else if (!message.compare(0, 7, "temp ")) {
+        // Set RGB
+        if (sscanf(message.c_str(), "temp %hhu", &id) == 1) {
+            // Arguments are valid
+            int16_t temp;
+            if (getTemperature(id, &temp)) {
+                // The light acknowledged
+                ws.send(hdl, std::to_string(temp), opcode::text);
+            } else {
+                // The light did not acknowledge
+                ws.send(hdl, "Error: light not responding", opcode::text);
+            }
+
+        } else {
+            // One or more arguments were invalid
+            ws.send(hdl, "Error: invalid arguments", opcode::text);
+        }
+
+    } else if (!message.compare(0, 7, "uptime ")) {
+        // Set RGB
+        if (sscanf(message.c_str(), "uptime %hhu", &id) == 1) {
+            // Arguments are valid
+            uint16_t uptime;
+            if (getUptime(id, &uptime)) {
+                // The light acknowledged
+                ws.send(hdl, std::to_string(uptime), opcode::text);
+            } else {
+                // The light did not acknowledge
+                ws.send(hdl, "Error: light not responding", opcode::text);
+            }
+
+        } else {
+            // One or more arguments were invalid
+            ws.send(hdl, "Error: invalid arguments", opcode::text);
+        }
 
     } else if (!message.compare(0, 7, "setrgb ")) {
         // Set RGB

@@ -40,6 +40,7 @@ void serialRead(void);
 void processSerialCommand(char message[]);
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
 void setEndpointID(uint8_t id);
+long getTemperature(void);
 void printWelcomeMessage(void);
 void printHelpMessage(void);
 
@@ -129,6 +130,38 @@ void processNetworkPacket(packet_t packet) {
             break;
         }
 
+        case CMD_GET_TEMP: {
+            // Respond with the temperature
+            long temp = getTemperature();
+            packet_t response = {
+                HEADER,
+                CMD_TEMP_RESPONSE,
+                {(temp & 0xff00) >> 8, temp & 0xff, 0}
+            };
+
+            radio.stopListening();
+            radio.write(&response, sizeof(response));
+            radio.startListening();
+
+            break;
+        }
+
+        case CMD_GET_UPTIME: {
+            // Respond with the temperature
+            unsigned long uptime = millis();
+            packet_t response = {
+                HEADER,
+                CMD_UPTIME_RESPONSE,
+                {(uptime & 0xff00) >> 8, uptime & 0xff, 0}
+            };
+
+            radio.stopListening();
+            radio.write(&response, sizeof(response));
+            radio.startListening();
+
+            break;
+        }
+
         default:
             // Ignore the packet
             break;
@@ -165,11 +198,8 @@ void processSerialCommand(char message[]) {
     uint8_t id, r, g, b;
     if (!strcmp(message, "help")) {
         printHelpMessage();
-    } else if (!strcmp(message, "version")) {
-        Serial.println(VERSION);
-        Serial.println(F("OK"));
     } else if (!strcmp(message, "getid")) {
-        Serial.println(endpointID, HEX);
+        Serial.println(endpointID);
         Serial.println(F("OK"));
     } else if (sscanf(message, "setid %hhu", &id) == 1) {
         setEndpointID(id);
@@ -201,6 +231,37 @@ void setRGB(uint8_t red, uint8_t green, uint8_t blue) {
 void setEndpointID(uint8_t id) {
     EEPROM.write(ENDPOINT_ID_LOCATION, id);
     endpointID = id;
+    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+}
+
+/**
+ * Gets the (very approximate) core temperature in millidegress Celsius.
+ * @return The core temperature
+ */
+long getTemperature(void) {
+    unsigned int wADC;
+
+    // The internal temperature has to be used
+    // with the internal reference of 1.1V.
+    // Channel 8 cannot be selected with
+    // the analogRead function yet.
+
+    // Set the internal reference and mux.
+    ADMUX = (_BV(REFS1) | _BV(REFS0) | _BV(MUX3));
+    ADCSRA |= _BV(ADEN);  // enable the ADC
+
+    delay(20);            // wait for voltages to become stable.
+
+    ADCSRA |= _BV(ADSC);  // Start the ADC
+
+    // Detect end-of-conversion
+    while (bit_is_set(ADCSRA,ADSC));
+
+    // Reading register "ADCW" takes care of how to read ADCL and ADCH.
+    wADC = ADCW;
+
+    // Approximate offset. Should be calibrated further.
+    return (long)((wADC - 324.31) * 1000 / 1.22);
 }
 
 /**
@@ -211,8 +272,8 @@ void printWelcomeMessage(void) {
     Serial.println(F("SIGMusic@UIUC Lights Serial Interface"));
     Serial.print(F("Version "));
     Serial.println(VERSION);
-    Serial.print(F("This light is endpoint 0x"));
-    Serial.println(endpointID, HEX);
+    Serial.print(F("This light is endpoint "));
+    Serial.println(endpointID);
     Serial.println(F("End all commands with a carriage return."));
     Serial.println(F("Type 'help' for a list of commands."));
     Serial.println(F("----------------------------------------"));
@@ -224,7 +285,6 @@ void printWelcomeMessage(void) {
 void printHelpMessage(void) {
     Serial.println(F("Available commands:"));
     Serial.println(F("  help - displays this help message"));
-    Serial.println(F("  version - displays the firmware version number"));
     Serial.println(F("  setrgb [red] [green] [blue] - sets the color"));
     Serial.println(F("      [red], [green], [blue] - the value of each channel (0 to 255)"));
     Serial.println(F("  setid [id] - sets the endpoint ID"));
