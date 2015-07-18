@@ -34,5 +34,5 @@ public:
 private:
     void onMessage(websocketpp::connection_hdl client, server_t::message_ptr msg);
     bool shouldConnect(websocketpp::connection_hdl client);
-    server ws;
+    server_t ws;
 };

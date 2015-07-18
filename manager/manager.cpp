@@ -52,7 +52,8 @@ int main(int argc, char** argv){
 
 
     // Broadcast red to all lights as a test
-    Radio::Message red(CMD_SET_RGB, {255, 0, 0});
+    uint8_t rgb[3] = {255, 0, 0};
+    Radio::Message red(CMD_SET_RGB, rgb);
     for (int i = 1; i <= 0xff; i++) {
         radio.send(i, red);
     }
@@ -110,7 +111,8 @@ void pingAllLights(void) {
  */
 bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
     printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
-    Radio::Message msg(CMD_SET_RGB, {red, green, blue});
+    uint8_t rgb[3] = {red, green, blue};
+    Radio::Message msg(CMD_SET_RGB, rgb);
     return radio.send(endpoint, msg);
 }
 
