@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <inttypes>
+#include <cstdint>
 #include <RF24/RF24.h>
 #include "../network.h"
 
@@ -19,7 +19,7 @@ public:
                 command(0),
                 data{}
             { }
-        
+
         Message(uint8_t cmd) :
                 command(cmd),
                 data{}
