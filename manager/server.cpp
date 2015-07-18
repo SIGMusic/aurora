@@ -31,17 +31,21 @@ Server::Server() {
     ws.start_accept();
 }
 
+void Server::run(void) {
+    ws.run();
+}
+
 void Server::send(connection_hdl client, string message) {
     ws.send(client, message, opcode::text);
 }
 
-void Server::onMessage(connection_hdl client, server::message_ptr msg) {
+void Server::onMessage(connection_hdl client, server_t::message_ptr msg) {
     processMessage(client, msg->get_payload());
 }
 
 bool Server::shouldConnect(connection_hdl client) {
     // Get the connection so we can get info about it
-    server::connection_ptr connection = ws.get_con_from_hdl(client);
+    server_t::connection_ptr connection = ws.get_con_from_hdl(client);
 
     // Figure out if the client knows the protocol.
     vector<string> p = connection->get_requested_subprotocols();

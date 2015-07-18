@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include <arpa/inet.h>
-#include "../network.h"
 #include "radio.h"
 
 

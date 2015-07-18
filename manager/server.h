@@ -9,9 +9,7 @@
 #include <websocketpp/server.hpp>
 
 
-typedef websocketpp::server<websocketpp::config::asio> server;
-
-using websocketpp::connection_hdl;
+typedef websocketpp::server<websocketpp::config::asio> server_t;
 
 
 class Server {
@@ -22,14 +20,19 @@ public:
     Server();
 
     /**
+     * Runs the webserver I/O loop. Does not return.
+     */
+    void run();
+
+    /**
      * Sends a message to the connected client.
      *
      * @param message The message to send
      */
-    void send(string message);
+    void send(std::string message);
 
 private:
-    void onMessage(connection_hdl hdl, server::message_ptr msg);
-    bool shouldConnect(connection_hdl hdl);
+    void onMessage(websocketpp::connection_hdl client, server_t::message_ptr msg);
+    bool shouldConnect(websocketpp::connection_hdl client);
     server ws;
 };

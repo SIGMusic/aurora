@@ -7,6 +7,7 @@
 
 #include <inttypes>
 #include <RF24/RF24.h>
+#include "../network.h"
 
 class Radio {
 public:

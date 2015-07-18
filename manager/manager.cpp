@@ -42,7 +42,7 @@ vector<bool> lights(256, false);
 int main(int argc, char** argv){
     cout << "Running websocket event loop" << endl;
     // TODO: this I/O loop runs forever. Move to the bottom when done testing.
-    ws.run();
+    server.run();
 
     printWelcomeMessage();
 
