@@ -37,7 +37,7 @@ bool Radio::send(uint8_t endpoint, const Message & msg) {
     packet_t packet = {
         HEADER,
         msg.command,
-        msg.data
+        {msg.data[0], msg.data[1], msg.data[2]}
     };
 
     _radio.stopListening();
