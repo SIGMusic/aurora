@@ -23,6 +23,9 @@ using std::string;
 #define WS_PORT                 7446
 
 
+server_t Server::ws;
+
+
 Server::Server() {
     ws.set_message_handler(&onMessage);
     ws.set_validate_handler(&shouldConnect);
