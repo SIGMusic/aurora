@@ -32,7 +32,7 @@ public:
     void send(websocketpp::connection_hdl client, const std::string message);
 
 private:
-    void onMessage(websocketpp::connection_hdl client, server_t::message_ptr msg);
-    bool shouldConnect(websocketpp::connection_hdl client);
-    server_t ws;
+    static void onMessage(websocketpp::connection_hdl client, server_t::message_ptr msg);
+    static bool shouldConnect(websocketpp::connection_hdl client);
+    static server_t ws;
 };
