@@ -9,7 +9,7 @@
 #include <websocketpp/server.hpp>
 
 
-typedef websocketpp::server<websocketpp::config::asio> server_t;
+typedef websocketpp::server<websocketpp::config::asio> ws_server;
 
 
 class Server {
@@ -32,7 +32,7 @@ public:
     void send(websocketpp::connection_hdl client, const std::string message);
 
 private:
-    static void onMessage(websocketpp::connection_hdl client, server_t::message_ptr msg);
+    static void onMessage(websocketpp::connection_hdl client, ws_server::message_ptr msg);
     static bool shouldConnect(websocketpp::connection_hdl client);
-    static server_t ws;
+    static ws_server * ws;
 };

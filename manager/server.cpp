@@ -23,33 +23,34 @@ using std::string;
 #define WS_PORT                 7446
 
 
-server_t Server::ws;
+ws_server * Server::ws;
 
 
 Server::Server() {
-    ws.set_message_handler(&onMessage);
-    ws.set_validate_handler(&shouldConnect);
+    ws = new ws_server();
+    ws->set_message_handler(&onMessage);
+    ws->set_validate_handler(&shouldConnect);
 
-    ws.init_asio();
-    ws.listen(WS_PORT);
-    ws.start_accept();
+    ws->init_asio();
+    ws->listen(WS_PORT);
+    ws->start_accept();
 }
 
 void Server::run(void) {
-    ws.run();
+    ws->run();
 }
 
 void Server::send(connection_hdl client, const string message) {
-    ws.send(client, message, opcode::text);
+    ws->send(client, message, opcode::text);
 }
 
-void Server::onMessage(connection_hdl client, server_t::message_ptr msg) {
+void Server::onMessage(connection_hdl client, ws_server::message_ptr msg) {
     processMessage(client, msg->get_payload());
 }
 
 bool Server::shouldConnect(connection_hdl client) {
     // Get the connection so we can get info about it
-    server_t::connection_ptr connection = ws.get_con_from_hdl(client);
+    ws_server::connection_ptr connection = ws->get_con_from_hdl(client);
 
     // Figure out if the client knows the protocol.
     vector<string> p = connection->get_requested_subprotocols();

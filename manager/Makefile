@@ -1,5 +1,5 @@
 # The recommended compiler flags for the Raspberry Pi
-CCFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11 -Wall
+CCFLAGS=-g -Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11 -Wall
 
 all: bin/manager.o bin/server.o bin/radio.o
 	g++ ${CCFLAGS} -I../lib -lrf24-bcm -lboost_system -lpthread -o bin/manager bin/manager.o bin/server.o bin/radio.o
