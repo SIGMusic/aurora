@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include "server.h"
+#include "manager.h"
 
 
 using websocketpp::connection_hdl;
@@ -23,8 +24,8 @@ using std::string;
 
 
 Server::Server() {
-    ws.set_message_handler(&Server::onMessage);
-    ws.set_validate_handler(&Server::shouldConnect);
+    ws.set_message_handler(&onMessage);
+    ws.set_validate_handler(&shouldConnect);
 
     ws.init_asio();
     ws.listen(WS_PORT);
