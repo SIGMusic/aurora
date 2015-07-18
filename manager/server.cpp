@@ -35,7 +35,7 @@ void Server::run(void) {
     ws.run();
 }
 
-void Server::send(connection_hdl client, const string & message) {
+void Server::send(connection_hdl client, const string message) {
     ws.send(client, message, opcode::text);
 }
 

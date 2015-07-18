@@ -29,7 +29,7 @@ public:
      *
      * @param message The message to send
      */
-    void send(std::string message);
+    void send(connection_hdl client, const std::string message);
 
 private:
     void onMessage(websocketpp::connection_hdl client, server_t::message_ptr msg);
