@@ -7,7 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <arpa/inet.h>
-#include "websocket.h"
+#include "server.h"
 
 
 using websocketpp::connection_hdl;

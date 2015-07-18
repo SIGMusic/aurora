@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <websocketpp/server.hpp>
-#include "websocket.h"
+#include "server.h"
 #include "radio.h"
 #include "manager.h"
 
