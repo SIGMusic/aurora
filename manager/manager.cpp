@@ -187,7 +187,24 @@ bool getUptime(uint8_t endpoint, uint16_t * uptime) {
 void processMessage(connection_hdl client, const std::string message) {
     uint8_t id, r, g, b;
 
-    if (!message.compare("list")) {
+    if (!message.compare(0, 7, "setrgb ")) {
+        // Set RGB
+        if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
+            // Arguments are valid
+            if (setRGB(id, r, g, b)) {
+                // The light acknowledged
+                server.send(client, "OK");
+            } else {
+                // The light did not acknowledge
+                server.send(client, "Error: light not responding");
+            }
+
+        } else {
+            // One or more arguments were invalid
+            server.send(client, "Error: invalid arguments");
+        }
+
+    } else if (!message.compare("list")) {
         // List
         string list = "";
         for (int i = 1; i <= 0xff; i++) {
@@ -240,22 +257,10 @@ void processMessage(connection_hdl client, const std::string message) {
             server.send(client, "Error: invalid arguments");
         }
 
-    } else if (!message.compare(0, 7, "setrgb ")) {
-        // Set RGB
-        if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
-            // Arguments are valid
-            if (setRGB(id, r, g, b)) {
-                // The light acknowledged
-                server.send(client, "OK");
-            } else {
-                // The light did not acknowledge
-                server.send(client, "Error: light not responding");
-            }
+    } else if (!message.compare("ping")) {
+        // Ping - useful for measuring roundtrip latency
+        server.send(client, "OK");
 
-        } else {
-            // One or more arguments were invalid
-            server.send(client, "Error: invalid arguments");
-        }
     } else {
         // Error
         server.send(client, "Error: unrecognized command");
