@@ -221,7 +221,7 @@ void processMessage(connection_hdl client, const std::string message) {
         pingAllLights();
         server.send(client, "OK");
 
-    } else if (!message.compare(0, 7, "temp ")) {
+    } else if (!message.compare(0, 5, "temp ")) {
         // Set RGB
         if (sscanf(message.c_str(), "temp %hhu", &id) == 1) {
             // Arguments are valid
@@ -257,9 +257,9 @@ void processMessage(connection_hdl client, const std::string message) {
             server.send(client, "Error: invalid arguments");
         }
 
-    } else if (!message.compare("ping")) {
-        // Ping - useful for measuring roundtrip latency
-        server.send(client, "OK");
+    } else if (!message.compare(0, 4, "ping")) {
+        // Echo the message - useful for measuring roundtrip latency
+        server.send(client, message);
 
     } else {
         // Error
