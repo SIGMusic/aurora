@@ -9,8 +9,8 @@
 
 
 // Radio pins
-#define CE_PIN                  RPI_BPLUS_GPIO_J8_22 // Radio chip enable pin
-#define CSN_PIN                 RPI_BPLUS_GPIO_J8_24 // Radio chip select pin
+#define CE_PIN                  RPI_GPIO_P1_15 // Radio chip enable pin
+#define CSN_PIN                 RPI_GPIO_P1_24 // Radio chip select pin
 
 
 Radio::Radio() :
