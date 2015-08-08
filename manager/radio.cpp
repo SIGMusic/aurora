@@ -77,7 +77,3 @@ bool Radio::receive(Message & msg, unsigned int timeout) {
 
     return true;
 }
-
-void Radio::printDetails() {
-    _radio.printDetails();
-}
