@@ -59,6 +59,11 @@ public:
      */
     bool receive(Message & msg, unsigned int timeout);
 
+    /**
+     * Prints debugging information about the radio configuration to stdout.
+     */
+    void printDetails();
+
 private:
     RF24 _radio;
     uint8_t endpointID;

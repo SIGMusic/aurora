@@ -15,3 +15,6 @@ bin/radio.o: radio.cpp radio.h
 
 clean:
 	rm -rf bin/*
+
+debug: CCFLAGS += -DDEBUG -g
+debug: all

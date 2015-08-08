@@ -46,6 +46,10 @@ int main(int argc, char** argv){
 
     printWelcomeMessage();
 
+#ifdef DEBUG
+    radio.printDetails();
+#endif
+
     cout << "Scanning for lights..." << endl;
     pingAllLights();
     cout << "Done scanning." << endl;
