@@ -4174,7 +4174,7 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <instance part="JP2" gate="G$1" x="101.6" y="104.14"/>
 <instance part="JP1" gate="G$1" x="20.32" y="162.56"/>
 <instance part="P+2" gate="1" x="38.1" y="175.26"/>
-<instance part="GND1" gate="1" x="38.1" y="154.94"/>
+<instance part="GND1" gate="1" x="71.12" y="154.94"/>
 <instance part="U1" gate="G$1" x="71.12" y="172.72" smashed="yes">
 <attribute name="NAME" x="66.04" y="180.34" size="1.778" layer="95"/>
 <attribute name="VALUE" x="66.04" y="177.8" size="1.778" layer="96"/>
@@ -4215,11 +4215,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <label x="116.84" y="109.22" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
-<pinref part="GND1" gate="1" pin="GND"/>
-<wire x1="38.1" y1="162.56" x2="38.1" y2="157.48" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="G$1" pin="1"/>
-<wire x1="27.94" y1="162.56" x2="38.1" y2="162.56" width="0.1524" layer="91"/>
-<label x="38.1" y="162.56" size="1.778" layer="95" rot="MR0"/>
+<pinref part="IC1" gate="G$1" pin="14"/>
+<wire x1="63.5" y1="111.76" x2="73.66" y2="111.76" width="0.1524" layer="91"/>
+<label x="73.66" y="111.76" size="1.778" layer="95" rot="MR0"/>
+</segment>
+<segment>
 <wire x1="50.8" y1="162.56" x2="50.8" y2="157.48" width="0.1524" layer="91"/>
 <wire x1="50.8" y1="157.48" x2="71.12" y2="157.48" width="0.1524" layer="91"/>
 <pinref part="U1" gate="G$1" pin="GND"/>
@@ -4229,14 +4229,13 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <junction x="71.12" y="157.48"/>
 <pinref part="C1" gate="G$1" pin="2"/>
 <pinref part="C2" gate="G$1" pin="2"/>
+<pinref part="GND1" gate="1" pin="GND"/>
+<pinref part="JP1" gate="G$1" pin="1"/>
+<wire x1="27.94" y1="162.56" x2="38.1" y2="162.56" width="0.1524" layer="91"/>
+<label x="38.1" y="162.56" size="1.778" layer="95" rot="MR0"/>
+<wire x1="38.1" y1="162.56" x2="38.1" y2="157.48" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="157.48" x2="50.8" y2="157.48" width="0.1524" layer="91"/>
-<junction x="38.1" y="157.48"/>
 <junction x="50.8" y="157.48"/>
-</segment>
-<segment>
-<pinref part="IC1" gate="G$1" pin="14"/>
-<wire x1="63.5" y1="111.76" x2="73.66" y2="111.76" width="0.1524" layer="91"/>
-<label x="73.66" y="111.76" size="1.778" layer="95" rot="MR0"/>
 </segment>
 </net>
 <net name="ROUT" class="0">
