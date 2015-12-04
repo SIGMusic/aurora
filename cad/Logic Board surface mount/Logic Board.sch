@@ -8178,10 +8178,6 @@ will be further integrated into the Sparkfun Library for other footprints.  It c
 <part name="GND5" library="SparkFun" deviceset="GND" device=""/>
 <part name="JP1" library="SparkFun" deviceset="ARDUINO_SERIAL_PROGRAM" device="PTH" value="FTDI Basic"/>
 <part name="C2" library="SparkFun" deviceset="CAP" device="0603-CAP" value="0.1uF"/>
-<part name="R1" library="SparkFun" deviceset="RESISTOR" device="0603-RES"/>
-<part name="R3" library="SparkFun" deviceset="RESISTOR" device="0603-RES"/>
-<part name="P+2" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
-<part name="P+3" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
 <part name="SJ1" library="SparkFun-Passives" deviceset="SOLDERJUMPER" device="NC" value=""/>
 <part name="P+4" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
 <part name="S1" library="Testing" deviceset="SWITCH-MOMENTARY-2" device="SMD-ALT01" value="Reset"/>
@@ -8195,16 +8191,11 @@ will be further integrated into the Sparkfun Library for other footprints.  It c
 <sheets>
 <sheet>
 <plain>
-<wire x1="210.82" y1="177.8" x2="245.872" y2="177.8" width="0.2032" layer="97" style="shortdash"/>
-<wire x1="245.872" y1="177.8" x2="245.872" y2="137.668" width="0.2032" layer="97" style="shortdash"/>
-<wire x1="245.872" y1="137.668" x2="210.82" y2="137.668" width="0.2032" layer="97" style="shortdash"/>
-<wire x1="210.82" y1="137.668" x2="210.82" y2="177.8" width="0.2032" layer="97" style="shortdash"/>
 <text x="165.862" y="11.684" size="1.778" layer="94">Original Arduino Mini Design by Team Arduino</text>
 <text x="165.862" y="9.144" size="1.778" layer="94">Arduino Pro Mini Design by Spark Fun Electronics</text>
 <text x="20.32" y="137.16" size="1.778" layer="97">Max Voltage Input: 16VDC</text>
 <text x="20.32" y="134.62" size="1.778" layer="97">Max Current Output: 150mA</text>
 <text x="20.32" y="139.7" size="1.778" layer="97">VCC = 5V or 3.3V Output</text>
-<text x="212.598" y="172.72" size="1.778" layer="97">Optional Pullups for I2C lines</text>
 <text x="240.284" y="7.366" size="1.778" layer="94">14</text>
 <text x="58.42" y="177.8" size="1.778" layer="97">Power isolation jumper</text>
 <text x="56.642" y="175.006" size="1.778" layer="97">(for low power aplications)</text>
@@ -8261,10 +8252,6 @@ will be further integrated into the Sparkfun Library for other footprints.  It c
 <attribute name="NAME" x="111.633" y="155.956" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="116.459" y="155.956" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R1" gate="G$1" x="223.52" y="152.4" rot="R90"/>
-<instance part="R3" gate="G$1" x="231.14" y="149.86" rot="R90"/>
-<instance part="P+2" gate="G$1" x="223.52" y="160.02"/>
-<instance part="P+3" gate="G$1" x="231.14" y="160.02"/>
 <instance part="SJ1" gate="1" x="68.58" y="162.56"/>
 <instance part="P+4" gate="G$1" x="86.36" y="165.1"/>
 <instance part="S1" gate="G$1" x="121.92" y="147.32" rot="R90"/>
@@ -8487,16 +8474,6 @@ will be further integrated into the Sparkfun Library for other footprints.  It c
 <label x="233.68" y="119.38" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<wire x1="223.52" y1="157.48" x2="223.52" y2="160.02" width="0.1524" layer="91"/>
-<pinref part="P+2" gate="G$1" pin="3.3V"/>
-<pinref part="R1" gate="G$1" pin="2"/>
-</segment>
-<segment>
-<wire x1="231.14" y1="154.94" x2="231.14" y2="160.02" width="0.1524" layer="91"/>
-<pinref part="P+3" gate="G$1" pin="3.3V"/>
-<pinref part="R3" gate="G$1" pin="2"/>
-</segment>
-<segment>
 <pinref part="P+4" gate="G$1" pin="3.3V"/>
 <wire x1="86.36" y1="165.1" x2="86.36" y2="162.56" width="0.1524" layer="91"/>
 <pinref part="SJ1" gate="1" pin="2"/>
@@ -8551,22 +8528,6 @@ will be further integrated into the Sparkfun Library for other footprints.  It c
 <wire x1="195.58" y1="109.22" x2="198.12" y2="109.22" width="0.1524" layer="91"/>
 <pinref part="U1" gate="G$1" pin="PB0(ICP)"/>
 <label x="198.12" y="109.22" size="1.27" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="A5" class="0">
-<segment>
-<wire x1="195.58" y1="142.24" x2="231.14" y2="142.24" width="0.1524" layer="91"/>
-<wire x1="231.14" y1="142.24" x2="231.14" y2="144.78" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="PC5(ADC5/SCL)"/>
-<pinref part="R3" gate="G$1" pin="1"/>
-</segment>
-</net>
-<net name="A4" class="0">
-<segment>
-<wire x1="195.58" y1="144.78" x2="223.52" y2="144.78" width="0.1524" layer="91"/>
-<wire x1="223.52" y1="144.78" x2="223.52" y2="147.32" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="PC4(ADC4/SDA)"/>
-<pinref part="R1" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="A3" class="0">
