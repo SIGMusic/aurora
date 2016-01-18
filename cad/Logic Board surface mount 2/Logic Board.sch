@@ -2819,144 +2819,6 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 </deviceset>
 </devicesets>
 </library>
-<library name="diy-modules">
-<description>&lt;b&gt;DIY Modules for Arduino, Raspberry Pi, CubieBoard etc.&lt;/b&gt;
-&lt;br&gt;&lt;br&gt;
-The library contains a list of symbols and footprints for popular, cheap and easy-to-use electronic modules.&lt;br&gt;
-The modules are intend to work with microprocessor-based platforms such as &lt;a href="http://arduino.cc"&gt;Arduino&lt;/a&gt;, &lt;a href="http://raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;, &lt;a href="http://cubieboard.org/"&gt;CubieBoard&lt;/a&gt;, &lt;a href="http://beagleboard.org/"&gt;BeagleBone&lt;/a&gt; and many others. There are many manufacturers of the modules in the world. Almost all of them can be bought on &lt;a href="ebay.com"&gt;ebay.com&lt;/a&gt;.&lt;br&gt;
-&lt;br&gt;
-By using this library, you can design a PCB for devices created with usage of modules. Even if you do not need to create PCB design, you can also use the library to quickly document your work by drawing schematics of devices built by you.&lt;br&gt;
-&lt;br&gt;
-The latest version, examples, photos and much more can be found at: &lt;b&gt;&lt;a href="http://diymodules.org/eagle"&gt;diymodules.org/eagle&lt;/a&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;
-Comments, suggestions and bug reports please send to: &lt;b&gt;&lt;a href="mailto:eagle@diymodules.org"&gt;eagle@diymodules.org&lt;/b&gt;&lt;/a&gt;&lt;br&gt;&lt;br&gt;
-&lt;i&gt;Version: 1.0.1 (2015-Apr-26)&lt;/i&gt;&lt;br&gt;
-&lt;i&gt;Created by: Miroslaw Brudnowski&lt;/i&gt;&lt;br&gt;&lt;br&gt;
-&lt;i&gt;Released under the Creative Commons Attribution 4.0 International License: &lt;a href="http://creativecommons.org/licenses/by/4.0"&gt;http://creativecommons.org/licenses/by/4.0&lt;/a&gt;&lt;/i&gt;
-&lt;br&gt;&lt;br&gt;
-&lt;center&gt;&lt;a href="http://diymodules.org/eagle"&gt;&lt;img src="http://diymodules.org/img/diymodules-lbr-image.php?v=1.0.1" alt="DIYmodules.org"&gt;&lt;/a&gt;&lt;/center&gt;</description>
-<packages>
-<package name="WIRELESS-NRD24L01-PA-EXT">
-<description>&lt;b&gt;2.4 GHz Wireless Module&lt;/b&gt; based on &lt;b&gt;NRF24L01&lt;/b&gt; chip with preamplifier and external antenna</description>
-<pad name="1" x="-18.415" y="3.81" drill="1" shape="square"/>
-<pad name="8" x="-15.875" y="-3.81" drill="1"/>
-<pad name="6" x="-15.875" y="-1.27" drill="1"/>
-<pad name="4" x="-15.875" y="1.27" drill="1"/>
-<pad name="2" x="-15.875" y="3.81" drill="1"/>
-<pad name="3" x="-18.415" y="1.27" drill="1"/>
-<pad name="5" x="-18.415" y="-1.27" drill="1"/>
-<pad name="7" x="-18.415" y="-3.81" drill="1"/>
-<text x="0" y="8.89" size="1.27" layer="25" align="bottom-center">&gt;NAME</text>
-<text x="0" y="-8.89" size="1.27" layer="27" align="top-center">&gt;VALUE</text>
-<wire x1="-20.32" y1="7.62" x2="20.32" y2="7.62" width="0.127" layer="21"/>
-<wire x1="20.32" y1="-7.62" x2="-20.32" y2="-7.62" width="0.127" layer="21"/>
-<wire x1="-20.32" y1="-7.62" x2="-20.32" y2="7.62" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="4.445" x2="-19.05" y2="5.08" width="0.127" layer="21"/>
-<wire x1="-19.05" y1="5.08" x2="-15.24" y2="5.08" width="0.127" layer="21"/>
-<wire x1="-15.24" y1="5.08" x2="-14.605" y2="4.445" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="4.445" x2="-14.605" y2="3.175" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="3.175" x2="-15.24" y2="2.54" width="0.127" layer="21"/>
-<wire x1="-15.24" y1="2.54" x2="-14.605" y2="1.905" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="1.905" x2="-14.605" y2="0.635" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="0.635" x2="-15.24" y2="0" width="0.127" layer="21"/>
-<wire x1="-15.24" y1="0" x2="-14.605" y2="-0.635" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="-0.635" x2="-14.605" y2="-1.905" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="-1.905" x2="-15.24" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="-15.24" y1="-2.54" x2="-14.605" y2="-3.175" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="-3.175" x2="-14.605" y2="-4.445" width="0.127" layer="21"/>
-<wire x1="-14.605" y1="-4.445" x2="-15.24" y2="-5.08" width="0.127" layer="21"/>
-<wire x1="-15.24" y1="-5.08" x2="-16.51" y2="-5.08" width="0.127" layer="21"/>
-<wire x1="-16.51" y1="-5.08" x2="-17.145" y2="-4.445" width="0.127" layer="21"/>
-<wire x1="-17.145" y1="-4.445" x2="-17.78" y2="-5.08" width="0.127" layer="21"/>
-<wire x1="-17.78" y1="-5.08" x2="-19.05" y2="-5.08" width="0.127" layer="21"/>
-<wire x1="-19.05" y1="-5.08" x2="-19.685" y2="-4.445" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="-4.445" x2="-19.685" y2="-3.175" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="-3.175" x2="-19.05" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="-19.05" y1="-2.54" x2="-19.685" y2="-1.905" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="-1.905" x2="-19.685" y2="-0.635" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="-0.635" x2="-19.05" y2="0" width="0.127" layer="21"/>
-<wire x1="-19.05" y1="0" x2="-19.685" y2="0.635" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="0.635" x2="-19.685" y2="1.905" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="1.905" x2="-19.05" y2="2.54" width="0.127" layer="21"/>
-<wire x1="-19.05" y1="2.54" x2="-19.685" y2="3.175" width="0.127" layer="21"/>
-<wire x1="-19.685" y1="3.175" x2="-19.685" y2="4.445" width="0.127" layer="21"/>
-<wire x1="13.335" y1="3.175" x2="19.685" y2="3.175" width="0.127" layer="21"/>
-<wire x1="19.685" y1="3.175" x2="19.685" y2="2.54" width="0.127" layer="21"/>
-<wire x1="19.685" y1="2.54" x2="19.685" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="19.685" y1="-2.54" x2="19.685" y2="-3.175" width="0.127" layer="21"/>
-<wire x1="19.685" y1="-3.175" x2="13.335" y2="-3.175" width="0.127" layer="21"/>
-<wire x1="13.335" y1="-3.175" x2="13.335" y2="3.175" width="0.127" layer="21"/>
-<wire x1="19.685" y1="2.54" x2="20.32" y2="2.54" width="0.127" layer="21"/>
-<wire x1="20.32" y1="2.54" x2="22.86" y2="2.54" width="0.127" layer="21"/>
-<wire x1="19.685" y1="-2.54" x2="20.32" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="20.32" y1="-2.54" x2="22.86" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="22.86" y1="2.54" x2="22.86" y2="3.175" width="0.127" layer="21"/>
-<wire x1="22.86" y1="3.175" x2="27.305" y2="3.175" width="0.127" layer="21"/>
-<wire x1="27.305" y1="3.175" x2="27.305" y2="2.54" width="0.127" layer="21"/>
-<wire x1="27.305" y1="2.54" x2="27.94" y2="2.54" width="0.127" layer="21"/>
-<wire x1="27.94" y1="2.54" x2="27.94" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="27.94" y1="-2.54" x2="27.305" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="27.305" y1="-2.54" x2="27.305" y2="-3.175" width="0.127" layer="21"/>
-<wire x1="27.305" y1="-3.175" x2="22.86" y2="-3.175" width="0.127" layer="21"/>
-<wire x1="22.86" y1="-3.175" x2="22.86" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="20.32" y1="7.62" x2="20.32" y2="2.54" width="0.127" layer="21"/>
-<wire x1="20.32" y1="-7.62" x2="20.32" y2="-2.54" width="0.127" layer="21"/>
-</package>
-</packages>
-<symbols>
-<symbol name="WIRELESS-NRF24L01-PA-EXT">
-<description>&lt;b&gt;2.4 GHz Wireless Module&lt;/b&gt; based on &lt;b&gt;NRF24L01&lt;/b&gt; chip with preamplifier and external antenna</description>
-<pin name="GND" x="-22.86" y="10.16" length="middle" direction="pwr"/>
-<pin name="VCC" x="-22.86" y="7.62" length="middle" direction="pwr"/>
-<pin name="CE" x="-22.86" y="5.08" length="middle"/>
-<pin name="CSN" x="-22.86" y="2.54" length="middle"/>
-<pin name="SCK" x="-22.86" y="0" length="middle"/>
-<pin name="MOSI" x="-22.86" y="-2.54" length="middle"/>
-<pin name="MISO" x="-22.86" y="-5.08" length="middle"/>
-<pin name="IRQ" x="-22.86" y="-7.62" length="middle"/>
-<wire x1="-17.78" y1="12.7" x2="17.78" y2="12.7" width="0.254" layer="94"/>
-<wire x1="17.78" y1="12.7" x2="17.78" y2="5.842" width="0.254" layer="94"/>
-<wire x1="17.78" y1="5.842" x2="17.78" y2="5.08" width="0.254" layer="94"/>
-<wire x1="17.78" y1="5.08" x2="17.78" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="17.78" y1="-2.54" x2="17.78" y2="-3.556" width="0.254" layer="94"/>
-<wire x1="17.78" y1="-3.556" x2="17.78" y2="-10.16" width="0.254" layer="94"/>
-<wire x1="17.78" y1="-10.16" x2="-17.78" y2="-10.16" width="0.254" layer="94"/>
-<wire x1="-17.78" y1="-10.16" x2="-17.78" y2="12.7" width="0.254" layer="94"/>
-<text x="20.32" y="10.16" size="1.778" layer="95">&gt;NAME</text>
-<text x="20.32" y="7.62" size="1.778" layer="96">&gt;VALUE</text>
-<wire x1="17.78" y1="5.08" x2="27.94" y2="5.08" width="0.254" layer="94"/>
-<wire x1="27.94" y1="5.08" x2="27.94" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="27.94" y1="-2.54" x2="17.78" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="17.78" y1="5.842" x2="8.89" y2="5.842" width="0.254" layer="94"/>
-<wire x1="8.89" y1="5.842" x2="8.89" y2="-3.556" width="0.254" layer="94"/>
-<wire x1="8.89" y1="-3.556" x2="17.78" y2="-3.556" width="0.254" layer="94"/>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="WIRELESS-NRF24L01-PA-EXT" prefix="M">
-<description>&lt;b&gt;2.4 GHz Wireless Module&lt;/b&gt; based on &lt;b&gt;NRF24L01&lt;/b&gt; chip with preamplifier and external antenna</description>
-<gates>
-<gate name="G$1" symbol="WIRELESS-NRF24L01-PA-EXT" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="WIRELESS-NRD24L01-PA-EXT">
-<connects>
-<connect gate="G$1" pin="CE" pad="3"/>
-<connect gate="G$1" pin="CSN" pad="4"/>
-<connect gate="G$1" pin="GND" pad="1"/>
-<connect gate="G$1" pin="IRQ" pad="8"/>
-<connect gate="G$1" pin="MISO" pad="7"/>
-<connect gate="G$1" pin="MOSI" pad="6"/>
-<connect gate="G$1" pin="SCK" pad="5"/>
-<connect gate="G$1" pin="VCC" pad="2"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 <library name="rcl">
 <description>&lt;b&gt;Resistors, Capacitors, Inductors&lt;/b&gt;&lt;p&gt;
 Based on the previous libraries:
@@ -15389,6 +15251,93 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="my-custom">
+<packages>
+<package name="FEMALE-2X4-SMT">
+<description>&lt;b&gt;2x4 female SMT header&lt;/b&gt;
+&lt;br&gt;
+&lt;a href="http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685"&gt;http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685&lt;/a&gt;</description>
+<text x="-5.08" y="3.683" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-5.08" y="-5.08" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<smd name="8" x="3.81" y="2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="6" x="1.27" y="2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="4" x="-1.27" y="2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="2" x="-3.81" y="2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="1" x="-3.81" y="-2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="3" x="-1.27" y="-2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="5" x="1.27" y="-2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<smd name="7" x="3.81" y="-2.54" dx="1" dy="0.6" layer="1" rot="R90"/>
+<wire x1="-5.08" y1="2.54" x2="5.08" y2="2.54" width="0.127" layer="21"/>
+<wire x1="5.08" y1="2.54" x2="5.08" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="5.08" y1="-2.54" x2="-5.08" y2="-2.54" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="-2.54" x2="-5.08" y2="2.54" width="0.127" layer="21"/>
+</package>
+</packages>
+<symbols>
+<symbol name="FEMALE-2X4-SMT">
+<description>&lt;b&gt;2x4 female SMT header&lt;/b&gt;
+&lt;br&gt;
+&lt;a href="http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685"&gt;http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685&lt;/a&gt;</description>
+<wire x1="-2.54" y1="2.54" x2="-2.54" y2="3.81" width="0.4064" layer="94"/>
+<wire x1="-2.54" y1="3.81" x2="-2.54" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="-2.54" x2="-2.54" y2="-3.81" width="0.4064" layer="94"/>
+<wire x1="-2.54" y1="-3.81" x2="-2.54" y2="-5.08" width="0.1524" layer="94"/>
+<wire x1="0" y1="2.54" x2="0" y2="3.81" width="0.4064" layer="94"/>
+<wire x1="0" y1="3.81" x2="0" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="0" y1="-2.54" x2="0" y2="-3.81" width="0.4064" layer="94"/>
+<wire x1="0" y1="-3.81" x2="0" y2="-5.08" width="0.1524" layer="94"/>
+<wire x1="2.54" y1="2.54" x2="2.54" y2="3.81" width="0.4064" layer="94"/>
+<wire x1="2.54" y1="3.81" x2="2.54" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="2.54" y1="-2.54" x2="2.54" y2="-3.81" width="0.4064" layer="94"/>
+<wire x1="2.54" y1="-3.81" x2="2.54" y2="-5.08" width="0.1524" layer="94"/>
+<wire x1="5.08" y1="2.54" x2="5.08" y2="3.81" width="0.4064" layer="94"/>
+<wire x1="5.08" y1="3.81" x2="5.08" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="5.08" y1="-2.54" x2="5.08" y2="-3.81" width="0.4064" layer="94"/>
+<wire x1="5.08" y1="-3.81" x2="5.08" y2="-5.08" width="0.1524" layer="94"/>
+<wire x1="6.985" y1="5.08" x2="-4.445" y2="5.08" width="0.4064" layer="94"/>
+<wire x1="-4.445" y1="5.08" x2="-4.445" y2="-5.08" width="0.4064" layer="94"/>
+<wire x1="-4.445" y1="-5.08" x2="6.985" y2="-5.08" width="0.4064" layer="94"/>
+<wire x1="6.985" y1="-5.08" x2="6.985" y2="5.08" width="0.4064" layer="94"/>
+<text x="-5.08" y="-5.08" size="1.778" layer="95" rot="R90">&gt;NAME</text>
+<text x="9.525" y="-5.08" size="1.778" layer="96" rot="R90">&gt;VALUE</text>
+<pin name="1" x="-2.54" y="-7.62" visible="pad" length="short" direction="pas" rot="R90"/>
+<pin name="2" x="-2.54" y="7.62" visible="pad" length="short" direction="pas" rot="R270"/>
+<pin name="3" x="0" y="-7.62" visible="pad" length="short" direction="pas" rot="R90"/>
+<pin name="4" x="0" y="7.62" visible="pad" length="short" direction="pas" rot="R270"/>
+<pin name="5" x="2.54" y="-7.62" visible="pad" length="short" direction="pas" rot="R90"/>
+<pin name="6" x="2.54" y="7.62" visible="pad" length="short" direction="pas" rot="R270"/>
+<pin name="7" x="5.08" y="-7.62" visible="pad" length="short" direction="pas" rot="R90"/>
+<pin name="8" x="5.08" y="7.62" visible="pad" length="short" direction="pas" rot="R270"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="FEMALE-2X4-SMT" prefix="J" uservalue="yes">
+<description>&lt;b&gt;2x4 female SMT header&lt;/b&gt;
+&lt;br&gt;
+&lt;a href="http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685"&gt;http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685&lt;/a&gt;</description>
+<gates>
+<gate name="G$1" symbol="FEMALE-2X4-SMT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="FEMALE-2X4-SMT">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+<connect gate="G$1" pin="3" pad="3"/>
+<connect gate="G$1" pin="4" pad="4"/>
+<connect gate="G$1" pin="5" pad="5"/>
+<connect gate="G$1" pin="6" pad="6"/>
+<connect gate="G$1" pin="7" pad="7"/>
+<connect gate="G$1" pin="8" pad="8"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -15433,7 +15382,6 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <part name="P+4" library="SparkFun" deviceset="3.3V" device="" value="VCC"/>
 <part name="S1" library="Testing" deviceset="SWITCH-MOMENTARY-2" device="SMD-ALT01" value="Reset"/>
 <part name="Q1" library="Testing" deviceset="RESONATOR" device="1:1" value="8/16/20MHz"/>
-<part name="M1" library="diy-modules" deviceset="WIRELESS-NRF24L01-PA-EXT" device=""/>
 <part name="C4" library="rcl" deviceset="C-US" device="C1206" value="10uF"/>
 <part name="B2" library="special" deviceset="LED-BOARD" device="V4"/>
 <part name="J1" library="SparkFun-Connectors" deviceset="M02" device="3.5MM"/>
@@ -15447,6 +15395,7 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
+<part name="J2" library="my-custom" deviceset="FEMALE-2X4-SMT" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -15504,8 +15453,8 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <instance part="GND5" gate="1" x="144.78" y="93.98"/>
 <instance part="JP1" gate="G$1" x="226.06" y="116.84"/>
 <instance part="C2" gate="G$1" x="111.76" y="154.94" smashed="yes" rot="R270">
-<attribute name="NAME" x="111.633" y="155.956" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="116.459" y="155.956" size="1.778" layer="96" rot="R90"/>
+<attribute name="NAME" x="109.093" y="155.956" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="113.919" y="155.956" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="P+4" gate="G$1" x="86.36" y="165.1"/>
 <instance part="S1" gate="G$1" x="121.92" y="147.32" rot="R90"/>
@@ -15513,8 +15462,7 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <attribute name="NAME" x="141.224" y="130.81" size="1.778" layer="95"/>
 <attribute name="VALUE" x="137.922" y="121.412" size="1.778" layer="96"/>
 </instance>
-<instance part="M1" gate="G$1" x="60.96" y="20.32"/>
-<instance part="C4" gate="G$1" x="15.24" y="30.48" rot="R180"/>
+<instance part="C4" gate="G$1" x="17.78" y="35.56"/>
 <instance part="B2" gate="RED" x="99.06" y="104.14" rot="R180"/>
 <instance part="B2" gate="GREEN" x="99.06" y="83.82" rot="R180"/>
 <instance part="B2" gate="BLUE" x="99.06" y="60.96" rot="R180"/>
@@ -15529,6 +15477,7 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <instance part="GND6" gate="1" x="93.98" y="101.6"/>
 <instance part="GND9" gate="1" x="93.98" y="81.28"/>
 <instance part="GND10" gate="1" x="93.98" y="58.42"/>
+<instance part="J2" gate="G$1" x="35.56" y="22.86" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -15605,12 +15554,8 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <wire x1="60.96" y1="139.7" x2="60.96" y2="137.16" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="GND"/>
-<label x="30.48" y="30.48" size="1.778" layer="95"/>
 <pinref part="C4" gate="G$1" pin="2"/>
-<wire x1="15.24" y1="35.56" x2="22.86" y2="35.56" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="35.56" x2="22.86" y2="30.48" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="30.48" x2="38.1" y2="30.48" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="30.48" x2="17.78" y2="25.4" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="J1" gate="G$1" pin="1"/>
@@ -15636,6 +15581,11 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <wire x1="99.06" y1="60.96" x2="93.98" y2="60.96" width="0.1524" layer="91"/>
 <pinref part="B2" gate="BLUE" pin="P$1"/>
 <pinref part="GND10" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="J2" gate="G$1" pin="1"/>
+<wire x1="17.78" y1="25.4" x2="27.94" y2="25.4" width="0.1524" layer="91"/>
+<label x="17.78" y="25.4" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="AREF" class="0">
@@ -15671,9 +15621,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <junction x="198.12" y="96.52"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="SCK"/>
-<wire x1="38.1" y1="20.32" x2="30.48" y2="20.32" width="0.1524" layer="91"/>
-<label x="30.48" y="20.32" size="1.778" layer="95"/>
+<label x="17.78" y="20.32" size="1.778" layer="95"/>
+<pinref part="J2" gate="G$1" pin="5"/>
+<wire x1="17.78" y1="20.32" x2="27.94" y2="20.32" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MISO" class="0">
@@ -15683,9 +15633,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <label x="198.12" y="99.06" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="MISO"/>
-<wire x1="38.1" y1="15.24" x2="30.48" y2="15.24" width="0.1524" layer="91"/>
-<label x="30.48" y="15.24" size="1.778" layer="95"/>
+<label x="17.78" y="17.78" size="1.778" layer="95"/>
+<pinref part="J2" gate="G$1" pin="7"/>
+<wire x1="17.78" y1="17.78" x2="27.94" y2="17.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MOSI" class="0">
@@ -15695,9 +15645,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <label x="198.12" y="101.6" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="MOSI"/>
-<wire x1="38.1" y1="17.78" x2="30.48" y2="17.78" width="0.1524" layer="91"/>
-<label x="30.48" y="17.78" size="1.778" layer="95"/>
+<label x="53.34" y="20.32" size="1.778" layer="95" rot="MR0"/>
+<pinref part="J2" gate="G$1" pin="6"/>
+<wire x1="53.34" y1="20.32" x2="43.18" y2="20.32" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="TXO" class="0">
@@ -15760,10 +15710,13 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <wire x1="60.96" y1="162.56" x2="76.2" y2="162.56" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="VCC"/>
-<label x="30.48" y="27.94" size="1.778" layer="95"/>
+<label x="53.34" y="25.4" size="1.778" layer="95" rot="MR0"/>
+<pinref part="J2" gate="G$1" pin="2"/>
+<wire x1="53.34" y1="25.4" x2="43.18" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="25.4" x2="53.34" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="40.64" x2="17.78" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="C4" gate="G$1" pin="1"/>
-<wire x1="15.24" y1="27.94" x2="38.1" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="40.64" x2="17.78" y2="38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D9" class="0">
@@ -15773,9 +15726,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <label x="198.12" y="106.68" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="CE"/>
-<wire x1="38.1" y1="25.4" x2="30.48" y2="25.4" width="0.1524" layer="91"/>
-<label x="30.48" y="25.4" size="1.778" layer="95"/>
+<label x="17.78" y="22.86" size="1.778" layer="95"/>
+<pinref part="J2" gate="G$1" pin="3"/>
+<wire x1="17.78" y1="22.86" x2="27.94" y2="22.86" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D8" class="0">
@@ -15820,9 +15773,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <label x="198.12" y="127" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="IRQ"/>
-<wire x1="38.1" y1="12.7" x2="30.48" y2="12.7" width="0.1524" layer="91"/>
-<label x="30.48" y="12.7" size="1.778" layer="95"/>
+<label x="53.34" y="17.78" size="1.778" layer="95" rot="MR0"/>
+<pinref part="J2" gate="G$1" pin="8"/>
+<wire x1="53.34" y1="17.78" x2="43.18" y2="17.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D3" class="0">
@@ -15882,9 +15835,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <label x="198.12" y="104.14" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
-<pinref part="M1" gate="G$1" pin="CSN"/>
-<wire x1="38.1" y1="22.86" x2="30.48" y2="22.86" width="0.1524" layer="91"/>
-<label x="30.48" y="22.86" size="1.778" layer="95"/>
+<label x="53.34" y="22.86" size="1.778" layer="95" rot="MR0"/>
+<pinref part="J2" gate="G$1" pin="4"/>
+<wire x1="53.34" y1="22.86" x2="43.18" y2="22.86" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
