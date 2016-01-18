@@ -9,7 +9,7 @@ Preliminary BOM (subject to change):
 * 1 x [300Ω resistor](http://www.digikey.com/product-detail/en/RC1206JR-07330RL/311-330ERCT-ND/732226)
 * 1 x [Red LED](http://www.digikey.com/product-detail/en/LTST-C150CKT/160-1167-1-ND/269239)
 * 1 x [Green LED](http://www.digikey.com/product-detail/en/LTST-C150GKT/160-1169-1-ND/269241)
-* 1 x [Momentary push button](http://www.digikey.com/product-detail/en/PWR70Q2S/CKN10416-ND/3131759)
+* 1 x [Momentary push button](http://www.digikey.com/product-detail/en/PTS525SM10SMTR%20LFS/CKN9104CT-ND/1146923)
 * 1 x [ATmega328p](http://www.digikey.com/product-detail/en/ATMEGA328-AUR/ATMEGA328-AURCT-ND/3440951)
     * [With Arduino bootloader](https://www.tindie.com/products/Hanscorp2014/atmega328p-tqfp-warduino-bootloader/)
 * 1 x [3.3V linear voltage regulator](http://www.digikey.com/product-detail/en/MIC5205-3.3YM5-TR/576-1259-1-ND/771886)
