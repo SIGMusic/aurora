@@ -15354,12 +15354,30 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <text x="-2.54" y="-5.08" size="1.778" layer="96" rot="R90">&gt;VALUE</text>
 <pin name="+12V" x="0" y="-2.54" visible="off" length="short" direction="sup" rot="R90"/>
 </symbol>
+<symbol name="GND">
+<wire x1="-1.905" y1="0" x2="1.905" y2="0" width="0.254" layer="94"/>
+<text x="-2.54" y="-2.54" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="GND" x="0" y="2.54" visible="off" length="short" direction="sup" rot="R270"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="+12V" prefix="P+">
 <description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
 <gates>
 <gate name="1" symbol="+12V" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="GND" prefix="GND">
+<description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="GND" x="0" y="0"/>
 </gates>
 <devices>
 <device name="">
@@ -15426,6 +15444,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <part name="P+2" library="supply1" deviceset="+12V" device=""/>
 <part name="P+3" library="supply1" deviceset="+12V" device=""/>
 <part name="P+5" library="supply1" deviceset="+12V" device=""/>
+<part name="GND6" library="supply1" deviceset="GND" device=""/>
+<part name="GND9" library="supply1" deviceset="GND" device=""/>
+<part name="GND10" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -15505,6 +15526,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <instance part="P+2" gate="1" x="73.66" y="99.06" rot="R180"/>
 <instance part="P+3" gate="1" x="73.66" y="78.74" rot="R180"/>
 <instance part="P+5" gate="1" x="73.66" y="55.88" rot="R180"/>
+<instance part="GND6" gate="1" x="93.98" y="101.6"/>
+<instance part="GND9" gate="1" x="93.98" y="81.28"/>
+<instance part="GND10" gate="1" x="93.98" y="58.42"/>
 </instances>
 <busses>
 </busses>
@@ -15597,6 +15621,21 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <pinref part="R6" gate="G$1" pin="2"/>
 <pinref part="GND8" gate="1" pin="GND"/>
 <wire x1="198.12" y1="71.12" x2="198.12" y2="66.04" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<wire x1="99.06" y1="104.14" x2="93.98" y2="104.14" width="0.1524" layer="91"/>
+<pinref part="B2" gate="RED" pin="P$1"/>
+<pinref part="GND6" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="B2" gate="GREEN" pin="P$1"/>
+<wire x1="99.06" y1="83.82" x2="93.98" y2="83.82" width="0.1524" layer="91"/>
+<pinref part="GND9" gate="1" pin="GND"/>
+</segment>
+<segment>
+<wire x1="99.06" y1="60.96" x2="93.98" y2="60.96" width="0.1524" layer="91"/>
+<pinref part="B2" gate="BLUE" pin="P$1"/>
+<pinref part="GND10" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="AREF" class="0">
@@ -15909,7 +15948,7 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <net name="BOUT" class="0">
 <segment>
 <wire x1="73.66" y1="71.12" x2="99.06" y2="71.12" width="0.1524" layer="91"/>
-<label x="96.52" y="73.66" size="1.778" layer="95"/>
+<label x="73.66" y="71.12" size="1.778" layer="95"/>
 <pinref part="B2" gate="BLUE" pin="P$2"/>
 <wire x1="99.06" y1="63.5" x2="99.06" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="Q4" gate="G$1" pin="D"/>
@@ -15918,7 +15957,7 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <net name="GOUT" class="0">
 <segment>
 <wire x1="73.66" y1="93.98" x2="99.06" y2="93.98" width="0.1524" layer="91"/>
-<label x="96.52" y="93.98" size="1.778" layer="95"/>
+<label x="73.66" y="93.98" size="1.778" layer="95"/>
 <pinref part="B2" gate="GREEN" pin="P$2"/>
 <wire x1="99.06" y1="86.36" x2="99.06" y2="93.98" width="0.1524" layer="91"/>
 <pinref part="Q3" gate="G$1" pin="D"/>
@@ -15927,7 +15966,7 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <net name="ROUT" class="0">
 <segment>
 <wire x1="73.66" y1="114.3" x2="99.06" y2="114.3" width="0.1524" layer="91"/>
-<label x="96.52" y="114.3" size="1.778" layer="95"/>
+<label x="73.66" y="114.3" size="1.778" layer="95"/>
 <pinref part="B2" gate="RED" pin="P$2"/>
 <wire x1="99.06" y1="106.68" x2="99.06" y2="114.3" width="0.1524" layer="91"/>
 <pinref part="Q2" gate="G$1" pin="D"/>
@@ -15942,14 +15981,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 </net>
 <net name="+12V" class="0">
 <segment>
-<wire x1="99.06" y1="104.14" x2="96.52" y2="104.14" width="0.1524" layer="91"/>
-<pinref part="B2" gate="RED" pin="P$1"/>
 <pinref part="Q2" gate="G$1" pin="S"/>
-<wire x1="73.66" y1="104.14" x2="99.06" y2="104.14" width="0.1524" layer="91"/>
-<junction x="99.06" y="104.14"/>
 <pinref part="P+2" gate="1" pin="+12V"/>
 <wire x1="73.66" y1="101.6" x2="73.66" y2="104.14" width="0.1524" layer="91"/>
-<junction x="73.66" y="104.14"/>
 </segment>
 <segment>
 <wire x1="33.02" y1="162.56" x2="35.56" y2="162.56" width="0.1524" layer="91"/>
@@ -15967,22 +16001,14 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <label x="15.24" y="162.56" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="B2" gate="GREEN" pin="P$1"/>
 <pinref part="Q3" gate="G$1" pin="S"/>
-<wire x1="73.66" y1="83.82" x2="99.06" y2="83.82" width="0.1524" layer="91"/>
 <pinref part="P+3" gate="1" pin="+12V"/>
 <wire x1="73.66" y1="83.82" x2="73.66" y2="81.28" width="0.1524" layer="91"/>
-<junction x="73.66" y="83.82"/>
 </segment>
 <segment>
-<wire x1="99.06" y1="60.96" x2="96.52" y2="60.96" width="0.1524" layer="91"/>
-<pinref part="B2" gate="BLUE" pin="P$1"/>
-<pinref part="Q4" gate="G$1" pin="S"/>
-<wire x1="73.66" y1="60.96" x2="99.06" y2="60.96" width="0.1524" layer="91"/>
-<junction x="99.06" y="60.96"/>
 <pinref part="P+5" gate="1" pin="+12V"/>
+<pinref part="Q4" gate="G$1" pin="S"/>
 <wire x1="73.66" y1="60.96" x2="73.66" y2="58.42" width="0.1524" layer="91"/>
-<junction x="73.66" y="60.96"/>
 </segment>
 </net>
 </nets>
