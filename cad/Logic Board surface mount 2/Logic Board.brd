@@ -162,8 +162,8 @@
 <text x="33.02" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">RXI</text>
 <text x="30.48" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">VCC</text>
 <text x="27.94" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">CTS</text>
-<text x="24.13" y="2.794" size="0.8128" layer="21" ratio="15" rot="R90">BLK</text>
-<text x="40.132" y="2.794" size="0.8128" layer="21" ratio="15" rot="R90">GRN</text>
+<text x="23.876" y="3.81" size="0.8128" layer="21" ratio="15" rot="R90" align="bottom-center">BLK</text>
+<text x="39.624" y="3.81" size="0.8128" layer="21" ratio="15" rot="R90" align="top-center">GRN</text>
 <text x="19.812" y="26.162" size="1.27" layer="27">Valid combinations:</text>
 <text x="19.812" y="23.622" size="1.27" layer="27">168V / 3.3V Reg / 8MHz</text>
 <text x="19.812" y="21.082" size="1.27" layer="27">168 / 5V Reg / 16MHz</text>
@@ -173,15 +173,16 @@
 Arduino Pro Mini Design by SparkFun Electronics
 Revised by Pete Lewis
 Modified by Alex Cordonnier</text>
-<text x="41.91" y="8.89" size="0.6096" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">PWR</text>
-<text x="41.91" y="11.43" size="0.6096" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">LED</text>
+<text x="41.91" y="8.89" size="0.8128" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">PWR</text>
+<text x="41.91" y="11.43" size="0.8128" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">LED</text>
 <text x="38.1" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">DTR</text>
 <text x="25.4" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">GND</text>
 <text x="15.494" y="41.275" size="0.8128" layer="21" ratio="15" rot="R90">+12V</text>
 <text x="9.144" y="43.815" size="0.8128" layer="21" ratio="15" rot="SR270" align="top-left">GND</text>
-<text x="6.35" y="7.62" size="1.4224" layer="21" ratio="15" align="top-left">ACM@UIUC
-SIGMusic
-Aurora Rev 1</text>
+<text x="22.86" y="7.112" size="2.1844" layer="1" ratio="15" align="top-right">ACM@UIUC
+Aurora V1</text>
+<text x="22.86" y="7.112" size="2.1844" layer="21" ratio="15" align="top-right">ACM@UIUC
+Aurora V1</text>
 </plain>
 <libraries>
 <library name="SparkFun">
@@ -299,6 +300,43 @@ We've spent an enormous amount of time creating and checking these footprints an
 </package>
 <package name="OSHW-LOGO-S">
 <polygon width="0.15" layer="21">
+<vertex x="0.3947" y="-0.9528" curve="9.498218"/>
+<vertex x="0.5465" y="-0.8746"/>
+<vertex x="0.9235" y="-1.182"/>
+<vertex x="1.182" y="-0.9235"/>
+<vertex x="0.8746" y="-0.5465" curve="19.000773"/>
+<vertex x="1.0049" y="-0.232"/>
+<vertex x="1.4888" y="-0.1828"/>
+<vertex x="1.4888" y="0.1828"/>
+<vertex x="1.0049" y="0.232" curve="19.000773"/>
+<vertex x="0.8746" y="0.5465"/>
+<vertex x="1.182" y="0.9235"/>
+<vertex x="0.9235" y="1.182"/>
+<vertex x="0.5465" y="0.8746" curve="19.000773"/>
+<vertex x="0.232" y="1.0049"/>
+<vertex x="0.1828" y="1.4888"/>
+<vertex x="-0.1828" y="1.4888"/>
+<vertex x="-0.232" y="1.0049" curve="19.000773"/>
+<vertex x="-0.5465" y="0.8746"/>
+<vertex x="-0.9235" y="1.182"/>
+<vertex x="-1.182" y="0.9235"/>
+<vertex x="-0.8746" y="0.5465" curve="19.000773"/>
+<vertex x="-1.0049" y="0.232"/>
+<vertex x="-1.4888" y="0.1828"/>
+<vertex x="-1.4888" y="-0.1828"/>
+<vertex x="-1.0049" y="-0.232" curve="19.000773"/>
+<vertex x="-0.8746" y="-0.5465"/>
+<vertex x="-1.182" y="-0.9235"/>
+<vertex x="-0.9235" y="-1.182"/>
+<vertex x="-0.5465" y="-0.8746" curve="9.498218"/>
+<vertex x="-0.3947" y="-0.9528"/>
+<vertex x="-0.1794" y="-0.4331" curve="-67.514699"/>
+<vertex x="-0.4688" y="0" curve="-247.473915"/>
+<vertex x="0.1794" y="-0.4331"/>
+</polygon>
+</package>
+<package name="OSHW-LOGO-S_COPPER">
+<polygon width="0.15" layer="1">
 <vertex x="0.3947" y="-0.9528" curve="9.498218"/>
 <vertex x="0.5465" y="-0.8746"/>
 <vertex x="0.9235" y="-1.182"/>
@@ -3232,7 +3270,8 @@ Please make sure your boards conform to these design rules.</description>
 <element name="Q2" library="transistor-power" package="SOT223" value="N-HEXFET-2D_SOT232-" x="22.86" y="22.86" rot="R90"/>
 <element name="Q3" library="transistor-power" package="SOT223" value="N-HEXFET-2D_SOT232-" x="22.86" y="15.24" rot="R90"/>
 <element name="J2" library="my-custom" package="FEMALE-2X4-SMT" value="" x="35.56" y="15.875"/>
-<element name="U$1" library="SparkFun-Aesthetics" package="OSHW-LOGO-S" value="" x="18.923" y="5.588"/>
+<element name="U$1" library="SparkFun-Aesthetics" package="OSHW-LOGO-S" value="" x="22.86" y="9.525"/>
+<element name="U$3" library="SparkFun-Aesthetics" package="OSHW-LOGO-S_COPPER" value="" x="22.86" y="9.525"/>
 </elements>
 <signals>
 <signal name="GND" class="1">
