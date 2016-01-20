@@ -3,7 +3,7 @@ Preliminary BOM (subject to change):
 * 1 x [2x4 female headers](http://www.digikey.com/product-detail/en/89898-304LF/609-3040-ND/1535685)
 * 1 x [2-position screw terminal](http://www.digikey.com/product-detail/en/691508110302/732-5963-1-ND/5047612)
 * 3 x [N-channel MOSFET](http://www.digikey.com/product-detail/en/BUK98180-100A%2FCUX/568-12493-1-ND/5361195)
-* 4 x [0.1uF capacitor](http://www.digikey.com/product-detail/en/C1206C104K5RAC7867/399-1249-1-ND/411524)
+* 3 x [0.1uF capacitor](http://www.digikey.com/product-detail/en/C1206C104K5RAC7867/399-1249-1-ND/411524)
 * 3 x [10uF capacitor](http://www.digikey.com/product-detail/en/C1206C106K4PACTU/399-5091-1-ND/1465625)
 * 2 x [10KΩ resistor](http://www.digikey.com/product-detail/en/RC1206JR-0710KL/311-10KERCT-ND/732156)
 * 1 x [300Ω resistor](http://www.digikey.com/product-detail/en/RC1206JR-07330RL/311-330ERCT-ND/732226)
