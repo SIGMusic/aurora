@@ -3268,7 +3268,7 @@ Please make sure your boards conform to these design rules.</description>
 <element name="C5" library="rcl" package="C1206K" value="0.1uF" x="38.1" y="41.275"/>
 <element name="FRAME1" library="SparkFun-Aesthetics" package="CREATIVE_COMMONS" value="FRAME-LETTER" x="-15.982121875" y="-8.89"/>
 <element name="S1" library="Testing" package="TACTILE-SWITCH-SMD-ALT01" value="Reset" x="24.13" y="43.18"/>
-<element name="Y1" library="Testing" package="RESONATOR-SMD-1:1" value="8/16/20MHz" x="28.7782" y="33.0454" rot="R270"/>
+<element name="Y1" library="Testing" package="RESONATOR-SMD-1:1" value="8 MHz" x="28.7782" y="33.0454" rot="R270"/>
 <element name="C1" library="rcl" package="C1206K" value="10uF" x="29.21" y="16.002" rot="R270"/>
 <element name="B1" library="special" package="LED_BOARD-V4" value="LED-BOARDV4" x="0" y="0"/>
 <element name="J1" library="my-custom" package="SCREWTERMINAL" value="" x="12.065" y="36.449"/>
@@ -3463,9 +3463,9 @@ Please make sure your boards conform to these design rules.</description>
 <via x="31.75" y="16.51" extent="1-16" drill="0.5" diameter="0.254"/>
 <wire x1="35.56" y1="25.4" x2="39.37" y2="21.59" width="0.254" layer="16"/>
 <contactref element="J2" pad="2"/>
-<contactref element="C1" pad="1"/>
 <wire x1="39.37" y1="21.59" x2="39.37" y2="16.51" width="0.254" layer="16"/>
 <wire x1="39.37" y1="16.51" x2="31.75" y2="16.51" width="0.254" layer="16"/>
+<contactref element="C1" pad="1"/>
 </signal>
 <signal name="D9">
 <contactref element="U2" pad="13"/>
