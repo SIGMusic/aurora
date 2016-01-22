@@ -15543,11 +15543,6 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <pinref part="R1" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="C1" gate="G$1" pin="2"/>
-<wire x1="45.72" y1="38.1" x2="30.48" y2="38.1" width="0.1524" layer="91"/>
-<wire x1="30.48" y1="38.1" x2="30.48" y2="27.94" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="J1" gate="G$1" pin="1"/>
 <wire x1="15.24" y1="160.02" x2="15.24" y2="152.4" width="0.1524" layer="91"/>
 <pinref part="GND1" gate="1" pin="GND"/>
@@ -15575,6 +15570,9 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <pinref part="J2" gate="G$1" pin="1"/>
 <wire x1="30.48" y1="27.94" x2="40.64" y2="27.94" width="0.1524" layer="91"/>
 <label x="30.48" y="27.94" size="1.778" layer="95"/>
+<wire x1="30.48" y1="27.94" x2="30.48" y2="38.1" width="0.1524" layer="91"/>
+<pinref part="C1" gate="G$1" pin="2"/>
+<wire x1="30.48" y1="38.1" x2="45.72" y2="38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="RESET" class="0">
@@ -15945,6 +15943,26 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="102,1,147.32,172.72,3.3V,VCC,,,,"/>
+<approved hash="102,1,160.02,106.68,3.3V,VCC,,,,"/>
+<approved hash="102,1,170.18,160.02,3.3V,VCC,,,,"/>
+<approved hash="102,1,91.44,165.1,3.3V,VCC,,,,"/>
+<approved hash="202,1,53.34,152.4,U1,BP,,,,"/>
+<approved hash="106,1,220.98,157.48,A0,,,,,"/>
+<approved hash="106,1,220.98,154.94,A1,,,,,"/>
+<approved hash="106,1,220.98,152.4,A2,,,,,"/>
+<approved hash="106,1,220.98,149.86,A3,,,,,"/>
+<approved hash="106,1,220.98,142.24,A6,,,,,"/>
+<approved hash="106,1,220.98,139.7,A7,,,,,"/>
+<approved hash="106,1,220.98,124.46,D4,,,,,"/>
+<approved hash="106,1,220.98,109.22,D9,,,,,"/>
+<approved hash="106,1,220.98,106.68,D10,,,,,"/>
+<approved hash="113,1,12.0227,162.793,J1,,,,,"/>
+<approved hash="113,1,48.26,25.5312,J2,,,,,"/>
+<approved hash="113,1,147.714,148.869,S1,,,,,"/>
+<approved hash="116,1,132.08,157.48,C5,2,DTR,,,"/>
+</errors>
 </schematic>
 </drawing>
 </eagle>
