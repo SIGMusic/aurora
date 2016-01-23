@@ -19,6 +19,7 @@
 * 3 x [Nylon screws](http://www.digikey.com/product-detail/en/29341/36-29341-ND/1532216)
 
 ## Base Station
+* 1 x [2x26 female headers](http://www.digikey.com/product-detail/en/PPPC132LFBN-RC/S7116-ND/810252)
 * 1 x [2x4 female headers](http://www.digikey.com/product-detail/en/NPPC042KFMS-RC/S5713-ND/776172)
 * 1 x [10uF capacitor](http://www.digikey.com/product-detail/en/C1206C106K4PACTU/399-5091-1-ND/1465625)
 * 2 x [Nylon standoffs](http://www.digikey.com/product-detail/en/MTS-8/RPC1574-ND/392815)
