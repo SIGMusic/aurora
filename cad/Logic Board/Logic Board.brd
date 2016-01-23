@@ -3417,8 +3417,8 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="31.75" y1="13.61" x2="31.75" y2="12.852" width="0.254" layer="1"/>
 <wire x1="31.75" y1="12.852" x2="30.328" y2="11.43" width="0.254" layer="1"/>
 <via x="27.94" y="33.401" extent="1-16" drill="0.5"/>
-<wire x1="29.36961875" y1="31.158578125" x2="27.94" y2="32.588196875" width="0.254" layer="1"/>
-<wire x1="27.94" y1="32.588196875" x2="27.94" y2="33.401" width="0.254" layer="1"/>
+<wire x1="27.932778125" y1="32.59541875" x2="27.932778125" y2="33.393778125" width="0.254" layer="1"/>
+<wire x1="27.932778125" y1="33.393778125" x2="27.94" y2="33.401" width="0.254" layer="1"/>
 </signal>
 <signal name="RESET">
 <contactref element="R2" pad="1"/>
