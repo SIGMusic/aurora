@@ -158,10 +158,10 @@
 <wire x1="38.481" y1="42.672" x2="38.481" y2="13.97" width="0.0762" layer="51"/>
 <text x="24.7904" y="39.7764" size="0.8128" layer="21" font="fixed" ratio="15" rot="R180" align="bottom-center">Reset</text>
 <text x="-7.112" y="-2.921" size="2.286" layer="27">Arduino Pro Mini</text>
-<text x="33.02" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">TXO</text>
-<text x="30.48" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">RXI</text>
-<text x="27.94" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">VCC</text>
-<text x="25.4" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">CTS</text>
+<text x="32.258" y="6.35" size="0.6096" layer="21" ratio="15" rot="R90" align="bottom-center">TXO</text>
+<text x="29.718" y="6.35" size="0.6096" layer="21" ratio="15" rot="R90" align="bottom-center">RXI</text>
+<text x="27.178" y="6.35" size="0.6096" layer="21" ratio="15" rot="R90" align="bottom-center">VCC</text>
+<text x="24.638" y="6.35" size="0.6096" layer="21" ratio="15" rot="R90" align="bottom-center">CTS</text>
 <text x="21.336" y="3.81" size="0.8128" layer="21" ratio="15" rot="R90" align="bottom-center">BLK</text>
 <text x="37.084" y="3.81" size="0.8128" layer="21" ratio="15" rot="R90" align="top-center">GRN</text>
 <text x="19.812" y="26.162" size="1.27" layer="27">Valid combinations:</text>
@@ -175,10 +175,10 @@ Revised by Pete Lewis
 Modified by Alex Cordonnier</text>
 <text x="41.91" y="8.89" size="0.8128" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">PWR</text>
 <text x="41.91" y="11.43" size="0.8128" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">LED</text>
-<text x="35.56" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">DTR</text>
-<text x="22.86" y="7.112" size="0.6096" layer="21" ratio="15" align="bottom-center">GND</text>
-<text x="15.494" y="41.275" size="0.8128" layer="21" ratio="15" rot="R90">+12V</text>
-<text x="9.144" y="43.815" size="0.8128" layer="21" ratio="15" rot="SR270" align="top-left">GND</text>
+<text x="34.798" y="6.35" size="0.6096" layer="21" ratio="15" rot="R90" align="bottom-center">DTR</text>
+<text x="22.098" y="6.35" size="0.6096" layer="21" ratio="15" rot="R90" align="bottom-center">GND</text>
+<text x="15.748" y="40.767" size="0.8128" layer="21" ratio="15" rot="R90">+12V</text>
+<text x="9.144" y="41.275" size="0.8128" layer="21" ratio="15" rot="R90">GND</text>
 <text x="13.081" y="6.985" size="1.778" layer="1" ratio="15" align="top-center">ACM@UIUC
 Aurora V1</text>
 <text x="13.081" y="6.985" size="1.778" layer="21" ratio="15" align="top-center">ACM@UIUC
@@ -208,6 +208,14 @@ Aurora V1</text>
 <hole x="39.751" y="3.429" drill="3.2"/>
 <hole x="3.302" y="3.429" drill="3.2"/>
 <hole x="38.735" y="36.195" drill="3.2"/>
+<text x="30.988" y="13.335" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">GND</text>
+<text x="33.528" y="13.335" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">CE</text>
+<text x="30.988" y="19.685" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">VCC</text>
+<text x="33.528" y="19.685" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">CSN</text>
+<text x="36.068" y="13.335" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">SCK</text>
+<text x="36.068" y="19.939" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">MOSI</text>
+<text x="38.608" y="13.208" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">MISO</text>
+<text x="38.608" y="19.685" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-center">IRQ</text>
 </plain>
 <libraries>
 <library name="SparkFun">
