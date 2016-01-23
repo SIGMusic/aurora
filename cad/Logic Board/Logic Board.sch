@@ -14934,6 +14934,8 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <wire x1="-3.6" y1="3.7" x2="-2.57" y2="3.7" width="0.127" layer="21"/>
 <wire x1="-0.873" y1="3.7" x2="0.873" y2="3.7" width="0.127" layer="21"/>
 <wire x1="3.6" y1="3.7" x2="2.57" y2="3.7" width="0.127" layer="21"/>
+<text x="-3.81" y="8.255" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3.81" y="-4.445" size="1.27" layer="27" align="top-left">&gt;VALUE</text>
 </package>
 <package name="TACTILE-BUTTON-PTS525">
 <smd name="1" x="-3.2" y="1.9" dx="1.6" dy="1" layer="1"/>
@@ -14945,8 +14947,8 @@ http://www.irf.com/product-info/datasheets/data/irll014n.pdf</description>
 <wire x1="-2.55" y1="2.55" x2="2.55" y2="2.55" width="0.127" layer="21"/>
 <wire x1="-2.55" y1="-2.55" x2="2.55" y2="-2.55" width="0.127" layer="21"/>
 <circle x="0" y="0" radius="1" width="0.127" layer="21"/>
-<text x="-2.54" y="3.81" size="1.27" layer="21">&gt;NAME</text>
-<text x="-2.54" y="-3.81" size="1.27" layer="21" align="top-left">&gt;VALUE</text>
+<text x="-2.54" y="3.81" size="1.27" layer="25">&gt;NAME</text>
+<text x="-2.54" y="-3.81" size="1.27" layer="27" align="top-left">&gt;VALUE</text>
 </package>
 </packages>
 <symbols>
