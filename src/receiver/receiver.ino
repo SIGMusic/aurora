@@ -7,7 +7,7 @@
 #include <SPI.h>
 #include <EEPROM.h>
 #include <RF24.h>
-#include "../network.h"
+#include "network.h"
 
 
 // Network-host endianness conversions
@@ -22,8 +22,8 @@
 #define BLUE_PIN                6
 
 // Radio pins
-#define CE_PIN                  9 // Radio chip enable pin
-#define CSN_PIN                 10 // Radio chip select pin
+#define CE_PIN                  7 // Radio chip enable pin
+#define CSN_PIN                 8 // Radio chip select pin
 
 // Serial protocol
 #define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
@@ -77,7 +77,7 @@ void initRadio(void) {
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
     radio.setChannel(CHANNEL);
     radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
-    radio.setRetries(0, NUM_RETRIES);
+    radio.setRetries(1, NUM_RETRIES);
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
@@ -229,6 +229,11 @@ void setRGB(uint8_t red, uint8_t green, uint8_t blue) {
  * @param id The new endpoint ID
  */
 void setEndpointID(uint8_t id) {
+    // Make sure it's not the base station ID
+    if (id == BASE_STATION_ID) {
+        return;
+    }
+
     EEPROM.write(ENDPOINT_ID_LOCATION, id);
     endpointID = id;
     radio.openReadingPipe(1, RF_ADDRESS(endpointID));
@@ -268,15 +273,15 @@ long getTemperature(void) {
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
-    Serial.println(F("----------------------------------------"));
-    Serial.println(F("SIGMusic@UIUC Lights Serial Interface"));
+    Serial.println(F("-----------------------------------------"));
+    Serial.println(F("ACM@UIUC SIGMusic Lights Serial Interface"));
     Serial.print(F("Version "));
     Serial.println(VERSION);
-    Serial.print(F("This light is endpoint "));
+    Serial.print(F("This light is endpoint # "));
     Serial.println(endpointID);
     Serial.println(F("End all commands with a carriage return."));
     Serial.println(F("Type 'help' for a list of commands."));
-    Serial.println(F("----------------------------------------"));
+    Serial.println(F("-----------------------------------------"));
 }
 
 /**
@@ -288,6 +293,6 @@ void printHelpMessage(void) {
     Serial.println(F("  setrgb [red] [green] [blue] - sets the color"));
     Serial.println(F("      [red], [green], [blue] - the value of each channel (0 to 255)"));
     Serial.println(F("  setid [id] - sets the endpoint ID"));
-    Serial.println(F("      [id] - the new ID"));
+    Serial.println(F("      [id] - the new ID (1 to 255)"));
     Serial.println(F("  getid - displays the endpoint ID in hex"));
 }
