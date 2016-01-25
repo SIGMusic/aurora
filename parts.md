@@ -1,7 +1,7 @@
 # BOM
 
 ## Logic Board
-* 1 x [1x6 male headers](http://www.digikey.com/product-detail/en/95293-401A06LF/609-4398-1-ND/2665613)
+* 1 x [1x6 male headers](http://www.digikey.com/product-detail/en/M20-8770642/952-2552-ND/)
 * 1 x [2x4 female headers](http://www.digikey.com/product-detail/en/NPPC042KFMS-RC/S5713-ND/776172)
 * 1 x [2-position screw terminal](http://www.digikey.com/product-detail/en/691508110302/732-5963-1-ND/5047612)
 * 3 x [N-channel MOSFET](http://www.digikey.com/product-detail/en/BUK98180-100A%2FCUX/568-12493-1-ND/5361195)
