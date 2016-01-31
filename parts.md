@@ -19,6 +19,9 @@
 * 3 x [Nylon screws](http://www.digikey.com/product-detail/en/29341/36-29341-ND/1532216)
 
 ## Base Station
+* 1 x [Raspberry Pi 2 Model B](http://www.amazon.com/Raspberry-Pi-Model-Project-Board/dp/B00T2U7R7I)
+* 1 x [16 GB SD card](http://www.amazon.com/gp/product/B013CP5F90/)
+* 1 x [5V 2A power supply](http://www.amazon.com/NorthPada%C2%AE-Charger-Raspberry-Android-Samsung/dp/B00OY7HR1U/)
 * 1 x [2x26 female headers](http://www.digikey.com/product-detail/en/PPPC132LFBN-RC/S7116-ND/810252)
 * 1 x [2x4 female headers](http://www.digikey.com/product-detail/en/NPPC042KFMS-RC/S5713-ND/776172)
 * 1 x [10uF capacitor](http://www.digikey.com/product-detail/en/C1206C106K4PACTU/399-5091-1-ND/1465625)
