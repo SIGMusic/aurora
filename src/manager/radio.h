@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <RF24/RF24.h>
+#include "manager.h"
 #include "../network.h"
 
 class Radio {
@@ -28,6 +29,11 @@ public:
         Message(uint8_t cmd, uint8_t d[3]) :
                 command(cmd),
                 data{d[0], d[1], d[2]}
+            { }
+
+        Message(uint8_t cmd, color_t c) :
+                command(cmd),
+                data{c.r, c.g, c.b}
             { }
 
         uint8_t command;

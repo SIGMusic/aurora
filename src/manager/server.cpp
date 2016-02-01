@@ -52,7 +52,7 @@ bool Server::shouldConnect(connection_hdl client) {
     // Get the connection so we can get info about it
     ws_server::connection_ptr connection = ws->get_con_from_hdl(client);
 
-    // Figure out if the client knows the protocol.
+    // Figure out if the client knows the protocol
     vector<string> p = connection->get_requested_subprotocols();
     if (std::find(p.begin(), p.end(), WS_PROTOCOL_NAME) != p.end()) {
         // Tell the client we're going to use this protocol

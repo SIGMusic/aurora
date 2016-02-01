@@ -277,7 +277,7 @@ void printWelcomeMessage(void) {
     Serial.println(F("ACM@UIUC SIGMusic Lights Serial Interface"));
     Serial.print(F("Version "));
     Serial.println(VERSION);
-    Serial.print(F("This light is endpoint # "));
+    Serial.print(F("This light is endpoint "));
     Serial.println(endpointID);
     Serial.println(F("End all commands with a carriage return."));
     Serial.println(F("Type 'help' for a list of commands."));

@@ -5,6 +5,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <sys/mman.h>
+#include <semaphore.h>
 #include <websocketpp/server.hpp>
 #include "server.h"
 #include "radio.h"
@@ -36,26 +38,79 @@ void printWelcomeMessage(void);
 
 Server server;
 Radio radio;
-vector<bool> lights(256, false);
+vector<bool> connected(NUM_IDS, false);
+color_t* colors;
+sem_t* colors_sem;
 
 
-int main(int argc, char** argv){
-    cout << "Running websocket event loop" << endl;
-    // TODO: this I/O loop runs forever. Move to the bottom when done testing.
-    server.run();
-
+int main(int argc, char** argv) {
+    
     printWelcomeMessage();
 
-    cout << "Scanning for lights..." << endl;
-    pingAllLights();
-    cout << "Done scanning." << endl;
+    // Map a shared array to store the colors
+    colors = (color_t*)mmap(NULL, NUM_IDS * sizeof(color_t),
+        PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0);
+    if (colors == (void*)-1) {
+        perror("mmap");
+        exit(1);
+    }
 
+    // Set up the colors semaphore
+    colors_sem = (sem_t*)mmap(NULL, sizeof(sem_t),
+        PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0);
+    if (colors_sem == (void*)-1) {
+        perror("mmap");
+        exit(1);
+    }
 
-    // Broadcast red to all lights as a test
-    uint8_t rgb[3] = {255, 0, 0};
-    Radio::Message red(CMD_SET_RGB, rgb);
-    for (int i = 1; i <= 0xff; i++) {
-        radio.send(i, red);
+    if (sem_init(colors_sem, 1, 1)) {
+        perror("sem_init");
+        exit(1);
+    }
+
+    // Fork off the websocket server
+    if (!fork()) {
+
+        cout << "Running websocket event loop" << endl;
+        server.run(); // Runs forever
+        
+        // Should never get here
+        return 0;
+    }
+
+    // Fork off the network controller
+    if (!fork()) {
+
+        cout << "Scanning for lights..." << endl;
+        pingAllLights();
+        cout << "Done scanning." << endl;
+
+        clock_t last_update = clock();
+        while(1) {
+            
+            // Only transmit once per frame
+            clock_t now = clock();
+            if ((((float)now)/CLOCKS_PER_SEC -
+                ((float)last_update)/CLOCKS_PER_SEC) > 1.0/MAX_FPS) {
+
+                sem_wait(colors_sem);
+                for (int i = 1; i < NUM_IDS; i++) {
+                    
+                    // Only transmit to connected lights
+                    if (connected[i]) {
+                        Radio::Message msg(CMD_SET_RGB, colors[i]);
+                        radio.send(i, msg);
+                    }
+                }
+                sem_post(colors_sem);
+
+                last_update = now;
+            }
+        }
+    }
+
+    while(1) {
+        sleep(1);
     }
 
     return 0;
@@ -68,11 +123,11 @@ void pingAllLights(void) {
     // Generate the ping packet
     Radio::Message ping(CMD_PING);
 
-    for (int i = 1; i <= 0xff; i++) {
+    for (int i = 1; i < NUM_IDS; i++) {
 
         if (!radio.send(i, ping)) {
             // Packet wasn't delivered, so move on
-            lights[i] = false;
+            connected[i] = false;
             continue;
         }
 
@@ -81,7 +136,7 @@ void pingAllLights(void) {
         // Wait here until we get a response or timeout
         if (!radio.receive(response, PING_TIMEOUT)) {
             // Skip endpoints that timed out
-            lights[i] = false;
+            connected[i] = false;
             continue;
         }
 
@@ -89,14 +144,14 @@ void pingAllLights(void) {
         if (response.command != CMD_PING_RESPONSE ||
             response.data[0] != i) {
 
-            lights[i] = false;
+            connected[i] = false;
             continue;
         }
 
         printf("Found light %d\n", i);
 
         // Add the endpoint to the list
-        lights[i] = true;
+        connected[i] = true;
     }
 }
 
@@ -191,13 +246,17 @@ void processMessage(connection_hdl client, const std::string message) {
         // Set RGB
         if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
             // Arguments are valid
-            if (setRGB(id, r, g, b)) {
-                // The light acknowledged
-                server.send(client, "OK");
-            } else {
-                // The light did not acknowledge
-                server.send(client, "Error: light not responding");
+            if (!connected[id]) {
+                server.send(client, "Error: light not connected");
             }
+
+            sem_wait(colors_sem);
+            colors[id].r = r;
+            colors[id].g = g;
+            colors[id].b = b;
+            sem_post(colors_sem);
+
+            server.send(client, "OK");
 
         } else {
             // One or more arguments were invalid
@@ -208,7 +267,7 @@ void processMessage(connection_hdl client, const std::string message) {
         // List
         string list = "";
         for (int i = 1; i <= 0xff; i++) {
-            if (lights[i]) {
+            if (connected[i]) {
                 char num[5];
                 sprintf(num, "%d,", i);
                 list.append(num);
@@ -271,9 +330,9 @@ void processMessage(connection_hdl client, const std::string message) {
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
-    puts("-------------------------------------");
-    puts("SIGMusic@UIUC Lights Base Station");
+    printf("-------------------------------------\n");
+    printf("ACM@UIUC SIGMusic Lights Base Station\n");
     printf("Version %x\n", VERSION);
-    puts("This base station is endpoint 0");
-    puts("-------------------------------------");
+    printf("This base station is endpoint %d\n", BASE_STATION_ID);
+    printf("-------------------------------------\n");
 }

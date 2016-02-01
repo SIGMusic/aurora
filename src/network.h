@@ -16,6 +16,9 @@
 // The endpoint ID of the base station
 #define BASE_STATION_ID         0x00
 
+// Number of possible IDs
+#define NUM_IDS                 256
+
 // Must prefix every message
 #define HEADER                  ((uint16_t)htons(7446))
 
@@ -37,7 +40,7 @@ enum COMMANDS {
 };
 
 // The structure of a packet specified in the protocol
-typedef struct packet_tag {
+typedef struct packet {
     uint16_t header;
     uint8_t command;
     uint8_t data[3];

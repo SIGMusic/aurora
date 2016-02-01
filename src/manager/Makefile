@@ -11,7 +11,7 @@ bin/server.o: server.cpp server.h
 	g++ -c ${CCFLAGS} -I../../lib -lboost_system -lpthread -o bin/server.o server.cpp
 
 bin/radio.o: radio.cpp radio.h
-	g++ -c ${CCFLAGS} -lrf24-bcm -lpthread -o bin/radio.o radio.cpp
+	g++ -c ${CCFLAGS} -I../../lib -lboost_system -lrf24-bcm -lpthread -o bin/radio.o radio.cpp
 
 clean:
 	rm -rf bin/*
