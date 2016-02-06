@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include <websocketpp/server.hpp>
+// The FPS limit
+#define MAX_FPS         30
 
-#define MAX_FPS     30
+// Number of possible endpoint IDs
+#define NUM_IDS                 256
 
 typedef struct color {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 } color_t;
-
-extern void processMessage(websocketpp::connection_hdl client, const std::string message);

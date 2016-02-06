@@ -11,13 +11,10 @@
 #define HASH(a)                 ((a) ^ 0x55)
 
 // Generates a 40-bit nRF address
-#define RF_ADDRESS(endpoint)    (0x5349474D00LL | HASH(endpoint & 0xFF))
+#define RF_ADDRESS(endpoint)    (0x5349474D00LL | HASH((endpoint) & 0xFF))
 
 // The endpoint ID of the base station
 #define BASE_STATION_ID         0x00
-
-// Number of possible IDs
-#define NUM_IDS                 256
 
 // Must prefix every message
 #define HEADER                  ((uint16_t)htons(7446))
