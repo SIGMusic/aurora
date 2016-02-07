@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include "server.h"
-#include "manager.h"
+#include "common.h"
 
 
 using websocketpp::connection_hdl;
@@ -25,10 +25,7 @@ using std::vector;
 
 ws_server * Server::ws;
 
-color_t* Server::colors;
-sem_t* Server::colors_sem;
-uint32_t* Server::connected;
-sem_t* Server::connected_sem;
+struct shared* Server::s;
 
 
 Server::Server() {
@@ -38,13 +35,9 @@ Server::Server() {
     ws->set_validate_handler(&shouldConnect);
 }
 
-void Server::run(color_t* colors, sem_t* colors_sem,
-    uint32_t* connected, sem_t* connected_sem) {
+void Server::run(struct shared* s) {
     
-    Server::colors = colors;
-    Server::colors_sem = colors_sem;
-    Server::connected = connected;
-    Server::connected_sem = connected_sem;
+    Server::s = s;
 
     ws->init_asio();
     ws->listen(WS_PORT);
@@ -76,17 +69,16 @@ bool Server::shouldConnect(connection_hdl client) {
 
 void Server::processMessage(connection_hdl client, const std::string message) {
 
-    uint8_t id, r, g, b;
-
     if (!message.compare(0, 7, "setrgb ")) {
         
+        uint8_t id, r, g, b;
         if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
 
-            sem_wait(colors_sem);
-            colors[id].r = r;
-            colors[id].g = g;
-            colors[id].b = b;
-            sem_post(colors_sem);
+            sem_wait(&s->colors_sem);
+            s->colors[id].r = r;
+            s->colors[id].g = g;
+            s->colors[id].b = b;
+            sem_post(&s->colors_sem);
 
             ws->send(client, "OK", opcode::text);
 
@@ -99,19 +91,19 @@ void Server::processMessage(connection_hdl client, const std::string message) {
         
         string list = "";
 
-        sem_wait(connected_sem);
+        sem_wait(&s->connected_sem);
         
         // Get the list of connected lights
         for (int i = 0; i < NUM_IDS; i++) {
 
-            if (isLightConnected(i)) {
+            if (isLightConnected(s->connected, i)) {
                 char num[4];
                 sprintf(num, "%d,", i);
                 list.append(num);
             }
         }
 
-        sem_post(connected_sem);
+        sem_post(&s->connected_sem);
 
         ws->send(client, list, opcode::text);
 
@@ -122,15 +114,4 @@ void Server::processMessage(connection_hdl client, const std::string message) {
     } else {
         ws->send(client, "Error: unrecognized command", opcode::text);
     }
-}
-
-bool Server::isLightConnected(uint8_t id) {
-
-    int index = id / sizeof(uint32_t);
-    int bit = id % sizeof(uint32_t);
-
-    uint32_t flags = connected[index];
-    uint32_t mask = 1 << bit;
-
-    return (flags & mask);
 }

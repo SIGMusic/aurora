@@ -77,7 +77,8 @@ void initRadio(void) {
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
     radio.setChannel(CHANNEL);
     radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
-    radio.setRetries(1, NUM_RETRIES);
+    radio.setRetries(0, 0);
+    radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 

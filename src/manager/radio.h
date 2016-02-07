@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <RF24/RF24.h>
 #include <semaphore.h>
-#include "manager.h"
+#include "common.h"
 #include "../network.h"
 
 class Radio {
@@ -49,18 +49,15 @@ public:
     /**
      * Runs the radio control loop. Does not return.
      * 
-     * @param colors The array of color values
-     * @param colors_sem The semaphore for accessing the colors array
-     * @param connected The array of connected lights
-     * @param connected_sem The semaphore for accessing the connected array
+     * @param s The struct of shared memory
      */
-    void run(color_t* colors, sem_t* colors_sem,
-        uint32_t* connected, sem_t* connected_sem);
+    void run(struct shared* s);
 
 private:
 
     static void checkPipe();
     static bool send(uint8_t endpoint, const Message & msg);
+    static bool sendBulk(uint8_t endpoint, const Message & msg);
     static bool receive(Message & msg, unsigned int timeout);
     static void pingAllLights();
     static void setLightConnected(uint8_t id, bool isConnected);
@@ -70,9 +67,5 @@ private:
     static bool setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue);
 
     static RF24 radio;
-
-    static color_t* colors;
-    static sem_t* colors_sem;
-    static uint32_t* connected;
-    static sem_t* connected_sem;
+    static struct shared* s;
 };

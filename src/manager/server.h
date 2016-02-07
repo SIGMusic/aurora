@@ -9,7 +9,7 @@
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include <semaphore.h>
-#include "manager.h"
+#include "common.h"
 
 typedef websocketpp::server<websocketpp::config::asio> ws_server;
 
@@ -23,25 +23,16 @@ public:
     /**
      * Runs the webserver I/O loop. Does not return.
      * 
-     * @param colors The array of color values
-     * @param colors_sem The semaphore for accessing the colors array
-     * @param connected The array of connected lights
-     * @param connected_sem The semaphore for accessing the connected array
+     * @param s The struct of shared memory
      */
-    void run(color_t* colors, sem_t* colors_sem,
-        uint32_t* connected, sem_t* connected_sem);
+    void run(struct shared* s);
 
 private:
 
     static bool shouldConnect(websocketpp::connection_hdl client);
     static void onMessage(websocketpp::connection_hdl client, ws_server::message_ptr msg);
     static void processMessage(websocketpp::connection_hdl client, const std::string message);
-    static bool isLightConnected(uint8_t id);
     
     static ws_server* ws;
-
-    static color_t* colors;
-    static sem_t* colors_sem;
-    static uint32_t* connected;
-    static sem_t* connected_sem;
+    static struct shared* s;
 };

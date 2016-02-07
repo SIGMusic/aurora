@@ -1,21 +1,33 @@
 # The recommended compiler flags for the Raspberry Pi
-CC=g++
-CCFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11 -Wall -I../../lib -lpthread
+CXX=g++
+CXXFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11 -Wall -I../../lib
+LD=g++
+LDLIBS=-lpthread -lrf24-bcm -lboost_system
+OBJS=bin/main.o bin/server.o bin/radio.o bin/utils.o
 
-all: bin/manager.o bin/server.o bin/radio.o
-	${CC} ${CCFLAGS} -lrf24-bcm -lboost_system -o bin/manager bin/manager.o bin/server.o bin/radio.o
+all: $(OBJS)
+	$(LD) $(LDLIBS) -o bin/manager $^
 
-bin/manager.o: manager.cpp manager.h
-	${CC} -c ${CCFLAGS} -o bin/manager.o manager.cpp
+# Generic, but does not take into account dependencies
+# bin/%.o: %.cpp
+# 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-bin/server.o: server.cpp server.h
-	${CC} -c ${CCFLAGS} -lboost_system -o bin/server.o server.cpp
+bin/main.o: main.cpp server.h radio.h common.h
+	${CXX} -c ${CXXFLAGS} $< -o $@
 
-bin/radio.o: radio.cpp radio.h
-	${CC} -c ${CCFLAGS} -lrf24-bcm -o bin/radio.o radio.cpp
+bin/server.o: server.cpp server.h common.h
+	${CXX} -c ${CXXFLAGS} $< -o $@
+
+bin/radio.o: radio.cpp radio.h ../network.h common.h
+	${CXX} -c ${CXXFLAGS} $< -o $@
+
+bin/utils.o: utils.cpp common.h
+	${CXX} -c ${CXXFLAGS} $< -o $@
+
+.PHONY: all clean debug
 
 clean:
-	rm -rf bin/*
+	rm -f bin/manager $(OBJS)
 
-debug: CCFLAGS += -DDEBUG -g -Og
+debug: CXXFLAGS+=-DDEBUG -g -Og
 debug: all

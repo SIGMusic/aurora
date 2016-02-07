@@ -24,10 +24,7 @@ using std::endl;
 
 RF24 Radio::radio(CE_PIN, CSN_PIN);
 
-color_t* Radio::colors;
-sem_t* Radio::colors_sem;
-uint32_t* Radio::connected;
-sem_t* Radio::connected_sem;
+struct shared* Radio::s;
 
 
 Radio::Radio() {
@@ -36,7 +33,8 @@ Radio::Radio() {
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
     radio.setChannel(CHANNEL);
     radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
-    radio.setRetries(0, NUM_RETRIES);
+    radio.setRetries(0, 0);
+    radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
@@ -48,13 +46,9 @@ Radio::Radio() {
 #endif
 }
 
-void Radio::run(color_t* colors, sem_t* colors_sem,
-    uint32_t* connected, sem_t* connected_sem) {
+void Radio::run(struct shared* s) {
     
-    Radio::colors = colors;
-    Radio::colors_sem = colors_sem;
-    Radio::connected = connected;
-    Radio::connected_sem = connected_sem;
+    Radio::s = s;
 
     cout << "Scanning for lights..." << endl;
     pingAllLights();
@@ -68,18 +62,20 @@ void Radio::run(color_t* colors, sem_t* colors_sem,
         if ((((float)now)/CLOCKS_PER_SEC -
             ((float)last_update)/CLOCKS_PER_SEC) > 1.0/MAX_FPS) {
 
-            sem_wait(colors_sem);
-            sem_wait(connected_sem);
+            sem_wait(&s->colors_sem);
+            sem_wait(&s->connected_sem);
+            radio.stopListening();
             for (int i = 1; i < NUM_IDS; i++) {
                 
                 // Only transmit to connected lights
-                if (connected[i]) {
-                    Message msg(CMD_SET_RGB, colors[i]);
-                    send(i, msg);
+                if (isLightConnected(s->connected, i)) {
+                    Message msg(CMD_SET_RGB, s->colors[i]);
+                    sendBulk(i, msg);
                 }
             }
-            sem_post(connected_sem);
-            sem_post(colors_sem);
+            radio.startListening();
+            sem_post(&s->connected_sem);
+            sem_post(&s->colors_sem);
 
             last_update = now;
         }
@@ -88,16 +84,23 @@ void Radio::run(color_t* colors, sem_t* colors_sem,
 
 bool Radio::send(uint8_t endpoint, const Message & msg) {
 
+    radio.stopListening();
+    bool success = sendBulk(endpoint, msg);
+    radio.startListening();
+
+    return success;
+}
+
+bool Radio::sendBulk(uint8_t endpoint, const Message & msg) {
+
     packet_t packet = {
         HEADER,
         msg.command,
         {msg.data[0], msg.data[1], msg.data[2]}
     };
 
-    radio.stopListening();
     radio.openWritingPipe(RF_ADDRESS(endpoint));
     bool success = radio.write(&packet, sizeof(packet));
-    radio.startListening();
 
     return success;
 }
@@ -141,7 +144,7 @@ void Radio::pingAllLights() {
     // Generate the ping packet
     Message ping(CMD_PING);
 
-    sem_wait(connected_sem);
+    sem_wait(&s->connected_sem);
 
     for (int i = 1; i < NUM_IDS; i++) {
 
@@ -174,9 +177,15 @@ void Radio::pingAllLights() {
         setLightConnected(i, true);
     }
 
-    sem_post(connected_sem);
+    sem_post(&s->connected_sem);
 }
 
+/**
+ * Changes the connected status of the light.
+ *
+ * @param id The light to change
+ * @param isConnected True if the light is now connected, false otherwise
+ */
 void Radio::setLightConnected(uint8_t id, bool isConnected) {
 
     int index = id / sizeof(uint32_t);
@@ -185,9 +194,9 @@ void Radio::setLightConnected(uint8_t id, bool isConnected) {
     uint32_t mask = 1 << bit;
 
     if (isConnected) {
-        connected[index] |= mask;
+        s->connected[index] |= mask;
     } else {
-        connected[index] &= ~mask;
+        s->connected[index] &= ~mask;
     }
 }
 
@@ -198,7 +207,7 @@ void Radio::setLightConnected(uint8_t id, bool isConnected) {
  * @param green The new green value
  * @param blue The new blue value
  *
- * @return Whether the light acknowledged or not.
+ * @return whether the light acknowledged or not
  */
 bool Radio::setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
 
@@ -213,7 +222,7 @@ bool Radio::setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
  * @param endpoint The endpoint to change
  * @param temp The place to store the temperature in millidegrees Celsius
  *
- * @return Whether the light acknowledged or not.
+ * @return whether the light acknowledged or not
  */
 bool Radio::getTemperature(uint8_t endpoint, int16_t * temp) {
 
@@ -244,7 +253,7 @@ bool Radio::getTemperature(uint8_t endpoint, int16_t * temp) {
  * @param endpoint The endpoint to change
  * @param uptime The place to store the uptime in milliseconds
  *
- * @return Whether the light acknowledged or not.
+ * @return whether the light acknowledged or not
  */
 bool Radio::getUptime(uint8_t endpoint, uint16_t * uptime) {
 

@@ -22,11 +22,8 @@
  // The radio channel to listen on: 2.4005 GHz + (Channel# * 1 MHz)
 #define CHANNEL                 80
 
-// The number of tries to wait for acknowledgement before giving up
-#define NUM_RETRIES             5
-
 // A list of command bytes specified in the protocol
-enum COMMANDS {
+enum commands {
     CMD_SET_RGB         = 0x10,
     CMD_PING            = 0x80,
     CMD_PING_RESPONSE   = 0x81,
