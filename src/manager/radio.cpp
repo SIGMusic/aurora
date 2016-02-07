@@ -69,6 +69,7 @@ void Radio::run(color_t* colors, sem_t* colors_sem,
             ((float)last_update)/CLOCKS_PER_SEC) > 1.0/MAX_FPS) {
 
             sem_wait(colors_sem);
+            sem_wait(connected_sem);
             for (int i = 1; i < NUM_IDS; i++) {
                 
                 // Only transmit to connected lights
@@ -77,6 +78,7 @@ void Radio::run(color_t* colors, sem_t* colors_sem,
                     send(i, msg);
                 }
             }
+            sem_post(connected_sem);
             sem_post(colors_sem);
 
             last_update = now;
