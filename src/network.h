@@ -7,11 +7,8 @@
 
 #include <stdint.h>
 
-// Simple 1:1 single byte hash to minimize repeating bit patterns in address
-#define HASH(a)                 ((a) ^ 0x55)
-
 // Generates a 40-bit nRF address
-#define RF_ADDRESS(endpoint)    (0x5349474D00LL | HASH((endpoint) & 0xFF))
+#define RF_ADDRESS(endpoint)    (0x5349474D00LL | ((endpoint) & 0xFF))
 
 // The endpoint ID of the base station
 #define BASE_STATION_ID         0x00
