@@ -137,7 +137,7 @@ void processNetworkPacket(packet_t packet) {
         }
 
         case CMD_GET_UPTIME: {
-            // Respond with the temperature
+            // Respond with the uptime
             unsigned long uptime = millis();
             packet_t response = {
                 CMD_UPTIME_RESPONSE,
@@ -229,7 +229,7 @@ void setEndpointID(uint8_t id) {
 }
 
 /**
- * Gets the (very approximate) core temperature in millidegress Celsius.
+ * Gets the (very approximate) core temperature in millidegrees Celsius.
  * @return The core temperature
  */
 long getTemperature(void) {
@@ -255,7 +255,7 @@ long getTemperature(void) {
     wADC = ADCW;
 
     // Approximate offset. Should be calibrated further.
-    return (long)((wADC - 324.31) * 1000 / 1.22);
+    return (long)((wADC - 289)*1000/1.06);
 }
 
 /**
