@@ -62,53 +62,26 @@ void Radio::run(struct shared* s) {
         if ((((float)now)/CLOCKS_PER_SEC -
             ((float)last_update)/CLOCKS_PER_SEC) > 1.0/MAX_FPS) {
 
-            sem_wait(&s->colors_sem);
-            sem_wait(&s->connected_sem);
-            radio.stopListening();
-            for (int i = 1; i < NUM_IDS; i++) {
-                
-                // Only transmit to connected lights
-                if (isLightConnected(s->connected, i)) {
-                    Message msg(CMD_SET_RGB, s->colors[i]);
-                    sendBulk(i, msg);
-                }
-            }
-            radio.startListening();
-            sem_post(&s->connected_sem);
-            sem_post(&s->colors_sem);
-
+            transmitFrame();
             last_update = now;
         }
     }
 }
 
-bool Radio::send(uint8_t endpoint, const Message & msg) {
-
-    radio.stopListening();
-    bool success = sendBulk(endpoint, msg);
-    radio.startListening();
-
-    return success;
-}
-
-bool Radio::sendBulk(uint8_t endpoint, const Message & msg) {
-
-    packet_t packet = {
-        HEADER,
-        msg.command,
-        {msg.data[0], msg.data[1], msg.data[2]}
-    };
+bool Radio::send(uint8_t endpoint, packet_t & msg) {
 
     radio.openWritingPipe(RF_ADDRESS(endpoint));
-    bool success = radio.write(&packet, sizeof(packet));
+    bool success = radio.write(&msg, sizeof(msg));
 
     return success;
 }
 
-bool Radio::receive(Message & msg, unsigned int timeout) {
+bool Radio::receive(packet_t & response, unsigned int timeout) {
 
     unsigned int started_waiting_at = millis();
     bool wasTimeout = false;
+
+    radio.startListening();
 
     while (!radio.available() && !wasTimeout) {
         if ((millis() - started_waiting_at) > timeout) {
@@ -121,17 +94,9 @@ bool Radio::receive(Message & msg, unsigned int timeout) {
     }
 
     // Get the response
-    packet_t response;
     radio.read(&response, sizeof(packet_t));
 
-    // Make sure the response is valid
-    if (response.header != HEADER) {
-        return false;
-    }
-
-    // Copy the response into the client's buffer
-    msg.command = response.command;
-    std::copy(std::begin(response.data), std::end(response.data), std::begin(msg.data));
+    radio.stopListening();
 
     return true;
 }
@@ -142,7 +107,10 @@ bool Radio::receive(Message & msg, unsigned int timeout) {
 void Radio::pingAllLights() {
 
     // Generate the ping packet
-    Message ping(CMD_PING);
+    packet_t ping = {
+        CMD_PING,
+        {0, 0, 0}
+    };
 
     sem_wait(&s->connected_sem);
 
@@ -154,7 +122,7 @@ void Radio::pingAllLights() {
             continue;
         }
 
-        Message response;
+        packet_t response;
         
         // Wait here until we get a response or timeout
         if (!receive(response, PING_TIMEOUT)) {
@@ -180,6 +148,27 @@ void Radio::pingAllLights() {
     sem_post(&s->connected_sem);
 }
 
+void Radio::transmitFrame() {
+
+    sem_wait(&s->colors_sem);
+    sem_wait(&s->connected_sem);
+
+    for (int i = 1; i < NUM_IDS; i++) {
+        
+        // Only transmit to connected lights
+        if (isLightConnected(s->connected, i)) {
+            packet_t msg = {
+                CMD_SET_RGB,
+                {s->colors[i].r, s->colors[i].g, s->colors[i].b}
+            };
+            send(i, msg);
+        }
+    }
+
+    sem_post(&s->connected_sem);
+    sem_post(&s->colors_sem);
+}
+
 /**
  * Changes the connected status of the light.
  *
@@ -198,83 +187,4 @@ void Radio::setLightConnected(uint8_t id, bool isConnected) {
     } else {
         s->connected[index] &= ~mask;
     }
-}
-
-/**
- * Sets the RGB value of the given light.
- * @param endpoint The endpoint to change
- * @param red The new red value
- * @param green The new green value
- * @param blue The new blue value
- *
- * @return whether the light acknowledged or not
- */
-bool Radio::setRGB(uint8_t endpoint, uint8_t red, uint8_t green, uint8_t blue) {
-
-    printf("Setting light %u to %u, %u, %u\n", endpoint, red, green, blue);
-    uint8_t rgb[3] = {red, green, blue};
-    Message msg(CMD_SET_RGB, rgb);
-    return send(endpoint, msg);
-}
-
-/**
- * Gets the temperature of the given light.
- * @param endpoint The endpoint to change
- * @param temp The place to store the temperature in millidegrees Celsius
- *
- * @return whether the light acknowledged or not
- */
-bool Radio::getTemperature(uint8_t endpoint, int16_t * temp) {
-
-    Message request(CMD_GET_TEMP);
-    if (!send(endpoint, request)) {
-        // Sending failed
-        return false;
-    }
-
-    Message response;
-    if (!receive(response, GET_TEMP_TIMEOUT)) {
-        // Failed to get a response
-        return false;
-    }
-
-    if (response.command != CMD_TEMP_RESPONSE) {
-        // Invalid response
-        return false;
-    }
-
-    *temp = (response.data[0] << 8) | response.data[1];
-
-    return true;
-}
-
-/**
- * Gets the uptime of the given light.
- * @param endpoint The endpoint to change
- * @param uptime The place to store the uptime in milliseconds
- *
- * @return whether the light acknowledged or not
- */
-bool Radio::getUptime(uint8_t endpoint, uint16_t * uptime) {
-
-    Message request(CMD_GET_UPTIME);
-    if (!send(endpoint, request)) {
-        // Sending failed
-        return false;
-    }
-
-    Message response;
-    if (!receive(response, GET_UPTIME_TIMEOUT)) {
-        // Failed to get a response
-        return false;
-    }
-
-    if (response.command != CMD_UPTIME_RESPONSE) {
-        // Invalid response
-        return false;
-    }
-
-    *uptime = (response.data[0] << 8) | response.data[1];
-
-    return true;
 }

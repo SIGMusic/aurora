@@ -9,11 +9,6 @@
 #include <RF24.h>
 #include "network.h"
 
-
-// Network-host endianness conversions
-#define htons(n) (((((uint16_t)(n) & 0xFF)) << 8) | (((uint16_t)(n) & 0xFF00) >> 8))
-#define ntohs(n) (((((uint16_t)(n) & 0xFF)) << 8) | (((uint16_t)(n) & 0xFF00) >> 8))
-
 // RGB pins
 // Note: pins 5 and 6 use the fast, inaccurate PWM timer. If this becomes
 // an issue, look into software PWM implementations.
@@ -103,10 +98,6 @@ void networkRead(void) {
  * @param packet The packet received
  */
 void processNetworkPacket(packet_t packet) {
-    if (packet.header != HEADER) {
-        // Invalid packet
-        return;
-    }
 
     switch (packet.command) {
 
@@ -119,7 +110,6 @@ void processNetworkPacket(packet_t packet) {
         case CMD_PING: {
             // Respond to the ping with the endpoint ID and version
             packet_t response = {
-                HEADER,
                 CMD_PING_RESPONSE,
                 {endpointID, VERSION, 0}
             };
@@ -135,7 +125,6 @@ void processNetworkPacket(packet_t packet) {
             // Respond with the temperature
             long temp = getTemperature();
             packet_t response = {
-                HEADER,
                 CMD_TEMP_RESPONSE,
                 {(temp & 0xff00) >> 8, temp & 0xff, 0}
             };
@@ -151,7 +140,6 @@ void processNetworkPacket(packet_t packet) {
             // Respond with the temperature
             unsigned long uptime = millis();
             packet_t response = {
-                HEADER,
                 CMD_UPTIME_RESPONSE,
                 {(uptime & 0xff00) >> 8, uptime & 0xff, 0}
             };

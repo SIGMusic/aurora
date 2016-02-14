@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     }
 
     // Wait on all the children
-    while(wait(NULL) != -1);
+    while (wait(NULL) != -1);
 
     exit(EXIT_FAILURE); // Should not get here
 }

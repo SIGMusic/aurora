@@ -15,6 +15,7 @@ typedef websocketpp::server<websocketpp::config::asio> ws_server;
 
 class Server {
 public:
+    
     /**
      * Initializes a websocket server.
      */

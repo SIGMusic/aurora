@@ -13,9 +13,6 @@
 // The endpoint ID of the base station
 #define BASE_STATION_ID         0x00
 
-// Must prefix every message
-#define HEADER                  ((uint16_t)htons(7446))
-
  // The radio channel to listen on: 2.4005 GHz + (Channel# * 1 MHz)
 #define CHANNEL                 80
 
@@ -32,7 +29,6 @@ enum commands {
 
 // The structure of a packet specified in the protocol
 typedef struct packet {
-    uint16_t header;
     uint8_t command;
     uint8_t data[3];
 } packet_t;
