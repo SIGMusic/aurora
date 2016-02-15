@@ -108,10 +108,10 @@ void processNetworkPacket(packet_t packet) {
         }
 
         case CMD_PING: {
-            // Respond to the ping with the endpoint ID and version
+            // Respond with an echo of the received ping
             packet_t response = {
                 CMD_PING_RESPONSE,
-                {endpointID, VERSION, 0}
+                {packet.data[0], packet.data[1], packet.data[2]}
             };
 
             radio.stopListening();

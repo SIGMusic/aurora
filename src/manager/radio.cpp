@@ -13,13 +13,13 @@ using std::endl;
 
 
 // Radio pins
-#define CE_PIN                  RPI_GPIO_P1_15 // Radio chip enable pin
-#define CSN_PIN                 RPI_GPIO_P1_24 // Radio chip select pin
+#define CE_PIN                  RPI_V2_GPIO_P1_15 // Radio chip enable pin
+#define CSN_PIN                 RPI_V2_GPIO_P1_24 // Radio chip select pin
 
 // Wireless protocol
-#define PING_TIMEOUT            10 // Time to wait for a ping response in milliseconds
-#define GET_TEMP_TIMEOUT        10 // Time to wait for a temperature response in milliseconds
-#define GET_UPTIME_TIMEOUT      10 // Time to wait for an uptime response in milliseconds
+#define PING_TIMEOUT            1 // Time to wait for a ping response in milliseconds
+#define GET_TEMP_TIMEOUT        1 // Time to wait for a temperature response in milliseconds
+#define GET_UPTIME_TIMEOUT      1 // Time to wait for an uptime response in milliseconds
 
 
 RF24 Radio::radio(CE_PIN, CSN_PIN);
@@ -39,7 +39,6 @@ Radio::Radio() {
     radio.setPayloadSize(sizeof(packet_t));
 
     radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID));
-    radio.startListening();
 
 #ifdef DEBUG
     radio.printDetails();
@@ -50,9 +49,7 @@ void Radio::run(struct shared* s) {
     
     Radio::s = s;
 
-    cout << "Scanning for lights..." << endl;
     pingAllLights();
-    cout << "Done scanning." << endl;
 
     clock_t last_update = clock();
     while(1) {
@@ -90,6 +87,7 @@ bool Radio::receive(packet_t & response, unsigned int timeout) {
     }
 
     if (wasTimeout) {
+        radio.stopListening();
         return false;
     }
 
@@ -105,6 +103,8 @@ bool Radio::receive(packet_t & response, unsigned int timeout) {
  * Pings every endpoint and records the ones that respond.
  */
 void Radio::pingAllLights() {
+
+    cout << "Scanning for lights..." << endl;
 
     // Generate the ping packet
     packet_t ping = {
@@ -146,6 +146,8 @@ void Radio::pingAllLights() {
     }
 
     sem_post(&s->connected_sem);
+    
+    cout << "Done scanning." << endl;
 }
 
 void Radio::transmitFrame() {
