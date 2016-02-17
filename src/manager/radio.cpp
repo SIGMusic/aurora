@@ -17,9 +17,7 @@ using std::endl;
 #define CSN_PIN                 RPI_V2_GPIO_P1_24 // Radio chip select pin
 
 // Wireless protocol
-#define PING_TIMEOUT            1 // Time to wait for a ping response in milliseconds
-#define GET_TEMP_TIMEOUT        1 // Time to wait for a temperature response in milliseconds
-#define GET_UPTIME_TIMEOUT      1 // Time to wait for an uptime response in milliseconds
+#define PING_TIMEOUT            4 // Time to wait for a ping response in milliseconds
 
 
 RF24 Radio::radio(CE_PIN, CSN_PIN);
@@ -32,7 +30,7 @@ Radio::Radio() {
     radio.begin();
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
     radio.setChannel(CHANNEL);
-    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
+    radio.setPALevel(RF24_PA_LOW); // Higher power doesn't work on cheap eBay radios
     radio.setRetries(0, 0);
     radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
@@ -65,12 +63,10 @@ void Radio::run(struct shared* s) {
     }
 }
 
-bool Radio::send(uint8_t endpoint, packet_t & msg) {
+void Radio::send(uint8_t endpoint, packet_t & msg) {
 
     radio.openWritingPipe(RF_ADDRESS(endpoint));
-    bool success = radio.write(&msg, sizeof(msg));
-
-    return success;
+    radio.write(&msg, sizeof(msg));
 }
 
 bool Radio::receive(packet_t & response, unsigned int timeout) {
@@ -106,35 +102,27 @@ void Radio::pingAllLights() {
 
     cout << "Scanning for lights..." << endl;
 
-    // Generate the ping packet
-    packet_t ping = {
-        CMD_PING,
-        {0, 0, 0}
-    };
-
     sem_wait(&s->connected_sem);
 
     for (int i = 1; i < NUM_IDS; i++) {
 
-        if (!send(i, ping)) {
-            // Packet wasn't delivered, so move on
-            setLightConnected(i, false);
-            continue;
-        }
+        packet_t ping = {
+            CMD_PING,
+            {0, 0, 0}
+        };
+
+        send(i, ping);
 
         packet_t response;
         
         // Wait here until we get a response or timeout
         if (!receive(response, PING_TIMEOUT)) {
-            // Skip endpoints that timed out
             setLightConnected(i, false);
             continue;
         }
 
         // Make sure the response checks out
-        if (response.command != CMD_PING_RESPONSE ||
-            response.data[0] != i) {
-
+        if (response.command != CMD_PING_RESPONSE) {
             setLightConnected(i, false);
             continue;
         }
@@ -146,8 +134,9 @@ void Radio::pingAllLights() {
     }
 
     sem_post(&s->connected_sem);
-    
+
     cout << "Done scanning." << endl;
+     
 }
 
 void Radio::transmitFrame() {

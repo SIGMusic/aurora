@@ -52,7 +52,7 @@ void setup() {
     initRadio();
 
     // Initialize serial console
-    Serial.begin(9600);
+    Serial.begin(115200);
     printWelcomeMessage();
 }
 
@@ -71,7 +71,7 @@ void initRadio(void) {
     radio.begin();
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
     radio.setChannel(CHANNEL);
-    radio.setPALevel(RF24_PA_MAX); // Range is important, not power consumption
+    radio.setPALevel(RF24_PA_LOW); // Higher power doesn't work on cheap eBay radios
     radio.setRetries(0, 0);
     radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
@@ -87,6 +87,7 @@ void initRadio(void) {
  */
 void networkRead(void) {
     if (radio.available()) {
+        Serial.println("Received packet");
         packet_t packet;
         radio.read(&packet, sizeof(packet_t));
         processNetworkPacket(packet);
@@ -102,13 +103,14 @@ void processNetworkPacket(packet_t packet) {
     switch (packet.command) {
 
         case CMD_SET_RGB: {
-            // Update the color
+
             setRGB(packet.data[0], packet.data[1], packet.data[2]);
             break;
         }
 
         case CMD_PING: {
-            // Respond with an echo of the received ping
+
+            // Echo the received message
             packet_t response = {
                 CMD_PING_RESPONSE,
                 {packet.data[0], packet.data[1], packet.data[2]}
@@ -122,11 +124,11 @@ void processNetworkPacket(packet_t packet) {
         }
 
         case CMD_GET_TEMP: {
-            // Respond with the temperature
+
             long temp = getTemperature();
             packet_t response = {
                 CMD_TEMP_RESPONSE,
-                {(temp & 0xff00) >> 8, temp & 0xff, 0}
+                {(temp & 0xFF0000) >> 16, (temp & 0xFF00) >> 8, (temp & 0xFF)}
             };
 
             radio.stopListening();
@@ -137,11 +139,25 @@ void processNetworkPacket(packet_t packet) {
         }
 
         case CMD_GET_UPTIME: {
-            // Respond with the uptime
+
             unsigned long uptime = millis();
             packet_t response = {
                 CMD_UPTIME_RESPONSE,
-                {(uptime & 0xff00) >> 8, uptime & 0xff, 0}
+                {(uptime & 0xFF0000) >> 16, (uptime & 0xFF00) >> 8, (uptime & 0xFF)}
+            };
+
+            radio.stopListening();
+            radio.write(&response, sizeof(response));
+            radio.startListening();
+
+            break;
+        }
+
+        case CMD_GET_VERSION: {
+
+            packet_t response = {
+                CMD_VERSION_RESPONSE,
+                {VERSION, 0, 0}
             };
 
             radio.stopListening();
@@ -152,7 +168,7 @@ void processNetworkPacket(packet_t packet) {
         }
 
         default:
-            // Ignore the packet
+            // Ignore the unknown packet
             break;
     }
 }
@@ -162,6 +178,7 @@ void processNetworkPacket(packet_t packet) {
  * the message is sent to be processed.
  */
 void serialRead(void) {
+
     static char buffer[MAX_SERIAL_LINE_LEN + 1];
     static int index = 0;
 
@@ -184,6 +201,7 @@ void serialRead(void) {
  * @param message The message received
  */
 void processSerialCommand(char message[]) {
+
     uint8_t id, r, g, b;
     if (!strcmp(message, "help")) {
         printHelpMessage();
@@ -208,6 +226,7 @@ void processSerialCommand(char message[]) {
  * @param blue The new blue value
  */
 void setRGB(uint8_t red, uint8_t green, uint8_t blue) {
+
     analogWrite(RED_PIN, red);
     analogWrite(GREEN_PIN, green);
     analogWrite(BLUE_PIN, blue);
@@ -218,6 +237,7 @@ void setRGB(uint8_t red, uint8_t green, uint8_t blue) {
  * @param id The new endpoint ID
  */
 void setEndpointID(uint8_t id) {
+
     // Make sure it's not the base station ID
     if (id == BASE_STATION_ID) {
         return;
@@ -233,6 +253,7 @@ void setEndpointID(uint8_t id) {
  * @return The core temperature
  */
 long getTemperature(void) {
+
     unsigned int wADC;
 
     // The internal temperature has to be used
@@ -240,7 +261,7 @@ long getTemperature(void) {
     // Channel 8 cannot be selected with
     // the analogRead function yet.
 
-    // Set the internal reference and mux.
+    // Set the internal reference and mux
     ADMUX = (_BV(REFS1) | _BV(REFS0) | _BV(MUX3));
     ADCSRA |= _BV(ADEN);  // enable the ADC
 
@@ -251,10 +272,11 @@ long getTemperature(void) {
     // Detect end-of-conversion
     while (bit_is_set(ADCSRA,ADSC));
 
-    // Reading register "ADCW" takes care of how to read ADCL and ADCH.
+    // Reading register "ADCW" takes care of reading ADCL and ADCH.
     wADC = ADCW;
 
-    // Approximate offset. Should be calibrated further.
+    // Typical calibration per the datasheet.
+    // Should store the measured calibration offset in EEPROM.
     return (long)((wADC - 289)*1000/1.06);
 }
 

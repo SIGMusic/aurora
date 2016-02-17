@@ -13,7 +13,7 @@
 
 class Radio {
 public:
-    
+
     /**
      * Initializes the radio.
      */
@@ -28,7 +28,7 @@ public:
 
 private:
 
-    static bool send(uint8_t endpoint, packet_t & msg);
+    static void send(uint8_t endpoint, packet_t & msg);
     static bool receive(packet_t & msg, unsigned int timeout);
     static void pingAllLights();
     static void transmitFrame();
