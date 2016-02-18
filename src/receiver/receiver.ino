@@ -24,18 +24,16 @@
 #define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
 
 // Firmware information
-#define VERSION                 0 // The firmware version number
 #define ENDPOINT_ID_LOCATION    0x000 // The address in EEPROM to store the ID
 
 
 void initRadio(void);
+uint8_t detectClearestChannel(void);
 void networkRead(void);
-void processNetworkPacket(packet_t packet);
 void serialRead(void);
 void processSerialCommand(char message[]);
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
 void setEndpointID(uint8_t id);
-long getTemperature(void);
 void printWelcomeMessage(void);
 void printHelpMessage(void);
 
@@ -43,17 +41,19 @@ void printHelpMessage(void);
 RF24 radio(CE_PIN, CSN_PIN);
 
 uint8_t endpointID = EEPROM.read(ENDPOINT_ID_LOCATION);
+int startingChannel;
 
 /**
  * Initialize radio and serial.
  */
 void setup() {
-    // Start the radio
-    initRadio();
 
     // Initialize serial console
     Serial.begin(115200);
     printWelcomeMessage();
+
+    // Start the radio
+    initRadio();
 }
 
 /**
@@ -70,12 +70,16 @@ void loop() {
 void initRadio(void) {
     radio.begin();
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
-    radio.setChannel(CHANNEL);
     radio.setPALevel(RF24_PA_LOW); // Higher power doesn't work on cheap eBay radios
     radio.setRetries(0, 0);
     radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
+
+    startingChannel = detectClearestChannel();
+    radio.setChannel(channels[startingChannel]);
+
+    delay(1000);
 
     radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
     radio.openReadingPipe(1, RF_ADDRESS(endpointID));
@@ -83,93 +87,73 @@ void initRadio(void) {
 }
 
 /**
- * Reads network data into a struct and sends it to be processed.
+ * Finds the channel with the least noise.
+ *
+ * @return the channel number with the least noise
  */
-void networkRead(void) {
-    if (radio.available()) {
-        Serial.println("Received packet");
-        packet_t packet;
-        radio.read(&packet, sizeof(packet_t));
-        processNetworkPacket(packet);
+uint8_t detectClearestChannel(void) {
+
+    Serial.println(F("Detecting clearest channel..."));
+
+    uint8_t noise[sizeof(channels)] = {0};
+
+    // Check each channel 10 times
+    for (int j = 0; j < 10; j++) {
+
+        for (int i = 0; i < sizeof(channels); i++) {
+            
+            radio.setChannel(channels[i]);
+
+            delay(1); // Wait for a bit to listen to the channel
+
+            if (radio.testRPD()) {
+                noise[i]++;
+            }
+        }
     }
+
+    // Find the channel that had the least noise
+    int best = 0;
+    for (int i = 0; i < sizeof(noise); i++) {
+        if (noise[i] <= noise[best]) {
+            best = i;
+        }
+    }
+
+    Serial.print(F("Using channel "));
+    Serial.println(channels[best]);
+
+    return best;
 }
 
 /**
- * Takes action on a packet received over the network.
- * @param packet The packet received
+ * Reads network data into a struct and sends it to be processed.
  */
-void processNetworkPacket(packet_t packet) {
+void networkRead(void) {
 
-    switch (packet.command) {
+    static bool acquired = false;
+    static int millisOffset = 0;
 
-        case CMD_SET_RGB: {
+    if (radio.available()) {
 
-            setRGB(packet.data[0], packet.data[1], packet.data[2]);
-            break;
-        }
+        acquired = true;
 
-        case CMD_PING: {
+        packet_t packet;
+        radio.read(&packet, sizeof(packet));
+        setRGB(packet.data[0], packet.data[1], packet.data[2]);
 
-            // Echo the received message
-            packet_t response = {
-                CMD_PING_RESPONSE,
-                {packet.data[0], packet.data[1], packet.data[2]}
-            };
+        // Synchronize local time with the transmitter's
+        millisOffset = packet.sync - (millis() % DWELL_TIME);
+        
+        Serial.println(packet.sync);
+    }
 
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
+    if (acquired) {
 
-            break;
-        }
-
-        case CMD_GET_TEMP: {
-
-            long temp = getTemperature();
-            packet_t response = {
-                CMD_TEMP_RESPONSE,
-                {(temp & 0xFF0000) >> 16, (temp & 0xFF00) >> 8, (temp & 0xFF)}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        case CMD_GET_UPTIME: {
-
-            unsigned long uptime = millis();
-            packet_t response = {
-                CMD_UPTIME_RESPONSE,
-                {(uptime & 0xFF0000) >> 16, (uptime & 0xFF00) >> 8, (uptime & 0xFF)}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        case CMD_GET_VERSION: {
-
-            packet_t response = {
-                CMD_VERSION_RESPONSE,
-                {VERSION, 0, 0}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        default:
-            // Ignore the unknown packet
-            break;
+        // Make sure we're on the right channel
+        unsigned long adjustedTime = millis() + millisOffset;
+        int channelIndex = (adjustedTime / DWELL_TIME) % sizeof(channels);
+        radio.setChannel(channels[channelIndex]);
     }
 }
 
@@ -249,45 +233,11 @@ void setEndpointID(uint8_t id) {
 }
 
 /**
- * Gets the (very approximate) core temperature in millidegrees Celsius.
- * @return The core temperature
- */
-long getTemperature(void) {
-
-    unsigned int wADC;
-
-    // The internal temperature has to be used
-    // with the internal reference of 1.1V.
-    // Channel 8 cannot be selected with
-    // the analogRead function yet.
-
-    // Set the internal reference and mux
-    ADMUX = (_BV(REFS1) | _BV(REFS0) | _BV(MUX3));
-    ADCSRA |= _BV(ADEN);  // enable the ADC
-
-    delay(20);            // wait for voltages to become stable.
-
-    ADCSRA |= _BV(ADSC);  // Start the ADC
-
-    // Detect end-of-conversion
-    while (bit_is_set(ADCSRA,ADSC));
-
-    // Reading register "ADCW" takes care of reading ADCL and ADCH.
-    wADC = ADCW;
-
-    // Typical calibration per the datasheet.
-    // Should store the measured calibration offset in EEPROM.
-    return (long)((wADC - 289)*1000/1.06);
-}
-
-/**
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
     Serial.println(F("-----------------------------------------"));
     Serial.println(F("ACM@UIUC SIGMusic Lights Serial Interface"));
-    Serial.print(F("Version "));
-    Serial.println(VERSION);
     Serial.print(F("This light is endpoint "));
     Serial.println(endpointID);
     Serial.println(F("End all commands with a carriage return."));

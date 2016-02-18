@@ -6,17 +6,11 @@
 #pragma once
 #include <semaphore.h>
 
-// The software version number
-#define SW_VERSION      0
-
 // Cap on the number of light updates per second
-#define MAX_FPS         30
+#define MAX_FPS         25
 
 // Number of possible endpoint IDs
 #define NUM_IDS         256
-
-// The length of the connected array
-#define CONNECTED_LEN   ((NUM_IDS + sizeof(uint32_t) - 1)/sizeof(uint32_t))
 
 // Represents a 24-bit RGB color
 typedef struct color {
@@ -29,9 +23,6 @@ typedef struct color {
 struct shared {
     color_t colors[NUM_IDS];
     sem_t colors_sem;
-
-    uint32_t connected[CONNECTED_LEN];
-    sem_t connected_sem;
 };
 
 /**
