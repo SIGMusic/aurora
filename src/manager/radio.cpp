@@ -60,18 +60,26 @@ void Radio::run(struct shared* s) {
 
 void Radio::transmitFrame() {
 
+    static int lastChannelIndex = -1;
+
     sem_wait(&s->colors_sem);
 
     for (int i = 1; i < 8; i++) {
 
         // Make sure we're on the right channel
-        int channelIndex = (millis() / DWELL_TIME) % sizeof(channels);
-        radio.setChannel(channels[channelIndex]);
+        int channelIndex = (millis() / DWELL_TIME) % NUM_CHANNELS;
 
-        cout << (millis() % DWELL_TIME) << endl;
+        if (channelIndex != lastChannelIndex) {
+            radio.setChannel(channelIndex);
+            lastChannelIndex = channelIndex;
+            cout << "Channel " << channelIndex << endl;
+        }
+
+        // cout << (millis() % DWELL_TIME) << endl;
         
         packet_t msg = {
-            {s->colors[i].r, s->colors[i].g, s->colors[i].b},
+            {(uint8_t)channelIndex, 0, 0},
+            // {s->colors[i].r, s->colors[i].g, s->colors[i].b},
             (uint8_t)(millis() % DWELL_TIME)
         };
 

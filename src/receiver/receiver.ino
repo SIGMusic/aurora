@@ -41,7 +41,7 @@ void printHelpMessage(void);
 RF24 radio(CE_PIN, CSN_PIN);
 
 uint8_t endpointID = EEPROM.read(ENDPOINT_ID_LOCATION);
-int startingChannel;
+int startingIndex;
 
 /**
  * Initialize radio and serial.
@@ -76,12 +76,11 @@ void initRadio(void) {
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    startingChannel = detectClearestChannel();
-    radio.setChannel(channels[startingChannel]);
+    startingIndex = 50; //detectClearestChannel();
+    radio.setChannel(startingIndex);
 
-    delay(1000);
+    // delay(1000);
 
-    radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
     radio.openReadingPipe(1, RF_ADDRESS(endpointID));
     radio.startListening();
 }
@@ -95,12 +94,12 @@ uint8_t detectClearestChannel(void) {
 
     Serial.println(F("Detecting clearest channel..."));
 
-    uint8_t noise[sizeof(channels)] = {0};
+    uint8_t noise[NUM_CHANNELS] = {0};
 
     // Check each channel 10 times
     for (int j = 0; j < 10; j++) {
 
-        for (int i = 0; i < sizeof(channels); i++) {
+        for (int i = 0; i < NUM_CHANNELS; i++) {
             
             radio.setChannel(channels[i]);
 
@@ -114,8 +113,8 @@ uint8_t detectClearestChannel(void) {
 
     // Find the channel that had the least noise
     int best = 0;
-    for (int i = 0; i < sizeof(noise); i++) {
-        if (noise[i] <= noise[best]) {
+    for (int i = 0; i < NUM_CHANNELS; i++) {
+        if (noise[i] < noise[best]) {
             best = i;
         }
     }
@@ -132,28 +131,56 @@ uint8_t detectClearestChannel(void) {
 void networkRead(void) {
 
     static bool acquired = false;
+    static int indexOffset = 0;
     static int millisOffset = 0;
-
-    if (radio.available()) {
-
-        acquired = true;
-
-        packet_t packet;
-        radio.read(&packet, sizeof(packet));
-        setRGB(packet.data[0], packet.data[1], packet.data[2]);
-
-        // Synchronize local time with the transmitter's
-        millisOffset = packet.sync - (millis() % DWELL_TIME);
-        
-        Serial.println(packet.sync);
-    }
+    static int lastChannelIndex = startingIndex;
 
     if (acquired) {
 
         // Make sure we're on the right channel
-        unsigned long adjustedTime = millis() + millisOffset;
-        int channelIndex = (adjustedTime / DWELL_TIME) % sizeof(channels);
-        radio.setChannel(channels[channelIndex]);
+        unsigned long adjustedTime = millis() + indexOffset + millisOffset;
+        int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
+
+        if (channelIndex != lastChannelIndex) {
+            radio.setChannel(channelIndex);
+            lastChannelIndex = channelIndex;
+
+            Serial.print(F("Channel "));
+            Serial.println(channelIndex);
+        }
+    }
+
+    if (radio.available()) {
+
+        packet_t packet;
+        radio.read(&packet, sizeof(packet));
+
+        // Synchronize local time with the transmitter's
+        if (!acquired) {
+            unsigned long now = millis();
+            int presumedIndex = (now / DWELL_TIME) % NUM_CHANNELS;
+            indexOffset = (startingIndex - presumedIndex) * DWELL_TIME;
+            millisOffset = packet.sync - (now % DWELL_TIME);
+
+            // Serial.print(F("Current time is "));
+            // Serial.println(now);
+            // Serial.print(F("Starting index is "));
+            // Serial.println(startingIndex);
+            // Serial.print(F("Presumed index is "));
+            // Serial.println(presumedIndex);
+            // Serial.print(F("Offset is "));
+            // Serial.println(millisOffset);
+
+            acquired = true;
+
+        } else {
+            // Already mostly synced - just update milliseconds since last hop
+            millisOffset = packet.sync - (millis() % DWELL_TIME);
+        }
+            
+        Serial.println(packet.data[0]);
+
+        setRGB(packet.data[0], packet.data[1], packet.data[2]);
     }
 }
 
