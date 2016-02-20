@@ -156,14 +156,14 @@
 <plain>
 <wire x1="26.416" y1="42.672" x2="26.416" y2="13.97" width="0.0762" layer="51"/>
 <wire x1="38.481" y1="42.672" x2="38.481" y2="13.97" width="0.0762" layer="51"/>
-<text x="24.7904" y="39.7764" size="0.8128" layer="21" font="fixed" ratio="15" rot="R180" align="bottom-center">Reset</text>
+<text x="24.7904" y="39.7764" size="1.016" layer="21" font="fixed" ratio="15" rot="R180" align="bottom-center">Reset</text>
 <text x="-7.112" y="-2.921" size="2.286" layer="27">Arduino Pro Mini</text>
 <text x="32.131" y="5.207" size="0.6096" layer="21" font="vector" ratio="15" rot="R90">TXO</text>
 <text x="29.591" y="5.207" size="0.6096" layer="21" ratio="15" rot="R90">RXI</text>
 <text x="27.178" y="5.207" size="0.6096" layer="21" ratio="15" rot="R90">+5V</text>
 <text x="24.511" y="5.207" size="0.6096" layer="21" ratio="15" rot="R90">CTS</text>
-<text x="21.463" y="3.81" size="0.8128" layer="21" ratio="15" rot="R90" align="bottom-center">BLK</text>
-<text x="36.957" y="3.81" size="0.8128" layer="21" ratio="15" rot="R90" align="top-center">GRN</text>
+<text x="21.463" y="3.81" size="1.016" layer="21" ratio="15" rot="R90" align="bottom-center">BLK</text>
+<text x="36.957" y="3.81" size="1.016" layer="21" ratio="15" rot="R90" align="top-center">GRN</text>
 <text x="19.812" y="26.162" size="1.27" layer="27">Valid combinations:</text>
 <text x="19.812" y="23.622" size="1.27" layer="27">168V / 3.3V Reg / 8MHz</text>
 <text x="19.812" y="21.082" size="1.27" layer="27">168 / 5V Reg / 16MHz</text>
@@ -177,11 +177,11 @@ Modified by Alex Cordonnier</text>
 <text x="41.91" y="11.43" size="0.8128" layer="21" font="vector" ratio="15" rot="R90" align="bottom-center">LED</text>
 <text x="34.671" y="5.207" size="0.6096" layer="21" font="vector" ratio="15" rot="R90">DTR</text>
 <text x="21.971" y="5.207" size="0.6096" layer="21" ratio="15" rot="R90">GND</text>
-<text x="9.398" y="40.767" size="0.8128" layer="21" ratio="15" rot="R90">+12V</text>
-<text x="15.494" y="41.275" size="0.8128" layer="21" ratio="15" rot="R90">GND</text>
-<text x="11.43" y="5.08" size="1.6764" layer="1" ratio="15" align="top-center">ACM@UIUC
+<text x="9.398" y="40.767" size="1.016" layer="21" ratio="15" rot="R90">+12V</text>
+<text x="14.986" y="43.815" size="1.016" layer="21" ratio="15" rot="R270">GND</text>
+<text x="11.43" y="6.35" size="1.6764" layer="1" ratio="15" align="top-center">ACM@UIUC
 Logic Brd V2</text>
-<text x="11.43" y="5.08" size="1.6764" layer="21" ratio="15" align="top-center">ACM@UIUC
+<text x="11.43" y="6.35" size="1.6764" layer="21" ratio="15" align="top-center">ACM@UIUC
 Logic Brd V2</text>
 <wire x1="31.369" y1="44.831" x2="32.131" y2="44.831" width="0.254" layer="21"/>
 <wire x1="31.369" y1="42.291" x2="32.131" y2="42.291" width="0.254" layer="21"/>
@@ -191,8 +191,8 @@ Logic Brd V2</text>
 <wire x1="37.719" y1="42.799" x2="38.481" y2="42.799" width="0.254" layer="21"/>
 <wire x1="37.719" y1="42.291" x2="38.481" y2="42.291" width="0.254" layer="21"/>
 <wire x1="37.719" y1="40.259" x2="38.481" y2="40.259" width="0.254" layer="21"/>
-<wire x1="23.749" y1="37.846" x2="24.511" y2="37.846" width="0.254" layer="21"/>
-<wire x1="23.749" y1="35.814" x2="24.511" y2="35.814" width="0.254" layer="21"/>
+<wire x1="24.384" y1="37.846" x2="25.146" y2="37.846" width="0.254" layer="21"/>
+<wire x1="24.384" y1="35.814" x2="25.146" y2="35.814" width="0.254" layer="21"/>
 <wire x1="30.226" y1="16.891" x2="30.226" y2="16.129" width="0.254" layer="21"/>
 <wire x1="28.194" y1="16.891" x2="28.194" y2="16.129" width="0.254" layer="21"/>
 <wire x1="37.465" y1="12.192" x2="38.735" y2="12.192" width="0.254" layer="21"/>
@@ -203,9 +203,9 @@ Logic Brd V2</text>
 <wire x1="31.496" y1="8.001" x2="32.004" y2="8.001" width="0.254" layer="21"/>
 <wire x1="37.592" y1="9.652" x2="38.862" y2="9.652" width="0.254" layer="21"/>
 <wire x1="37.592" y1="8.128" x2="38.862" y2="8.128" width="0.254" layer="21"/>
-<hole x="40.386" y="4.826" drill="3.2"/>
+<hole x="40.386" y="4.064" drill="3.2"/>
 <hole x="3.302" y="42.799" drill="3.2"/>
-<hole x="38.735" y="36.195" drill="3.2"/>
+<hole x="38.735" y="36.703" drill="3.2"/>
 <text x="30.988" y="13.97" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-right">GND</text>
 <text x="33.528" y="13.97" size="0.508" layer="21" ratio="15" rot="R90" align="bottom-right">CE</text>
 <text x="30.988" y="19.177" size="0.508" layer="21" ratio="15" rot="R90">VCC</text>
@@ -216,7 +216,7 @@ Logic Brd V2</text>
 <text x="38.608" y="19.177" size="0.508" layer="21" ratio="15" rot="R90">IRQ</text>
 <wire x1="26.416" y1="10.414" x2="26.416" y2="9.398" width="0.254" layer="21"/>
 <wire x1="28.194" y1="10.414" x2="28.194" y2="9.398" width="0.254" layer="21"/>
-<hole x="11.938" y="7.112" drill="3.2"/>
+<hole x="17.018" y="9.271" drill="3.2"/>
 <wire x1="17.399" y1="42.926" x2="17.399" y2="42.164" width="0.254" layer="21"/>
 <wire x1="19.304" y1="42.926" x2="19.304" y2="42.164" width="0.254" layer="21"/>
 </plain>
@@ -3303,7 +3303,7 @@ Please make sure your boards conform to these design rules.</description>
 <attribute name="VALUE" x="31.496" y="38.735" size="0.4064" layer="27" rot="R270"/>
 </element>
 <element name="C2" library="rcl" package="C1206K" value="10uF" x="24.765" y="36.83" smashed="yes">
-<attribute name="NAME" x="24.765" y="38.1" size="0.6096" layer="25" align="bottom-center"/>
+<attribute name="NAME" x="24.765" y="35.56" size="0.6096" layer="25" rot="R180" align="bottom-center"/>
 <attribute name="VALUE" x="24.573" y="37.438" size="0.4064" layer="27" rot="R270"/>
 </element>
 <element name="J3" library="SparkFun-Connectors" package="1X06_SMD_MALE" value="FTDI Basic" x="35.56" y="3.81" smashed="yes" rot="R180">
@@ -3345,8 +3345,8 @@ Please make sure your boards conform to these design rules.</description>
 <attribute name="NAME" x="40.767" y="16.51" size="0.6096" layer="25" ratio="10" rot="SR270" align="bottom-center"/>
 <attribute name="VALUE" x="30.48" y="11.43" size="1.27" layer="27" ratio="10"/>
 </element>
-<element name="LOGO1" library="SparkFun-Aesthetics" package="OSHW-LOGO-S" value="OSHW-LOGOS" x="17.78" y="7.62"/>
-<element name="U$1" library="SparkFun-Aesthetics" package="OSHW-LOGO-S_COPPER" value="" x="17.78" y="7.62"/>
+<element name="LOGO1" library="SparkFun-Aesthetics" package="OSHW-LOGO-S" value="OSHW-LOGOS" x="21.717" y="8.89"/>
+<element name="U$1" library="SparkFun-Aesthetics" package="OSHW-LOGO-S_COPPER" value="" x="21.717" y="8.89"/>
 <element name="S1" library="my-custom" package="TACTILE-BUTTON-PTS525" value="" x="24.765" y="42.545" smashed="yes">
 <attribute name="NAME" x="27.432" y="42.545" size="0.6096" layer="25" rot="SR270" align="bottom-center"/>
 <attribute name="VALUE" x="22.225" y="38.735" size="1.27" layer="21" align="top-left"/>
@@ -3379,8 +3379,8 @@ Please make sure your boards conform to these design rules.</description>
 <contactref element="Y1" pad="2"/>
 <contactref element="R3" pad="2"/>
 <wire x1="30.328" y1="11.43" x2="30.328" y2="8.89" width="0.254" layer="1"/>
-<wire x1="22.86" y1="3.81" x2="24.13" y2="3.81" width="0.254" layer="1"/>
-<wire x1="24.13" y1="3.81" x2="25.4" y2="3.81" width="0.254" layer="1"/>
+<wire x1="22.86" y1="3.81" x2="24.13" y2="3.81" width="0.4064" layer="1"/>
+<wire x1="24.13" y1="3.81" x2="25.4" y2="3.81" width="0.4064" layer="1"/>
 <via x="29.21" y="13.208" extent="1-16" drill="0.5" diameter="0.254"/>
 <via x="24.13" y="3.81" extent="1-16" drill="0.5" diameter="0.254"/>
 <contactref element="J2" pad="1"/>
