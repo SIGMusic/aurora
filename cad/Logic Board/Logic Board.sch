@@ -15367,13 +15367,13 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <sheets>
 <sheet>
 <plain>
-<text x="165.862" y="11.684" size="1.778" layer="94">Original Arduino Mini Design by Team Arduino</text>
-<text x="165.862" y="9.144" size="1.778" layer="94">Arduino Pro Mini Design by Spark Fun Electronics</text>
+<text x="150.622" y="9.144" size="1.778" layer="94">Original Arduino Mini Design by Team Arduino</text>
+<text x="150.622" y="6.604" size="1.778" layer="94">Arduino Pro Mini Design by Spark Fun Electronics</text>
 <text x="20.32" y="137.16" size="1.778" layer="97">Max Voltage Input: 16VDC</text>
 <text x="20.32" y="134.62" size="1.778" layer="97">Max Current Output: 150mA</text>
 <text x="20.32" y="139.7" size="1.778" layer="97">VCC = 5V or 3.3V Output</text>
 <text x="240.284" y="7.366" size="1.778" layer="94">14</text>
-<text x="165.862" y="6.35" size="1.778" layer="94">Logic Board Design by Alex Cordonnier</text>
+<text x="173.482" y="11.43" size="1.778" layer="94">Logic Board Design by Alex Cordonnier</text>
 </plain>
 <instances>
 <instance part="C4" gate="G$1" x="83.82" y="157.48"/>
