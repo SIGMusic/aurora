@@ -15867,7 +15867,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="R3" gate="G$1" pin="1"/>
 </segment>
 </net>
-<net name="+12V" class="0">
+<net name="VIN" class="0">
 <segment>
 <wire x1="33.02" y1="162.56" x2="35.56" y2="162.56" width="0.1524" layer="91"/>
 <wire x1="35.56" y1="152.4" x2="33.02" y2="152.4" width="0.1524" layer="91"/>
