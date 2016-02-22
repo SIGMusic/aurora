@@ -15361,7 +15361,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="LOGO1" library="SparkFun-Aesthetics" deviceset="OSHW-LOGO" device="S" value="OSHW-LOGOS"/>
 <part name="S1" library="my-custom" deviceset="TACTILE-BUTTON-PTS525" device=""/>
 <part name="U3" library="SparkFun-DigitalIC" deviceset="ATMEGA328P_TQFP" device="" value="ATMEGA328P_TQFP"/>
-<part name="U2" library="my-custom" deviceset="DIODE" device=""/>
+<part name="D3" library="my-custom" deviceset="DIODE" device=""/>
 <part name="P+8" library="supply1" deviceset="+5V" device=""/>
 </parts>
 <sheets>
@@ -15435,7 +15435,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="LOGO1" gate="G$1" x="233.68" y="48.26"/>
 <instance part="S1" gate="G$1" x="147.32" y="149.86"/>
 <instance part="U3" gate="U$1" x="198.12" y="127"/>
-<instance part="U2" gate="G$1" x="25.4" y="172.72" smashed="yes">
+<instance part="D3" gate="G$1" x="25.4" y="172.72" smashed="yes">
 <attribute name="NAME" x="22.86" y="174.7774" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="22.86" y="172.4914" size="1.778" layer="96" rot="R180"/>
 </instance>
@@ -15879,7 +15879,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="U1" gate="G$1" pin="EN"/>
 <pinref part="C2" gate="G$1" pin="1"/>
 <label x="15.24" y="162.56" size="1.778" layer="95"/>
-<pinref part="U2" gate="G$1" pin="C"/>
+<pinref part="D3" gate="G$1" pin="C"/>
 <wire x1="27.94" y1="172.72" x2="33.02" y2="172.72" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="172.72" x2="33.02" y2="162.56" width="0.1524" layer="91"/>
 <pinref part="J1" gate="G$1" pin="1"/>
@@ -15910,7 +15910,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </segment>
 <segment>
 <pinref part="P+8" gate="1" pin="+5V"/>
-<pinref part="U2" gate="G$1" pin="A"/>
+<pinref part="D3" gate="G$1" pin="A"/>
 <wire x1="17.78" y1="175.26" x2="17.78" y2="172.72" width="0.1524" layer="91"/>
 <wire x1="17.78" y1="172.72" x2="22.86" y2="172.72" width="0.1524" layer="91"/>
 </segment>
