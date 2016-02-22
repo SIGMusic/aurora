@@ -15933,9 +15933,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <approved hash="106,1,220.98,124.46,D4,,,,,"/>
 <approved hash="106,1,220.98,109.22,D9,,,,,"/>
 <approved hash="106,1,220.98,106.68,D10,,,,,"/>
-<approved hash="113,1,12.0227,162.793,J1,,,,,"/>
 <approved hash="113,1,48.26,25.5312,J2,,,,,"/>
-<approved hash="113,1,147.714,148.869,S1,,,,,"/>
 <approved hash="116,1,132.08,157.48,C5,2,DTR,,,"/>
 </errors>
 </schematic>
