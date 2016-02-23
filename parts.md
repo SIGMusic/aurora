@@ -17,7 +17,8 @@
 * 1 x [3.3V linear voltage regulator](http://www.digikey.com/product-detail/en/MIC5205-3.3YM5-TR/576-1259-1-ND/771886)
 * 1 x [Diode](http://www.digikey.com/product-detail/en/CD1206-S01575/CD1206-S01575CT-ND/3741949)
 * 1 x [8MHz resonator](http://www.digikey.com/product-detail/en/CSTCE8M00G55-R0/490-1195-1-ND/584632)
-* 3 x [Nylon screws](http://www.digikey.com/product-detail/en/29341/36-29341-ND/1532216)
+* 1" x 1.5" [Adhesive backing](http://www.digikey.com/product-detail/en/12X12-6-9495MP/3M9732-ND/2649277)
+* Optional: 3 x [Nylon screws](http://www.digikey.com/product-detail/en/29341/36-29341-ND/1532216)
 
 ## Base Station
 * 1 x [Raspberry Pi 2 Model B](http://www.amazon.com/Raspberry-Pi-Model-Project-Board/dp/B00T2U7R7I)
