@@ -15324,11 +15324,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="R1" library="resistor" deviceset="R-US_" device="R1206" value="330"/>
 <part name="D1" library="led" deviceset="LED" device="SML1206" value="Red"/>
 <part name="GND4" library="SparkFun" deviceset="GND" device=""/>
-<part name="R2" library="resistor" deviceset="R-US_" device="R1206" value="10K"/>
+<part name="R3" library="resistor" deviceset="R-US_" device="R1206" value="10K"/>
 <part name="GND10" library="SparkFun" deviceset="GND" device=""/>
-<part name="C7" library="rcl" deviceset="C-US" device="C1206K" value="0.1uF"/>
+<part name="C6" library="rcl" deviceset="C-US" device="C1206K" value="0.1uF"/>
 <part name="GND13" library="SparkFun" deviceset="GND" device=""/>
-<part name="R3" library="resistor" deviceset="R-US_" device="R1206" value="330"/>
+<part name="R2" library="resistor" deviceset="R-US_" device="R1206" value="330"/>
 <part name="D2" library="led" deviceset="LED" device="SML1206" value="Green"/>
 <part name="GND15" library="SparkFun" deviceset="GND" device=""/>
 <part name="U1" library="SparkFun" deviceset="V_REG_LDO" device="SMD" value="MIC5205"/>
@@ -15385,11 +15385,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="R1" gate="G$1" x="60.96" y="147.32" rot="R90"/>
 <instance part="D1" gate="G$1" x="60.96" y="157.48"/>
 <instance part="GND4" gate="1" x="60.96" y="139.7"/>
-<instance part="R2" gate="G$1" x="147.32" y="165.1" rot="R90"/>
+<instance part="R3" gate="G$1" x="147.32" y="165.1" rot="R90"/>
 <instance part="GND10" gate="1" x="147.32" y="139.7"/>
-<instance part="C7" gate="G$1" x="160.02" y="101.6" rot="R180"/>
+<instance part="C6" gate="G$1" x="160.02" y="101.6" rot="R180"/>
 <instance part="GND13" gate="1" x="160.02" y="96.52"/>
-<instance part="R3" gate="G$1" x="223.52" y="81.28" rot="R270"/>
+<instance part="R2" gate="G$1" x="223.52" y="81.28" rot="R270"/>
 <instance part="D2" gate="G$1" x="223.52" y="91.44"/>
 <instance part="GND15" gate="1" x="223.52" y="73.66"/>
 <instance part="U1" gate="G$1" x="45.72" y="157.48"/>
@@ -15459,7 +15459,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="S1" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="C7" gate="G$1" pin="1"/>
+<pinref part="C6" gate="G$1" pin="1"/>
 <pinref part="GND13" gate="1" pin="GND"/>
 </segment>
 <segment>
@@ -15507,7 +15507,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="R1" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="R3" gate="G$1" pin="2"/>
+<pinref part="R2" gate="G$1" pin="2"/>
 <pinref part="GND15" gate="1" pin="GND"/>
 </segment>
 <segment>
@@ -15544,7 +15544,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="147.32" y1="157.48" x2="139.7" y2="157.48" width="0.1524" layer="91"/>
 <junction x="147.32" y="157.48"/>
 <label x="157.48" y="157.48" size="1.778" layer="95"/>
-<pinref part="R2" gate="G$1" pin="1"/>
+<pinref part="R3" gate="G$1" pin="1"/>
 <pinref part="C5" gate="G$1" pin="1"/>
 <pinref part="S1" gate="G$1" pin="3"/>
 <pinref part="U3" gate="U$1" pin="PC6(/RESET)"/>
@@ -15605,11 +15605,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <net name="VCC" class="0">
 <segment>
 <wire x1="147.32" y1="172.72" x2="147.32" y2="170.18" width="0.1524" layer="91"/>
-<pinref part="R2" gate="G$1" pin="2"/>
+<pinref part="R3" gate="G$1" pin="2"/>
 <pinref part="P+5" gate="G$1" pin="3.3V"/>
 </segment>
 <segment>
-<pinref part="C7" gate="G$1" pin="2"/>
+<pinref part="C6" gate="G$1" pin="2"/>
 <pinref part="P+6" gate="G$1" pin="3.3V"/>
 </segment>
 <segment>
@@ -15864,7 +15864,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <net name="N$3" class="0">
 <segment>
 <pinref part="D2" gate="G$1" pin="C"/>
-<pinref part="R3" gate="G$1" pin="1"/>
+<pinref part="R2" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="VIN" class="0">
@@ -15923,6 +15923,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <approved hash="102,1,160.02,106.68,3.3V,VCC,,,,"/>
 <approved hash="102,1,170.18,160.02,3.3V,VCC,,,,"/>
 <approved hash="102,1,91.44,165.1,3.3V,VCC,,,,"/>
+<approved hash="102,1,60.96,73.66,+12V,VIN,,,,"/>
+<approved hash="102,1,60.96,116.84,+12V,VIN,,,,"/>
+<approved hash="102,1,60.96,96.52,+12V,VIN,,,,"/>
 <approved hash="202,1,53.34,152.4,U1,BP,,,,"/>
 <approved hash="106,1,220.98,157.48,A0,,,,,"/>
 <approved hash="106,1,220.98,154.94,A1,,,,,"/>
@@ -15933,7 +15936,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <approved hash="106,1,220.98,124.46,D4,,,,,"/>
 <approved hash="106,1,220.98,109.22,D9,,,,,"/>
 <approved hash="106,1,220.98,106.68,D10,,,,,"/>
+<approved hash="113,1,12.0227,159.787,J1,,,,,"/>
 <approved hash="113,1,48.26,25.5312,J2,,,,,"/>
+<approved hash="113,1,147.714,148.746,S1,,,,,"/>
 <approved hash="116,1,132.08,157.48,C5,2,DTR,,,"/>
 </errors>
 </schematic>
