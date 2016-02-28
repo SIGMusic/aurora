@@ -33,6 +33,8 @@ Radio::Radio() {
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
+    radio.setChannel(49);
+
     radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID));
 
 #ifdef DEBUG
@@ -60,27 +62,12 @@ void Radio::run(struct shared* s) {
 
 void Radio::transmitFrame() {
 
-    static int lastChannelIndex = -1;
-
     sem_wait(&s->colors_sem);
 
     for (int i = 1; i < 8; i++) {
-
-        // Make sure we're on the right channel
-        int channelIndex = (millis() / DWELL_TIME) % NUM_CHANNELS;
-
-        if (channelIndex != lastChannelIndex) {
-            radio.setChannel(channelIndex);
-            lastChannelIndex = channelIndex;
-            cout << "Channel " << channelIndex << endl;
-        }
-
-        // cout << (millis() % DWELL_TIME) << endl;
         
         packet_t msg = {
-            {(uint8_t)channelIndex, 0, 0},
-            // {s->colors[i].r, s->colors[i].g, s->colors[i].b},
-            (uint8_t)(millis() % DWELL_TIME)
+            {s->colors[i].r, s->colors[i].g, s->colors[i].b}
         };
 
         radio.openWritingPipe(RF_ADDRESS(i));
