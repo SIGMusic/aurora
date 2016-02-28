@@ -135,32 +135,32 @@ void networkRead(void) {
     static int millisOffset = 0;
     static int lastChannelIndex = startingIndex;
 
-    if (acquired) {
+    // Make sure we're on the right channel
+    unsigned long adjustedTime = millis() + indexOffset + millisOffset;
+    int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
+    
+    // Only change channels if we've acquired the signal
+    // and the new channel is different than the old one
+    if (acquired && channelIndex != lastChannelIndex) {
 
-        // Make sure we're on the right channel
-        unsigned long adjustedTime = millis() + indexOffset + millisOffset;
-        int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
+        radio.setChannel(channelIndex);
+        lastChannelIndex = channelIndex;
 
-        if (channelIndex != lastChannelIndex) {
-            radio.setChannel(channelIndex);
-            lastChannelIndex = channelIndex;
-
-            Serial.print(F("Channel "));
-            Serial.println(channelIndex);
-        }
+        Serial.print(F("Channel "));
+        Serial.println(channelIndex);
     }
 
     if (radio.available()) {
+
+        unsigned long now = millis();
 
         packet_t packet;
         radio.read(&packet, sizeof(packet));
 
         // Synchronize local time with the transmitter's
         if (!acquired) {
-            unsigned long now = millis();
             int presumedIndex = (now / DWELL_TIME) % NUM_CHANNELS;
             indexOffset = (startingIndex - presumedIndex) * DWELL_TIME;
-            millisOffset = packet.sync - (now % DWELL_TIME);
 
             // Serial.print(F("Current time is "));
             // Serial.println(now);
@@ -172,13 +172,16 @@ void networkRead(void) {
             // Serial.println(millisOffset);
 
             acquired = true;
-
-        } else {
-            // Already mostly synced - just update milliseconds since last hop
-            millisOffset = packet.sync - (millis() % DWELL_TIME);
         }
-            
-        Serial.println(packet.data[0]);
+
+        millisOffset = packet.sync - (now % DWELL_TIME);
+        // Serial.print("Offset: ");
+        // Serial.println(millisOffset);
+        unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
+        Serial.print("Start: ");
+        Serial.println(startTime);
+        
+        Serial.println(packet.sync);
 
         setRGB(packet.data[0], packet.data[1], packet.data[2]);
     }

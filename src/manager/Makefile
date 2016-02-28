@@ -6,7 +6,9 @@ LDLIBS=-lpthread -lrf24-bcm -lboost_system
 EXE=manager
 OBJS=main.o server.o radio.o
 
-all: $(OBJS)
+all: $(EXE)
+
+$(EXE): $(OBJS)
 	$(LD) $(LDLIBS) -o $(EXE) $^
 
 main.o: main.cpp server.h radio.h common.h
