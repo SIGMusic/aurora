@@ -6,9 +6,6 @@
 #pragma once
 #include <semaphore.h>
 
-// Cap on the number of light updates per second
-#define MAX_FPS         25
-
 // Number of possible endpoint IDs
 #define NUM_IDS         256
 
@@ -24,13 +21,3 @@ struct shared {
     color_t colors[NUM_IDS];
     sem_t colors_sem;
 };
-
-/**
- * Returns true if the given light is currently connected.
- * 
- * @param connected The shared array of connected lights
- * @param id The endpoint ID to check
- * 
- * @return true if the light is connected, false otherwise
- */
-extern bool isLightConnected(uint32_t* connected, uint8_t id);

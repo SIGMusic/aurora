@@ -17,6 +17,9 @@ using std::endl;
 #define CE_PIN                  RPI_V2_GPIO_P1_15 // Radio chip enable pin
 #define CSN_PIN                 RPI_V2_GPIO_P1_24 // Radio chip select pin
 
+// Cap on the number of light updates per second
+#define MAX_FPS         10
+
 
 RF24 Radio::radio(CE_PIN, CSN_PIN);
 
@@ -32,6 +35,8 @@ Radio::Radio() {
     radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
+
+    radio.setChannel(49);
 
     radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID));
 
@@ -64,23 +69,25 @@ void Radio::transmitFrame() {
 
     sem_wait(&s->colors_sem);
 
-    for (int i = 1; i < 8; i++) {
+    for (int i = 1; i <= 1; i++) {
 
         // Make sure we're on the right channel
-        int channelIndex = (millis() / DWELL_TIME) % NUM_CHANNELS;
+        // uint32_t now = millis();
+        uint32_t now = millis();
+        int channelIndex = (now / DWELL_TIME) % NUM_CHANNELS;
 
-        if (channelIndex != lastChannelIndex) {
-            radio.setChannel(channelIndex);
-            lastChannelIndex = channelIndex;
-            cout << "Channel " << channelIndex << endl;
-        }
+        // if (channelIndex != lastChannelIndex) {
+        //     radio.setChannel(channelIndex);
+        //     lastChannelIndex = channelIndex;
+        //     cout << "Channel " << channelIndex << endl;
+        // }
 
-        // cout << (millis() % DWELL_TIME) << endl;
+        cout << (now) << endl;
         
         packet_t msg = {
             {(uint8_t)channelIndex, 0, 0},
             // {s->colors[i].r, s->colors[i].g, s->colors[i].b},
-            (uint8_t)(millis() % DWELL_TIME)
+            (uint8_t)(now % DWELL_TIME)
         };
 
         radio.openWritingPipe(RF_ADDRESS(i));
@@ -90,9 +97,16 @@ void Radio::transmitFrame() {
     sem_post(&s->colors_sem);
 }
 
-unsigned long Radio::millis() {
+uint32_t Radio::millis() {
 
     struct timespec tv;
     clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
     return (tv.tv_sec * 1000) + (tv.tv_nsec / 1000000);
+}
+
+uint64_t Radio::micros() {
+
+    struct timespec tv;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
+    return (tv.tv_sec * 1000000) + (tv.tv_nsec / 1000);
 }

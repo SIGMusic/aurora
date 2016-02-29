@@ -28,7 +28,8 @@ public:
 private:
 
     static void transmitFrame();
-    static unsigned long millis();
+    static uint32_t millis();
+    static uint64_t micros();
 
     static RF24 radio;
     static struct shared* s;

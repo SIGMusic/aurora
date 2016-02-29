@@ -26,6 +26,9 @@
 // Firmware information
 #define ENDPOINT_ID_LOCATION    0x000 // The address in EEPROM to store the ID
 
+// millis() is terrible for some reason
+#define goodMillis()            (micros()/1000)
+
 
 void initRadio(void);
 uint8_t detectClearestChannel(void);
@@ -76,7 +79,7 @@ void initRadio(void) {
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    startingIndex = 50; //detectClearestChannel();
+    startingIndex = 49; //detectClearestChannel();
     radio.setChannel(startingIndex);
 
     // delay(1000);
@@ -136,23 +139,23 @@ void networkRead(void) {
     static int lastChannelIndex = startingIndex;
 
     // Make sure we're on the right channel
-    unsigned long adjustedTime = millis() + indexOffset + millisOffset;
+    uint32_t adjustedTime = goodMillis() + indexOffset + millisOffset;
     int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
     
-    // Only change channels if we've acquired the signal
-    // and the new channel is different than the old one
-    if (acquired && channelIndex != lastChannelIndex) {
+    // // Only change channels if we've acquired the signal
+    // // and the new channel is different than the old one
+    // if (acquired && channelIndex != lastChannelIndex) {
 
-        radio.setChannel(channelIndex);
-        lastChannelIndex = channelIndex;
+    //     radio.setChannel(channelIndex);
+    //     lastChannelIndex = channelIndex;
 
-        Serial.print(F("Channel "));
-        Serial.println(channelIndex);
-    }
+    //     Serial.print(F("Channel "));
+    //     Serial.println(channelIndex);
+    // }
 
     if (radio.available()) {
 
-        unsigned long now = millis();
+        uint32_t now = goodMillis();
 
         packet_t packet;
         radio.read(&packet, sizeof(packet));
@@ -177,11 +180,14 @@ void networkRead(void) {
         millisOffset = packet.sync - (now % DWELL_TIME);
         // Serial.print("Offset: ");
         // Serial.println(millisOffset);
-        unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
-        Serial.print("Start: ");
-        Serial.println(startTime);
+        // unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
+        // Serial.print("Start: ");
+        // Serial.println(startTime);
+        Serial.println(adjustedTime);
+        // Serial.print(" ");
+        // Serial.println((unsigned long)nowMicro);
         
-        Serial.println(packet.sync);
+        // Serial.println(packet.sync);
 
         setRGB(packet.data[0], packet.data[1], packet.data[2]);
     }

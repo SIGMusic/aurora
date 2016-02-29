@@ -14,7 +14,13 @@
 #define BASE_STATION_ID         0x00
 
 // Time to dwell on each channel before hopping
-#define DWELL_TIME              200 // ms
+#define DWELL_TIME              10 // ms
+
+// The time it takes for a packet to be transmitted.
+// (Packet size) * 8 / 250000
+// Packet size = sync byte + address + data + CRC
+// = 1 + 5 + sizeof(packet_t) + 2 = 8 + sizeof(packet)
+#define PACKET_DURATION         ((8 + sizeof(packet_t)) * 32) // us
 
 // The structure of a packet specified in the protocol
 typedef struct packet {
