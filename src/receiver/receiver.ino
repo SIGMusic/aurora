@@ -65,14 +65,8 @@ void setup() {
  * Continuously read in data from the network and from serial.
  */
 void loop() {
-    // packet_t p;
-    // if (radio.available()) {
-    //     uint32_t now = goodMillis();
-    //     radio.read(&p, sizeof(packet_t));
-    //     Serial.println(now + p.sync - (now % DWELL_TIME));
-    // }
     networkRead();
-    serialRead();
+    // serialRead();
 }
 
 /**
@@ -148,9 +142,29 @@ void networkRead(void) {
     static int millisOffset = 0;
     static int lastChannelIndex = startingIndex;
 
-    // Make sure we're on the right channel
-    uint32_t adjustedTime = goodMillis() + indexOffset + millisOffset;
-    int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
+
+    static int channelIndex = 0;
+    static uint32_t lastSwitchTime = 0;
+    static int lastChannel = 0;
+
+    uint32_t now = goodMillis();
+    if (acquired && now - lastSwitchTime >= DWELL_TIME) {
+
+        // Time to change channels
+        channelIndex = (channelIndex + 1) % NUM_CHANNELS;
+
+        if ((lastChannel + 10) % NUM_CHANNELS == channelIndex) {
+            Serial.print("Channel ");
+            Serial.println(channelIndex);
+            lastChannel = channelIndex;
+        }
+
+        lastSwitchTime = now;
+    }
+
+    // // Make sure we're on the right channel
+    // uint32_t adjustedTime = goodMillis() + indexOffset + millisOffset;
+    // int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
     
     // // Only change channels if we've acquired the signal
     // // and the new channel is different than the old one
@@ -170,42 +184,52 @@ void networkRead(void) {
         packet_t packet;
         radio.read(&packet, sizeof(packet));
 
-        // Synchronize local time with the transmitter's
+        // Serial.println((int32_t)(now - packet.sync - lastSwitchTime));
+        lastSwitchTime = now - packet.sync;
+
         if (!acquired) {
-            int presumedIndex = (now / DWELL_TIME) % NUM_CHANNELS;
-            indexOffset = (startingIndex - presumedIndex) * DWELL_TIME;
-
-            // Serial.print(F("Current time is "));
-            // Serial.println(now);
-            // Serial.print(F("Starting index is "));
-            // Serial.println(startingIndex);
-            // Serial.print(F("Presumed index is "));
-            // Serial.println(presumedIndex);
-            // Serial.print(F("Offset is "));
-            // Serial.println(millisOffset);
-
-            acquired = true;
+            channelIndex = packet.data[0];
+            lastChannel = channelIndex;
         }
 
-        millisOffset = packet.sync - (now % DWELL_TIME);
-        adjustedTime = now + /*indexOffset + */millisOffset;
-        // Serial.print("Offset: ");
-        Serial.print(now);
-        Serial.print(" ");
-        Serial.print(packet.sync);
-        Serial.print(" ");
-        Serial.print(millisOffset);
-        Serial.print(" ");
-        // unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
-        // Serial.print("Start: ");
-        // Serial.println(startTime);
-        Serial.println(adjustedTime);
-        // Serial.print(" ");
-        // Serial.println((unsigned long)nowMicro);
-        
-        // Serial.println(packet.sync);
+        acquired = true;
 
-        setRGB(packet.data[0], packet.data[1], packet.data[2]);
+        // // Synchronize local time with the transmitter's
+        // if (!acquired) {
+        //     int presumedIndex = (now / DWELL_TIME) % NUM_CHANNELS;
+        //     indexOffset = (startingIndex - presumedIndex) * DWELL_TIME;
+
+        //     // Serial.print(F("Current time is "));
+        //     // Serial.println(now);
+        //     // Serial.print(F("Starting index is "));
+        //     // Serial.println(startingIndex);
+        //     // Serial.print(F("Presumed index is "));
+        //     // Serial.println(presumedIndex);
+        //     // Serial.print(F("Offset is "));
+        //     // Serial.println(millisOffset);
+
+        //     acquired = true;
+        // }
+
+        // millisOffset = packet.sync - (now % DWELL_TIME);
+        // adjustedTime = now + /*indexOffset + */millisOffset;
+        // // Serial.print("Offset: ");
+        // Serial.print(now);
+        // Serial.print(" ");
+        // Serial.print(packet.sync);
+        // Serial.print(" ");
+        // Serial.print(millisOffset);
+        // Serial.print(" ");
+        // // unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
+        // // Serial.print("Start: ");
+        // // Serial.println(startTime);
+        // Serial.println(adjustedTime);
+        // // Serial.print(" ");
+        // // Serial.println((unsigned long)nowMicro);
+        
+        // // Serial.println(packet.sync);
+
+        // setRGB(packet.data[0], packet.data[1], packet.data[2]);
     }
 }
 
