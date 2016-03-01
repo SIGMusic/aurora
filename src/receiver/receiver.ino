@@ -19,6 +19,7 @@
 // Radio pins
 #define CE_PIN                  7 // Radio chip enable pin
 #define CSN_PIN                 8 // Radio chip select pin
+#define INT_PIN                 2 // Radio interrupt pin
 
 // Serial protocol
 #define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
@@ -34,6 +35,7 @@ void initRadio(void);
 uint8_t detectClearestChannel(void);
 void networkRead(void);
 void serialRead(void);
+void radioInterrupt(void);
 void processSerialCommand(char message[]);
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
 void setEndpointID(uint8_t id);
@@ -63,6 +65,12 @@ void setup() {
  * Continuously read in data from the network and from serial.
  */
 void loop() {
+    // packet_t p;
+    // if (radio.available()) {
+    //     uint32_t now = goodMillis();
+    //     radio.read(&p, sizeof(packet_t));
+    //     Serial.println(now + p.sync - (now % DWELL_TIME));
+    // }
     networkRead();
     serialRead();
 }
@@ -81,6 +89,8 @@ void initRadio(void) {
 
     startingIndex = 49; //detectClearestChannel();
     radio.setChannel(startingIndex);
+
+    // attachInterrupt(digitalPinToInterrupt(INT_PIN), radioInterrupt, LOW);
 
     // delay(1000);
 
@@ -178,8 +188,14 @@ void networkRead(void) {
         }
 
         millisOffset = packet.sync - (now % DWELL_TIME);
+        adjustedTime = now + /*indexOffset + */millisOffset;
         // Serial.print("Offset: ");
-        // Serial.println(millisOffset);
+        Serial.print(now);
+        Serial.print(" ");
+        Serial.print(packet.sync);
+        Serial.print(" ");
+        Serial.print(millisOffset);
+        Serial.print(" ");
         // unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
         // Serial.print("Start: ");
         // Serial.println(startTime);
@@ -214,6 +230,66 @@ void serialRead(void) {
             index++;
         }
     }
+}
+
+/**
+ * Handles radio events, in particular when a packet is received.
+ */
+void radioInterrupt(void) {
+
+    static bool acquired = false;
+    static int indexOffset = 0;
+    static int millisOffset = 0;
+    static int lastChannelIndex = startingIndex;
+    
+    // packet_t p;
+
+    bool txOK, txFail, rxReady;
+    radio.whatHappened(txOK, txFail, rxReady);
+
+    if (rxReady) {
+        // uint32_t now = goodMillis();
+        // radio.read(&p, sizeof(packet_t));
+        // Serial.println(now + p.sync - (now % DWELL_TIME));
+
+        uint32_t now = goodMillis();
+        packet_t packet;
+        radio.read(&packet, sizeof(packet));
+
+        // Synchronize local time with the transmitter's
+        if (!acquired) {
+            int presumedIndex = (now / DWELL_TIME) % NUM_CHANNELS;
+            indexOffset = (startingIndex - presumedIndex) * DWELL_TIME;
+
+            // Serial.print(F("Current time is "));
+            // Serial.println(now);
+            // Serial.print(F("Starting index is "));
+            // Serial.println(startingIndex);
+            // Serial.print(F("Presumed index is "));
+            // Serial.println(presumedIndex);
+            // Serial.print(F("Offset is "));
+            // Serial.println(millisOffset);
+
+            acquired = true;
+        }
+
+        millisOffset = packet.sync - (now % DWELL_TIME);
+        uint32_t adjustedTime = now + indexOffset + millisOffset;
+        int channelIndex = (adjustedTime / DWELL_TIME) % NUM_CHANNELS;
+
+        // Serial.print("Offset: ");
+        // Serial.println(millisOffset);
+        // unsigned long startTime = now - (channelIndex * DWELL_TIME + packet.sync);
+        // Serial.print("Start: ");
+        // Serial.println(startTime);
+        Serial.println(adjustedTime);
+        // Serial.print(" ");
+        // Serial.println((unsigned long)nowMicro);
+        
+        // Serial.println(packet.sync);
+
+        setRGB(packet.data[0], packet.data[1], packet.data[2]);
+    }   
 }
 
 /**
