@@ -19,6 +19,7 @@
 // Radio pins
 #define CE_PIN                  7 // Radio chip enable pin
 #define CSN_PIN                 8 // Radio chip select pin
+#define INT_PIN                 2 // Radio interrupt pin
 
 // Serial protocol
 #define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
@@ -29,7 +30,8 @@
 
 void initRadio(void);
 uint8_t detectClearestChannel(void);
-void networkRead(void);
+// void networkRead(void);
+void radioInterrupt(void);
 void serialRead(void);
 void processSerialCommand(char message[]);
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
@@ -59,7 +61,6 @@ void setup() {
  * Continuously read in data from the network and from serial.
  */
 void loop() {
-    networkRead();
     serialRead();
 }
 
@@ -76,6 +77,7 @@ void initRadio(void) {
     radio.setPayloadSize(sizeof(packet_t));
 
     radio.setChannel(49);
+    attachInterrupt(digitalPinToInterrupt(INT_PIN), radioInterrupt, LOW);
 
     radio.openReadingPipe(1, RF_ADDRESS(endpointID));
     radio.startListening();
@@ -84,21 +86,18 @@ void initRadio(void) {
 /**
  * Reads network data into a struct and sends it to be processed.
  */
-void networkRead(void) {
+void radioInterrupt(void) {
 
-    if (radio.available()) {
+    packet_t packet;
+    radio.read(&packet, sizeof(packet));
 
-        packet_t packet;
-        radio.read(&packet, sizeof(packet));
+    Serial.print(packet.data[0], HEX);
+    Serial.print(" ");
+    Serial.print(packet.data[1], HEX);
+    Serial.print(" ");
+    Serial.println(packet.data[2], HEX);
 
-        Serial.print(packet.data[0], HEX);
-        Serial.print(" ");
-        Serial.print(packet.data[1], HEX);
-        Serial.print(" ");
-        Serial.println(packet.data[2], HEX);
-
-        setRGB(packet.data[0], packet.data[1], packet.data[2]);
-    }
+    setRGB(packet.data[0], packet.data[1], packet.data[2]);
 }
 
 /**

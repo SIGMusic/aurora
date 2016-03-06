@@ -6,9 +6,6 @@
 #pragma once
 #include <semaphore.h>
 
-// Cap on the number of light updates per second
-#define MAX_FPS         25
-
 // Number of possible endpoint IDs
 #define NUM_IDS         256
 

@@ -27,7 +27,7 @@ public:
 
 private:
 
-    static void transmitFrame();
+    static void transmitFrame(int signal);
     static unsigned long millis();
 
     static RF24 radio;
