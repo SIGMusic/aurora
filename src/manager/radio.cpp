@@ -20,7 +20,7 @@ using std::endl;
 #define CSN_PIN                 RPI_V2_GPIO_P1_24 // Radio chip select pin
 
 // Cap on the number of light updates per second
-#define MAX_FPS         10
+#define MAX_FPS                 30
 
 
 RF24 Radio::radio(CE_PIN, CSN_PIN);
@@ -38,7 +38,7 @@ Radio::Radio() {
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    radio.setChannel(49);
+    // radio.setChannel(49);
 
     radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID));
 
@@ -99,12 +99,10 @@ void Radio::transmitFrame(int signal) {
         int channelIndex = (now / DWELL_TIME) % NUM_CHANNELS;
 
         if (channelIndex != lastChannelIndex) {
-            // radio.setChannel(channelIndex);
+            radio.setChannel(channelIndex);
             lastChannelIndex = channelIndex;
             cout << "Channel " << channelIndex << endl;
         }
-
-        // cout << (now) << endl;
         
         packet_t msg = {
             {(uint8_t)channelIndex, 0, 0},
@@ -124,11 +122,4 @@ uint32_t Radio::millis() {
     struct timespec tv;
     clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
     return (tv.tv_sec * 1000) + (tv.tv_nsec / 1000000);
-}
-
-uint64_t Radio::micros() {
-
-    struct timespec tv;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
-    return (tv.tv_sec * 1000000) + (tv.tv_nsec / 1000);
 }
