@@ -27,7 +27,7 @@ public:
 
 private:
 
-    static void transmitFrame();
+    static void transmitFrame(int signal);
     static uint32_t millis();
     static uint64_t micros();
 

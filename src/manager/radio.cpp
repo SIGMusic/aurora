@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <arpa/inet.h>
+#include <signal.h>
+#include <unistd.h>
 #include "radio.h"
 #include "../network.h"
 
@@ -49,24 +51,45 @@ void Radio::run(struct shared* s) {
     
     Radio::s = s;
 
-    clock_t last_update = clock();
+    timer_t timer;
+    struct sigaction sa;
+    struct itimerspec its;
+
+    // Create the timer
+    if (timer_create(CLOCK_MONOTONIC, NULL, &timer)) {
+        perror("timer_create");
+        exit(1);
+    }
+
+    // Set up the SIGALRM
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = Radio::transmitFrame;
+    sigaction(SIGALRM, &sa, NULL);
+
+    // Calculate the timer interval
+    double period = 1.0/MAX_FPS;
+    its.it_interval.tv_sec = (time_t) period;
+    its.it_interval.tv_nsec = (long) (period * 1000000000) % 1000000000;
+    its.it_value.tv_sec = its.it_interval.tv_sec;
+    its.it_value.tv_nsec = its.it_interval.tv_nsec;
+
+    // Start the timer
+    if (timer_settime(timer, 0, &its, NULL)) {
+        perror("timer_settime");
+        exit(1);
+    }
+
     while (1) {
-
-        // Only transmit once per frame
-        clock_t now = clock();
-        if ((((float)now)/CLOCKS_PER_SEC -
-            ((float)last_update)/CLOCKS_PER_SEC) > 1.0/MAX_FPS) {
-
-            transmitFrame();
-            last_update = now;
-        }
+        sleep(1000);
     }
 }
 
-void Radio::transmitFrame() {
+void Radio::transmitFrame(int signal) {
 
     static int lastChannelIndex = 0;
 
+    // Locking the semaphore in a signal handler should be okay as long as
+    // the webserver only locks it for short bursts.
     sem_wait(&s->colors_sem);
 
     for (int i = 1; i <= 1; i++) {
@@ -75,8 +98,7 @@ void Radio::transmitFrame() {
         uint32_t now = millis();
         int channelIndex = (now / DWELL_TIME) % NUM_CHANNELS;
 
-        // if (channelIndex != lastChannelIndex) {
-        if ((lastChannelIndex + 10) % NUM_CHANNELS >= channelIndex) {
+        if (channelIndex != lastChannelIndex) {
             // radio.setChannel(channelIndex);
             lastChannelIndex = channelIndex;
             cout << "Channel " << channelIndex << endl;

@@ -2,7 +2,7 @@
 CXX=g++
 CXXFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11 -Wall -I../../lib
 LD=g++
-LDLIBS=-lpthread -lrf24-bcm -lboost_system
+LDLIBS=-lpthread -lrf24-bcm -lboost_system -lrt
 EXE=manager
 OBJS=main.o server.o radio.o
 
