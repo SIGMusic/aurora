@@ -21,19 +21,15 @@
 #define CSN_PIN                 8 // Radio chip select pin
 #define INT_PIN                 2 // Radio interrupt pin
 
-// Serial protocol
-#define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
-
 // Firmware information
 #define ENDPOINT_ID_LOCATION    0x000 // The address in EEPROM to store the ID
 
 
 void initRadio(void);
 uint8_t detectClearestChannel(void);
-// void networkRead(void);
 void radioInterrupt(void);
 void serialRead(void);
-void processSerialCommand(char message[]);
+void processSerialCommand(String message);
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
 void setEndpointID(uint8_t id);
 void printWelcomeMessage(void);
@@ -51,6 +47,7 @@ void setup() {
 
     // Initialize serial console
     Serial.begin(115200);
+    Serial.setTimeout(-1);
     printWelcomeMessage();
 
     // Start the radio
@@ -106,20 +103,10 @@ void radioInterrupt(void) {
  */
 void serialRead(void) {
 
-    static char buffer[MAX_SERIAL_LINE_LEN + 1];
-    static int index = 0;
-
-    if (Serial.available()) {
-
-        buffer[index] = Serial.read();
-
-        if (buffer[index] == '\r' ||  index == MAX_SERIAL_LINE_LEN) {
-            buffer[index] = '\0'; // Terminate the message
-            index = 0; // Reset to the beginning of the buffer
-            processSerialCommand(buffer);
-        } else {
-            index++;
-        }
+    String message = Serial.readStringUntil('\r');
+    if (!message.equals("")) {
+        processSerialCommand(message);
+        Serial.read(); // Clear out the line terminator
     }
 }
 
@@ -127,22 +114,23 @@ void serialRead(void) {
  * Takes action on a command received over serial.
  * @param message The message received
  */
-void processSerialCommand(char message[]) {
+void processSerialCommand(String message) {
 
     uint8_t id, r, g, b;
-    if (!strcmp(message, "help")) {
+    if (message.equals("help")) {
         printHelpMessage();
-    } else if (!strcmp(message, "getid")) {
+    } else if (message.equals("getid")) {
         Serial.println(endpointID);
         Serial.println(F("OK"));
-    } else if (sscanf(message, "setid %hhu", &id) == 1) {
+    } else if (sscanf(message.c_str(), "setid %hhu", &id) == 1) {
         setEndpointID(id);
         Serial.println(F("OK"));
-    } else if (sscanf(message, "setrgb %hhu %hhu %hhu", &r, &g, &b) == 3) {
+    } else if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu", &r, &g, &b) == 3) {
         setRGB(r, g, b);
         Serial.println(F("OK"));
     } else {
-        Serial.println(F("Error: unrecognized command or invalid arguments"));
+        Serial.print(F("Error: unrecognized command or invalid arguments: "));
+        Serial.println(message);
     }
 }
 
@@ -179,6 +167,7 @@ void setEndpointID(uint8_t id) {
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
+    Serial.println();
     Serial.println(F("-----------------------------------------"));
     Serial.println(F("ACM@UIUC SIGMusic Lights Serial Interface"));
     Serial.print(F("This light is endpoint "));
