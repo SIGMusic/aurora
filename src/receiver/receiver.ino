@@ -1,5 +1,5 @@
 /**
- * SIGMusic Lights 2015
+ * SIGMusic Lights 2016
  * Arduino receiver firmware
  */
 
@@ -28,17 +28,20 @@
 void initRadio(void);
 uint8_t detectClearestChannel(void);
 void radioInterrupt(void);
+
 void serialRead(void);
 void processSerialCommand(String message);
+
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
+
 void setEndpointID(uint8_t id);
+uint8_t getEndpointID(void);
+
 void printWelcomeMessage(void);
 void printHelpMessage(void);
 
 
 RF24 radio(CE_PIN, CSN_PIN);
-
-uint8_t endpointID = EEPROM.read(ENDPOINT_ID_LOCATION);
 
 /**
  * Initialize radio and serial.
@@ -58,6 +61,7 @@ void setup() {
  * Continuously read in data from the network and from serial.
  */
 void loop() {
+    
     serialRead();
 }
 
@@ -65,6 +69,7 @@ void loop() {
  * Initializes the radio.
  */
 void initRadio(void) {
+
     radio.begin();
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
     radio.setPALevel(RF24_PA_LOW); // Higher power doesn't work on cheap eBay radios
@@ -73,10 +78,10 @@ void initRadio(void) {
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    radio.setChannel(49);
+    radio.setChannel(RF_CHANNEL);
     attachInterrupt(digitalPinToInterrupt(INT_PIN), radioInterrupt, LOW);
 
-    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+    radio.openReadingPipe(1, RF_ADDRESS(getEndpointID()));
     radio.startListening();
 }
 
@@ -104,9 +109,11 @@ void radioInterrupt(void) {
 void serialRead(void) {
 
     String message = Serial.readStringUntil('\r');
+
     if (!message.equals("")) {
+
         processSerialCommand(message);
-        Serial.read(); // Clear out the line terminator
+        Serial.read(); // Clear out the carriage return
     }
 }
 
@@ -117,18 +124,28 @@ void serialRead(void) {
 void processSerialCommand(String message) {
 
     uint8_t id, r, g, b;
+
     if (message.equals("help")) {
+
         printHelpMessage();
+
     } else if (message.equals("getid")) {
-        Serial.println(endpointID);
+
+        Serial.println(getEndpointID());
         Serial.println(F("OK"));
+
     } else if (sscanf(message.c_str(), "setid %hhu", &id) == 1) {
+
         setEndpointID(id);
         Serial.println(F("OK"));
+
     } else if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu", &r, &g, &b) == 3) {
+
         setRGB(r, g, b);
         Serial.println(F("OK"));
+
     } else {
+
         Serial.print(F("Error: unrecognized command or invalid arguments: "));
         Serial.println(message);
     }
@@ -159,19 +176,29 @@ void setEndpointID(uint8_t id) {
     }
 
     EEPROM.write(ENDPOINT_ID_LOCATION, id);
-    endpointID = id;
-    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+    radio.openReadingPipe(1, RF_ADDRESS(id));
+}
+
+/**
+ * Reads the value of the endpoint ID in EEPROM.
+ * 
+ * @return the endpoint ID
+ */
+uint8_t getEndpointID(void) {
+
+    return EEPROM.read(ENDPOINT_ID_LOCATION);
 }
 
 /**
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
+
     Serial.println();
     Serial.println(F("-----------------------------------------"));
     Serial.println(F("ACM@UIUC SIGMusic Lights Serial Interface"));
     Serial.print(F("This light is endpoint "));
-    Serial.println(endpointID);
+    Serial.println(getEndpointID());
     Serial.println(F("End all commands with a carriage return."));
     Serial.println(F("Type 'help' for a list of commands."));
     Serial.println(F("-----------------------------------------"));
@@ -181,6 +208,7 @@ void printWelcomeMessage(void) {
  * Prints the help message for the serial console.
  */
 void printHelpMessage(void) {
+
     Serial.println(F("Available commands:"));
     Serial.println(F("  help - displays this help message"));
     Serial.println(F("  setrgb [red] [green] [blue] - sets the color"));

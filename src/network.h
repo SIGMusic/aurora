@@ -1,11 +1,14 @@
 /**
- * SIGMusic Lights 2015
- * Header file for network configuration
+ * SIGMusic Lights 2016
+ * Network configuration settings
  */
 
 #pragma once
 
 #include <stdint.h>
+
+// The hardcoded RF channel (for now)
+#define RF_CHANNEL              49
 
 // Generates a 40-bit nRF address
 #define RF_ADDRESS(endpoint)    (0x5349474D00LL | ((endpoint) & 0xFF))

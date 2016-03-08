@@ -1,6 +1,6 @@
 /**
- * SIGMusic Lights 2015
- * Common definitions
+ * SIGMusic Lights 2016
+ * Raspberry Pi common definitions
  */
 
 #pragma once

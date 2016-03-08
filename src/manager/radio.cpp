@@ -1,5 +1,5 @@
 /**
- * SIGMusic Lights 2015
+ * SIGMusic Lights 2016
  * Radio class
  */
 
@@ -38,7 +38,7 @@ Radio::Radio() {
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    radio.setChannel(49);
+    radio.setChannel(RF_CHANNEL);
 
     radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID));
 
