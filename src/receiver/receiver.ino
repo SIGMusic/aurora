@@ -48,13 +48,14 @@ RF24 radio(CE_PIN, CSN_PIN);
  */
 void setup() {
 
-    // Initialize serial console
     Serial.begin(115200);
     Serial.setTimeout(-1);
-    printWelcomeMessage();
 
-    // Start the radio
     initRadio();
+
+    setRGB(0, 0, 0);
+
+    printWelcomeMessage();
 }
 
 /**
