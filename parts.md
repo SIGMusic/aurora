@@ -1,6 +1,8 @@
 # BOM
 
 ## Logic Board
+* 1 x [nRF24L01+ PA+LNA SMA radio module](http://www.ebay.com/itm/NRF24L01-PA-LNA-SMA-Antenna-Wireless-Transceiver-communication-module-2-4G-1100m-/310651702557?hash=item485448cd1d)
+* 1 x [10W RGB LED flood light](http://www.amazon.com/LENBO-lighting-voltage-85-265V-floodlight/dp/B00KA2GKLQ/)
 * 1 x [1x6 male headers](http://www.digikey.com/product-detail/en/M20-8770642/952-2552-ND/)
 * 1 x [2x4 female headers](http://www.digikey.com/product-detail/en/NPPC042KFMS-RC/S5713-ND/776172)
 * 1 x [2-position screw terminal](http://www.digikey.com/product-detail/en/691508110302/732-5963-1-ND/5047612)
@@ -17,8 +19,7 @@
 * 1 x [3.3V linear voltage regulator](http://www.digikey.com/product-detail/en/MIC5205-3.3YM5-TR/576-1259-1-ND/771886)
 * 1 x [Diode](http://www.digikey.com/product-detail/en/CD1206-S01575/CD1206-S01575CT-ND/3741949)
 * 1 x [8MHz resonator](http://www.digikey.com/product-detail/en/CSTCE8M00G55-R0/490-1195-1-ND/584632)
-* 1" x 1.5" [Adhesive backing](http://www.digikey.com/product-detail/en/12X12-6-9495MP/3M9732-ND/2649277)
-* Optional: 3 x [Nylon screws](http://www.digikey.com/product-detail/en/29341/36-29341-ND/1532216)
+* Optional: 4 x [Nylon screws](http://www.digikey.com/product-detail/en/29341/36-29341-ND/1532216)
 
 ## Base Station
 * 1 x [Raspberry Pi 2 Model B](http://www.amazon.com/Raspberry-Pi-Model-Project-Board/dp/B00T2U7R7I)
