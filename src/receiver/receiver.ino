@@ -1,5 +1,5 @@
 /**
- * SIGMusic Lights 2015
+ * SIGMusic Lights 2016
  * Arduino receiver firmware
  */
 
@@ -19,40 +19,42 @@
 // Radio pins
 #define CE_PIN                  7 // Radio chip enable pin
 #define CSN_PIN                 8 // Radio chip select pin
-
-// Serial protocol
-#define MAX_SERIAL_LINE_LEN     20 // Null terminator is already accounted for
+#define INT_PIN                 2 // Radio interrupt pin
 
 // Firmware information
-#define VERSION                 0 // The firmware version number
 #define ENDPOINT_ID_LOCATION    0x000 // The address in EEPROM to store the ID
 
 
 void initRadio(void);
-void networkRead(void);
-void processNetworkPacket(packet_t packet);
+uint8_t detectClearestChannel(void);
+void radioInterrupt(void);
+
 void serialRead(void);
-void processSerialCommand(char message[]);
+void processSerialCommand(String message);
+
 void setRGB(uint8_t red, uint8_t green, uint8_t blue);
+
 void setEndpointID(uint8_t id);
-long getTemperature(void);
+uint8_t getEndpointID(void);
+
 void printWelcomeMessage(void);
 void printHelpMessage(void);
 
 
 RF24 radio(CE_PIN, CSN_PIN);
 
-uint8_t endpointID = EEPROM.read(ENDPOINT_ID_LOCATION);
-
 /**
  * Initialize radio and serial.
  */
 void setup() {
-    // Start the radio
+
+    Serial.begin(115200);
+    Serial.setTimeout(-1);
+
     initRadio();
 
-    // Initialize serial console
-    Serial.begin(115200);
+    setRGB(0, 0, 0);
+
     printWelcomeMessage();
 }
 
@@ -60,7 +62,7 @@ void setup() {
  * Continuously read in data from the network and from serial.
  */
 void loop() {
-    networkRead();
+    
     serialRead();
 }
 
@@ -68,109 +70,37 @@ void loop() {
  * Initializes the radio.
  */
 void initRadio(void) {
+
     radio.begin();
     radio.setDataRate(RF24_250KBPS); // 250kbps should be plenty
-    radio.setChannel(CHANNEL);
     radio.setPALevel(RF24_PA_LOW); // Higher power doesn't work on cheap eBay radios
     radio.setRetries(0, 0);
     radio.setAutoAck(false);
     radio.setCRCLength(RF24_CRC_16);
     radio.setPayloadSize(sizeof(packet_t));
 
-    radio.openWritingPipe(RF_ADDRESS(BASE_STATION_ID));
-    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+    radio.setChannel(RF_CHANNEL);
+    attachInterrupt(digitalPinToInterrupt(INT_PIN), radioInterrupt, LOW);
+
+    radio.openReadingPipe(1, RF_ADDRESS(getEndpointID()));
     radio.startListening();
 }
 
 /**
  * Reads network data into a struct and sends it to be processed.
  */
-void networkRead(void) {
-    if (radio.available()) {
-        Serial.println("Received packet");
-        packet_t packet;
-        radio.read(&packet, sizeof(packet_t));
-        processNetworkPacket(packet);
-    }
-}
+void radioInterrupt(void) {
 
-/**
- * Takes action on a packet received over the network.
- * @param packet The packet received
- */
-void processNetworkPacket(packet_t packet) {
+    packet_t packet;
+    radio.read(&packet, sizeof(packet));
 
-    switch (packet.command) {
+    Serial.print(packet.data[0], HEX);
+    Serial.print(" ");
+    Serial.print(packet.data[1], HEX);
+    Serial.print(" ");
+    Serial.println(packet.data[2], HEX);
 
-        case CMD_SET_RGB: {
-
-            setRGB(packet.data[0], packet.data[1], packet.data[2]);
-            break;
-        }
-
-        case CMD_PING: {
-
-            // Echo the received message
-            packet_t response = {
-                CMD_PING_RESPONSE,
-                {packet.data[0], packet.data[1], packet.data[2]}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        case CMD_GET_TEMP: {
-
-            long temp = getTemperature();
-            packet_t response = {
-                CMD_TEMP_RESPONSE,
-                {(temp & 0xFF0000) >> 16, (temp & 0xFF00) >> 8, (temp & 0xFF)}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        case CMD_GET_UPTIME: {
-
-            unsigned long uptime = millis();
-            packet_t response = {
-                CMD_UPTIME_RESPONSE,
-                {(uptime & 0xFF0000) >> 16, (uptime & 0xFF00) >> 8, (uptime & 0xFF)}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        case CMD_GET_VERSION: {
-
-            packet_t response = {
-                CMD_VERSION_RESPONSE,
-                {VERSION, 0, 0}
-            };
-
-            radio.stopListening();
-            radio.write(&response, sizeof(response));
-            radio.startListening();
-
-            break;
-        }
-
-        default:
-            // Ignore the unknown packet
-            break;
-    }
+    setRGB(packet.data[0], packet.data[1], packet.data[2]);
 }
 
 /**
@@ -179,20 +109,12 @@ void processNetworkPacket(packet_t packet) {
  */
 void serialRead(void) {
 
-    static char buffer[MAX_SERIAL_LINE_LEN + 1];
-    static int index = 0;
+    String message = Serial.readStringUntil('\r');
 
-    if (Serial.available()) {
+    if (!message.equals("")) {
 
-        buffer[index] = Serial.read();
-
-        if (buffer[index] == '\r' ||  index == MAX_SERIAL_LINE_LEN) {
-            buffer[index] = '\0'; // Terminate the message
-            index = 0; // Reset to the beginning of the buffer
-            processSerialCommand(buffer);
-        } else {
-            index++;
-        }
+        processSerialCommand(message);
+        Serial.read(); // Clear out the carriage return
     }
 }
 
@@ -200,22 +122,33 @@ void serialRead(void) {
  * Takes action on a command received over serial.
  * @param message The message received
  */
-void processSerialCommand(char message[]) {
+void processSerialCommand(String message) {
 
     uint8_t id, r, g, b;
-    if (!strcmp(message, "help")) {
+
+    if (message.equals("help")) {
+
         printHelpMessage();
-    } else if (!strcmp(message, "getid")) {
-        Serial.println(endpointID);
+
+    } else if (message.equals("getid")) {
+
+        Serial.println(getEndpointID());
         Serial.println(F("OK"));
-    } else if (sscanf(message, "setid %hhu", &id) == 1) {
+
+    } else if (sscanf(message.c_str(), "setid %hhu", &id) == 1) {
+
         setEndpointID(id);
         Serial.println(F("OK"));
-    } else if (sscanf(message, "setrgb %hhu %hhu %hhu", &r, &g, &b) == 3) {
+
+    } else if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu", &r, &g, &b) == 3) {
+
         setRGB(r, g, b);
         Serial.println(F("OK"));
+
     } else {
-        Serial.println(F("Error: unrecognized command or invalid arguments"));
+
+        Serial.print(F("Error: unrecognized command or invalid arguments: "));
+        Serial.println(message);
     }
 }
 
@@ -244,52 +177,29 @@ void setEndpointID(uint8_t id) {
     }
 
     EEPROM.write(ENDPOINT_ID_LOCATION, id);
-    endpointID = id;
-    radio.openReadingPipe(1, RF_ADDRESS(endpointID));
+    radio.openReadingPipe(1, RF_ADDRESS(id));
 }
 
 /**
- * Gets the (very approximate) core temperature in millidegrees Celsius.
- * @return The core temperature
+ * Reads the value of the endpoint ID in EEPROM.
+ * 
+ * @return the endpoint ID
  */
-long getTemperature(void) {
+uint8_t getEndpointID(void) {
 
-    unsigned int wADC;
-
-    // The internal temperature has to be used
-    // with the internal reference of 1.1V.
-    // Channel 8 cannot be selected with
-    // the analogRead function yet.
-
-    // Set the internal reference and mux
-    ADMUX = (_BV(REFS1) | _BV(REFS0) | _BV(MUX3));
-    ADCSRA |= _BV(ADEN);  // enable the ADC
-
-    delay(20);            // wait for voltages to become stable.
-
-    ADCSRA |= _BV(ADSC);  // Start the ADC
-
-    // Detect end-of-conversion
-    while (bit_is_set(ADCSRA,ADSC));
-
-    // Reading register "ADCW" takes care of reading ADCL and ADCH.
-    wADC = ADCW;
-
-    // Typical calibration per the datasheet.
-    // Should store the measured calibration offset in EEPROM.
-    return (long)((wADC - 289)*1000/1.06);
+    return EEPROM.read(ENDPOINT_ID_LOCATION);
 }
 
 /**
  * Prints the welcome message for the serial console.
  */
 void printWelcomeMessage(void) {
+
+    Serial.println();
     Serial.println(F("-----------------------------------------"));
     Serial.println(F("ACM@UIUC SIGMusic Lights Serial Interface"));
-    Serial.print(F("Version "));
-    Serial.println(VERSION);
     Serial.print(F("This light is endpoint "));
-    Serial.println(endpointID);
+    Serial.println(getEndpointID());
     Serial.println(F("End all commands with a carriage return."));
     Serial.println(F("Type 'help' for a list of commands."));
     Serial.println(F("-----------------------------------------"));
@@ -299,6 +209,7 @@ void printWelcomeMessage(void) {
  * Prints the help message for the serial console.
  */
 void printHelpMessage(void) {
+
     Serial.println(F("Available commands:"));
     Serial.println(F("  help - displays this help message"));
     Serial.println(F("  setrgb [red] [green] [blue] - sets the color"));

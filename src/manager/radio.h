@@ -1,5 +1,5 @@
 /**
- * SIGMusic Lights 2015
+ * SIGMusic Lights 2016
  * Radio class
  */
 
@@ -9,7 +9,6 @@
 #include <RF24/RF24.h>
 #include <semaphore.h>
 #include "common.h"
-#include "../network.h"
 
 class Radio {
 public:
@@ -28,11 +27,8 @@ public:
 
 private:
 
-    static void send(uint8_t endpoint, packet_t & msg);
-    static bool receive(packet_t & msg, unsigned int timeout);
-    static void pingAllLights();
-    static void transmitFrame();
-    static void setLightConnected(uint8_t id, bool isConnected);
+    static void transmitFrame(int signal);
+    static unsigned long millis();
 
     static RF24 radio;
     static struct shared* s;

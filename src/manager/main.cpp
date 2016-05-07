@@ -1,5 +1,5 @@
 /**
- * SIGMusic Lights 2015
+ * SIGMusic Lights 2016
  * Raspberry Pi manager
  */
 
@@ -13,15 +13,10 @@
 #include "common.h"
 
 
-void printWelcomeMessage(void);
-
-
 int main(int argc, char** argv) {
 
     Server server;
     Radio radio;
-    
-    printWelcomeMessage();
 
     // Map a shared array to store the colors
     struct shared* s = (struct shared*)mmap(NULL, sizeof(struct shared),
@@ -33,12 +28,6 @@ int main(int argc, char** argv) {
 
     // Set up the colors semaphore
     if (sem_init(&s->colors_sem, 1, 1)) {
-        perror("sem_init");
-        exit(EX_OSERR);
-    }
-
-    // Set up the connected semaphore
-    if (sem_init(&s->connected_sem, 1, 1)) {
         perror("sem_init");
         exit(EX_OSERR);
     }
@@ -67,15 +56,4 @@ int main(int argc, char** argv) {
     while (wait(NULL) != -1);
 
     exit(EXIT_FAILURE); // Should not get here
-}
-
-/**
- * Prints the welcome message to the terminal.
- */
-void printWelcomeMessage(void) {
-    printf("-------------------------------------\n");
-    printf("ACM@UIUC SIGMusic Lights Base Station\n");
-    printf("Version %x\n", SW_VERSION);
-    printf("This base station is endpoint %d\n", BASE_STATION_ID);
-    printf("-------------------------------------\n");
 }

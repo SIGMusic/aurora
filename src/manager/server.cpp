@@ -1,5 +1,5 @@
 /**
- * SIGMusic Lights 2015
+ * SIGMusic Lights 2016
  * Websocket server class
  */
 
@@ -43,7 +43,6 @@ void Server::run(struct shared* s) {
     ws->listen(WS_PORT);
     ws->start_accept();
 
-    cout << "Running websocket event loop" << endl;
     ws->run();
 }
 
@@ -69,49 +68,39 @@ bool Server::shouldConnect(connection_hdl client) {
 
 void Server::processMessage(connection_hdl client, const std::string message) {
 
-    if (!message.compare(0, 7, "setrgb ")) {
-        
-        uint8_t id, r, g, b;
-        if (sscanf(message.c_str(), "setrgb %hhu %hhu %hhu %hhu", &id, &r, &g, &b) == 4) {
-
-            sem_wait(&s->colors_sem);
-            s->colors[id].r = r;
-            s->colors[id].g = g;
-            s->colors[id].b = b;
-            sem_post(&s->colors_sem);
-
-            ws->send(client, "OK", opcode::text);
-
-        } else {
-            // One or more arguments were invalid
-            ws->send(client, "Error: invalid arguments", opcode::text);
-        }
-
-    } else if (!message.compare("list")) {
-        
-        string list = "";
-
-        sem_wait(&s->connected_sem);
-        
-        // Get the list of connected lights
-        for (int i = 0; i < NUM_IDS; i++) {
-
-            if (isLightConnected(s->connected, i)) {
-                char num[4];
-                sprintf(num, "%d,", i);
-                list.append(num);
-            }
-        }
-
-        sem_post(&s->connected_sem);
-
-        ws->send(client, list, opcode::text);
-
-    } else if (!message.compare(0, 4, "ping")) {
+    if (!message.compare(0, 4, "ping")) {
         // Echo the message - useful for measuring roundtrip latency
         ws->send(client, message, opcode::text);
 
     } else {
-        ws->send(client, "Error: unrecognized command", opcode::text);
+        
+        int id = 1;
+        int r, g, b;
+        std::istringstream stream(message);
+        std::string token;
+
+        sem_wait(&s->colors_sem);
+
+        while (std::getline(stream, token, ',')) {
+
+            if (sscanf(token.c_str(), "%02x%02x%02x", &r, &g, &b) == 3) {
+
+                s->colors[id].r = (uint8_t)r;
+                s->colors[id].g = (uint8_t)g;
+                s->colors[id].b = (uint8_t)b;
+
+            } else {
+
+                // One or more arguments were invalid
+                char errorBuffer[50];
+                sprintf(errorBuffer, "Error: invalid arguments for ID %d", id);
+                ws->send(client, errorBuffer, opcode::text);
+                break;
+            }
+            
+            id++;
+        }
+
+        sem_post(&s->colors_sem);
     }
 }
