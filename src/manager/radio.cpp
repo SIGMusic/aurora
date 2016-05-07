@@ -47,6 +47,10 @@ Radio::Radio() {
 #endif
 }
 
+void ignoreSignal(int signal) {
+    return;
+}
+
 void Radio::run(struct shared* s) {
     
     Radio::s = s;
@@ -63,7 +67,7 @@ void Radio::run(struct shared* s) {
 
     // Set up the SIGALRM
     memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = Radio::transmitFrame;
+    sa.sa_handler = ignoreSignal;
     sigaction(SIGALRM, &sa, NULL);
 
     // Calculate the timer interval
@@ -79,15 +83,20 @@ void Radio::run(struct shared* s) {
         exit(1);
     }
 
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGALRM);
+
     while (1) {
-        sleep(1000);
+        int sig;
+        sigwait(&set, &sig);
+        puts("Alarm");
+        transmitFrame();
     }
 }
 
-void Radio::transmitFrame(int signal) {
+void Radio::transmitFrame() {
 
-    // Locking the semaphore in a signal handler should be okay as long as
-    // the webserver only locks it for short bursts.
     sem_wait(&s->colors_sem);
 
     for (int i = 1; i <= 8; i++) {
@@ -101,11 +110,4 @@ void Radio::transmitFrame(int signal) {
     }
 
     sem_post(&s->colors_sem);
-}
-
-unsigned long Radio::millis() {
-
-    struct timespec tv;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
-    return (tv.tv_sec * 1000) + (tv.tv_nsec / 1000000);
 }
