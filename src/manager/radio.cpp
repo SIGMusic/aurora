@@ -65,7 +65,7 @@ void Radio::run(struct shared* s) {
         exit(1);
     }
 
-    // Set up the SIGALRM
+    // Stop SIGALRM from killing the thread
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = ignoreSignal;
     sigaction(SIGALRM, &sa, NULL);
@@ -87,10 +87,10 @@ void Radio::run(struct shared* s) {
     sigemptyset(&set);
     sigaddset(&set, SIGALRM);
 
+    // Wait for the timer to go off
     while (1) {
         int sig;
         sigwait(&set, &sig);
-        puts("Alarm");
         transmitFrame();
     }
 }
