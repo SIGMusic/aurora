@@ -14,9 +14,10 @@ public:
     int init();
     int accept(struct sockaddr *addr, socklen_t *addrlen);
     int connect(int sockfd);
+    int disconnect(int sockfd);
     ssize_t recv(int sockfd, char* buf, size_t len);
     ssize_t send(int sockfd, const char* buf, size_t len);
-    int close(int sockfd);
+    // int close(int sockfd);
 
 private:
     int serverfd;
@@ -24,7 +25,7 @@ private:
     ssize_t recv_frame(int sockfd, char* buf, size_t len);
     ssize_t recv_complete(int sockfd, char* buf, size_t len);
     ssize_t send_complete(int sockfd, const char* buf, size_t len);
-    int handle_control_frame(int sockfd, const char* buf, size_t len);
-    int close(int sockfd, int status);
+    int handle_control_frame(int sockfd, char* buf, size_t len);
+    int disconnect(int sockfd, int status);
     char* base64(const unsigned char *input, int len);
 };

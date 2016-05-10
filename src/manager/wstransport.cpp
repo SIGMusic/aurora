@@ -26,20 +26,19 @@
 #define PORT             "7446" // the port users will be connecting to
 #define BACKLOG             10 // how many pending connections queue will hold
 
-enum STATUS_CODES {
-    ST_NORMAL = 1000,
-    ST_GOING_AWAY,
-    ST_PROTOCOL_ERROR,
-    ST_UNSUPPORTED_DATA,
-    ST_RSVD,
-    ST_RSVD_NO_STATUS,
-    ST_RSVD_ABNORMAL_CLOSE,
-    ST_INVALID_PAYLOAD,
-    ST_POLICY_VIOLATION,
-    ST_MESSAGE_TOO_BIG,
-    ST_EXTENSION_REQUIRED,
-    ST_INTERNAL_SERVER_ERROR,
-    ST_RSVD_TLS_HANDSHAKE = 1015,
+enum CLOSING_CODES {
+    CLOSE_NORMAL = 1000,
+    CLOSE_GOING_AWAY,
+    CLOSE_PROTOCOL_ERROR,
+    CLOSE_UNSUPPORTED,
+    CLOSE_NO_STATUS = 1005,
+    CLOSE_ABNORMAL,
+    CLOSE_INVALID_PAYLOAD,
+    CLOSE_POLICY_VIOLATION,
+    CLOSE_TOO_LARGE,
+    CLOSE_EXTENSION_REQUIRED,
+    CLOSE_INTERNAL_SERVER_ERROR,
+    CLOSE_RSVD_TLS_HANDSHAKE = 1015,
 };
 
 enum OPCODES {
@@ -93,7 +92,7 @@ int WSTransport::init() {
         }
 
         if (bind(serverfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(serverfd);
+            disconnect(serverfd);
             perror("bind");
             continue;
         }
@@ -130,6 +129,7 @@ int WSTransport::accept(struct sockaddr *addr, socklen_t *addrlen) {
 int WSTransport::connect(int sockfd) {
 
     int bad_request = 0;
+    int incorrect_version = 0;
 
     // Get the request string
     char* buf = NULL;
@@ -173,6 +173,12 @@ int WSTransport::connect(int sockfd) {
     if (strstr(buf, "\r\nSec-WebSocket-Version: 13\r\n") == NULL) {
         fprintf(stderr, "WSTransport::connect: missing Sec-WebSocket-Version: 13\n");
         bad_request = 1;
+
+        // Check if an incorrect version is specified so we can tell the client
+        // what version(s) we do support
+        if (strstr(buf, "\r\nSec-WebSocket-Version: ") != NULL) {
+            incorrect_version = 1;
+        }
     }
 
     // Verify the protocol matches
@@ -248,17 +254,64 @@ int WSTransport::connect(int sockfd) {
         // The request was invalid. Reject the handshake,
         // but do not close the connection.
 
+        // Send a version header if the version number was incorrect
+        char version_header[40];
+        version_header[0] = '\0';
+        if (incorrect_version) {
+            strcpy(version_header, "Sec-WebSocket-Version: 13\r\n");
+        }
+
         char response_buf[100];
         sprintf(response_buf,
             "HTTP/1.1 400 Bad Request\r\n"
-            "Connection: Closed\r\n"
+            "%s"
             "\r\n"
-            "<h1>400 Bad Request</h1>");
+            "<h1>400 Bad Request</h1>",
+            version_header);
 
         send_complete(sockfd, response_buf, strlen(response_buf));
 
         return -1;
     }
+}
+
+int WSTransport::disconnect(int sockfd) {
+    return disconnect(sockfd, CLOSE_NORMAL);
+}
+
+/**
+ * Sends a closing frame with the given status.
+ *
+ * @param[in]  sockfd  The socket to send to
+ * @param[in]  status  The status code to provide
+ *
+ * @return     0 on success, or -1 on failure
+ */
+int WSTransport::disconnect(int sockfd, int status) {
+
+    char frame[4];
+
+    frame[0] = 0b10000000 | OP_CLOSE;
+    frame[1] = 2;
+    *(uint16_t*)(&frame[2]) = htons(status);
+
+    if (send_complete(sockfd, frame, sizeof(frame)) == -1) {
+        return -1;
+    }
+
+    // Wait for response
+    int opcode = 0;
+    do {
+        char buf[1];
+        if (recv_complete(sockfd, buf, 1) == -1) {
+            return -1;
+        }
+
+        opcode = buf[0] & 0b00001111;
+        
+    } while (opcode != OP_CLOSE);
+
+    return 0;
 }
 
 ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
@@ -270,6 +323,11 @@ ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
 
         char framebuf[len];
         ssize_t framelen = recv_frame(sockfd, framebuf, len);
+        
+        if (framelen == -1) {
+            return -1;
+        }
+
         if (framelen < 2) {
             continue;
         }
@@ -282,29 +340,33 @@ ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
 
         if (rsv != 0) {
             fprintf(stderr, "WSTransport::recv_message: RSV bits were not 0\n");
-            close(sockfd, ST_PROTOCOL_ERROR);
+            disconnect(sockfd, CLOSE_PROTOCOL_ERROR);
             return -1;
         }
 
         if (opcode & 0b1000) {
             // A control frame was received
-            handle_control_frame(sockfd, framebuf, framelen);
+            if (handle_control_frame(sockfd, framebuf, framelen) == 1) {
+                // Socket closed in the middle of receiving.
+                // Discard the message.
+                return -1;
+            }
             continue;
         } else if (opcode == OP_CONTINUATION && num_frames_processed == 0) {
             fprintf(stderr, "WSTransport::recv_message: received continuation frame with no initial frame\n");
-            close(sockfd, ST_PROTOCOL_ERROR);
+            disconnect(sockfd, CLOSE_PROTOCOL_ERROR);
             return -1;
         } else if (opcode == OP_TEXT && num_frames_processed != 0) {
             fprintf(stderr, "WSTransport::recv_message: received duplicate initial frame\n");
-            close(sockfd, ST_PROTOCOL_ERROR);
+            disconnect(sockfd, CLOSE_PROTOCOL_ERROR);
             return -1;
         } else if (opcode != OP_TEXT && opcode != OP_CONTINUATION) {
             fprintf(stderr, "WSTransport::recv_message: unsupported data type\n");
-            close(sockfd, ST_UNSUPPORTED_DATA);
+            disconnect(sockfd, CLOSE_UNSUPPORTED);
             return -1;
         }
 
-        int mask_bit    = *p & 0b10000000;
+        int mask_bit       = *p & 0b10000000;
         size_t payload_len = *p & 0b01111111;
         p++;
 
@@ -322,7 +384,7 @@ ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
             p += sizeof(uint32_t);
         } else {
             fprintf(stderr, "WSTransport::recv_message: mask bit was not set\n");
-            close(sockfd, ST_PROTOCOL_ERROR);
+            disconnect(sockfd, CLOSE_PROTOCOL_ERROR);
             return -1;
         }
 
@@ -345,18 +407,42 @@ ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
 
 ssize_t WSTransport::send(int sockfd, const char* buf, size_t len) {
 
-    // TODO
-    return 0;
-}
+    ssize_t sent = 0;
 
-int WSTransport::close(int sockfd) {
-    return close(sockfd, ST_NORMAL);
-}
+    char header[7];
+    
+    header[0] = 0b10000000 | OP_TEXT;
 
-int WSTransport::close(int sockfd, int status) {
+    // Calculate the payload length field
+    size_t headerlen = 1;
+    if (len < 126) {
+        header[1] = len;
+        headerlen += 1;
+    } else if (len <= 0xFFFF) {
+        header[1] = 126;
+        *(uint16_t*)(&header[2]) = htons(len);
+        headerlen += 1 + sizeof(uint16_t);
+    } else {
+        header[1] = 127;
+        *(uint64_t*)(&header[2]) = htonll(len);
+        headerlen += 1 + sizeof(uint64_t);
+    }
 
-    // TODO: send closing message
-    return ::close(sockfd);
+    // Send the header
+    ssize_t rv = send_complete(sockfd, header, headerlen);
+    if (rv != headerlen) {
+        return -1;
+    }
+    sent += rv;
+
+    // Send the payload
+    rv = send_complete(sockfd, buf, len);
+    if (rv != len) {
+        return -1;
+    }
+    sent += rv;
+
+    return sent;
 }
 
 /**
@@ -427,7 +513,7 @@ ssize_t WSTransport::recv_frame(int sockfd, char* buf, size_t len) {
 
     char* p = buf;
     p++;
-    int mask_bit         = *p & 0b10000000;
+    int mask_bit       = *p & 0b10000000;
     size_t payload_len = *p & 0b01111111;
     p++;
 
@@ -543,11 +629,42 @@ ssize_t WSTransport::send_complete(int sockfd, const char* buf, size_t len) {
  * @param[in]  buf     The buffer containing the frame
  * @param[in]  len     The length of the frame
  *
- * @return     0 on success, or -1 on error
+ * @return     0 on success, 1 on socket close, or -1 on error
  */
-int WSTransport::handle_control_frame(int sockfd, const char* buf, size_t len) {
+int WSTransport::handle_control_frame(int sockfd, char* buf, size_t len) {
 
-    // TODO
+    // Check the opcode
+    int opcode = buf[0] & 0b00001111;
+
+    switch (opcode) {
+
+    case OP_CLOSE:
+        // Respond with matching close message
+        buf[1] = 0;
+        if (send_complete(sockfd, buf, 2) == -1) {
+            return -1;
+        }
+        close(sockfd);
+        return 1;
+
+    case OP_PING:
+        // Respond with matching pong message
+        buf[0] &= ~0b00001111;
+        buf[0] |= OP_PONG;
+        if (send_complete(sockfd, buf, len) == -1) {
+            return -1;
+        }
+        break;
+
+    case OP_PONG:
+        // Ignore unsolicited pong
+        break;
+
+    default:
+        // Not a recognized control frame
+        return -1;
+    }
+
     return 0;
 }
 

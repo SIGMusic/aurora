@@ -49,6 +49,15 @@ public:
     virtual int connect(int sockfd) = 0;
 
     /**
+     * Closes the connection normally by sending any necessary closing messages.
+     *
+     * @param[in]  sockfd    The client's socket
+     *
+     * @return     0 on success, or -1 on error
+     */
+    virtual int disconnect(int sockfd) = 0;
+
+    /**
      * Waits for and receives a message from the client.
      *
      * @param[in]  sockfd    The client's socket
@@ -71,12 +80,13 @@ public:
     virtual ssize_t send(int sockfd, const char* buf, size_t len) = 0;
 
     /**
-     * Closes a connection to a client.
-     * The client must have successfully connected.
+     * Closes the socket.
      *
      * @param[in]  sockfd    The client's socket
      *
      * @return     0 on success, or -1 on error
      */
-    virtual int close(int sockfd) = 0;
+    virtual int close(int sockfd) {
+        return ::close(sockfd);
+    }
 };
