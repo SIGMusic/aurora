@@ -1,10 +1,15 @@
-# The recommended compiler flags for the Raspberry Pi
 CXX=g++
-CXXFLAGS=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -std=c++11 -Wall -I../../lib
+CXXFLAGS=-std=c++11 -Wall -I/opt/local/include
+LDLIBS=-lpthread -lrt -lssl -lcrypto -lrf24-bcm
 LD=g++
-LDLIBS=-lpthread -lrf24-bcm -lboost_system -lrt
 EXE=manager
-OBJS=main.o server.o radio.o
+OBJS=main.o server.o radio.o wstransport.o
+
+# Check if Raspberry Pi
+ifneq (,$(findstring arm, $(shell uname -m)))
+	# Add the recommended compiler flags for the Raspberry Pi
+	CXXFLAGS+=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s
+endif
 
 all: $(EXE)
 
@@ -14,10 +19,13 @@ $(EXE): $(OBJS)
 main.o: main.cpp server.h radio.h common.h
 	${CXX} -c ${CXXFLAGS} $< -o $@
 
-server.o: server.cpp server.h common.h
+server.o: server.cpp server.h common.h transport.h wstransport.h
 	${CXX} -c ${CXXFLAGS} $< -o $@
 
 radio.o: radio.cpp radio.h ../network.h common.h
+	${CXX} -c ${CXXFLAGS} $< -o $@
+
+wstransport.o: wstransport.cpp wstransport.h transport.h
 	${CXX} -c ${CXXFLAGS} $< -o $@
 
 .PHONY: all clean debug

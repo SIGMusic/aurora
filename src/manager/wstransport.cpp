@@ -20,6 +20,14 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 
+// Add support for htonll and ntohll if necessary
+#ifndef htonll
+#define htonll(x) htobe64(x)
+#endif
+#ifndef ntohll
+#define ntohll(x) be64toh(x)
+#endif
+
 
 #define PROTOCOL_NAME    "nlcp" // the subprotocol that clients must support:
                                 // Networked Lights Control Protocol
@@ -42,10 +50,10 @@ enum CLOSING_CODES {
 };
 
 enum OPCODES {
-    OP_CONTINUATION = 0,
+    OP_CONTINUATION = 0x0,
     OP_TEXT,
     OP_BINARY,
-    OP_CLOSE = 8,
+    OP_CLOSE = 0x8,
     OP_PING,
     OP_PONG,
 };
@@ -78,7 +86,7 @@ int WSTransport::init() {
 
     // loop through all the results and bind to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((serverfd = socket(p->ai_family, p->ai_socktype,
+        if ((serverfd = ::socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
             perror("socket");
             continue;
@@ -91,8 +99,8 @@ int WSTransport::init() {
             return -1;
         }
 
-        if (bind(serverfd, p->ai_addr, p->ai_addrlen) == -1) {
-            disconnect(serverfd);
+        if (::bind(serverfd, p->ai_addr, p->ai_addrlen) == -1) {
+            ::close(serverfd);
             perror("bind");
             continue;
         }
@@ -107,12 +115,12 @@ int WSTransport::init() {
         return -1;
     }
 
-    if (listen(serverfd, BACKLOG) == -1) {
+    if (::listen(serverfd, BACKLOG) == -1) {
         perror("listen");
         return -1;
     }
 
-    return 0;
+    return serverfd;
 }
 
 int WSTransport::accept(struct sockaddr *addr, socklen_t *addrlen) {
@@ -293,7 +301,8 @@ int WSTransport::disconnect(int sockfd, int status) {
 
     frame[0] = 0b10000000 | OP_CLOSE;
     frame[1] = 2;
-    *(uint16_t*)(&frame[2]) = htons(status);
+    frame[2] = (htons(status) >> 8) & 0xFF;
+    frame[3] = (htons(status) >> 0) & 0xFF;
 
     if (send_complete(sockfd, frame, sizeof(frame)) == -1) {
         return -1;
@@ -316,7 +325,7 @@ int WSTransport::disconnect(int sockfd, int status) {
 
 ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
 
-    ssize_t received = 0;
+    size_t received = 0;
     int num_frames_processed = 0;
 
     while (received < len) {
@@ -390,7 +399,7 @@ ssize_t WSTransport::recv(int sockfd, char* buf, size_t len) {
 
         size_t bytes_left = len - received;
 
-        for (int i = 0; i < std::min(payload_len, bytes_left); i++) {
+        for (size_t i = 0; i < std::min(payload_len, bytes_left); i++) {
             buf[received + i] = p[i] ^ mask[i % 4];
         }
 
@@ -409,23 +418,40 @@ ssize_t WSTransport::send(int sockfd, const char* buf, size_t len) {
 
     ssize_t sent = 0;
 
-    char header[7];
+    char header[10];
     
     header[0] = 0b10000000 | OP_TEXT;
 
     // Calculate the payload length field
-    size_t headerlen = 1;
+    ssize_t headerlen = 1;
     if (len < 126) {
+
         header[1] = len;
         headerlen += 1;
+
     } else if (len <= 0xFFFF) {
+
         header[1] = 126;
-        *(uint16_t*)(&header[2]) = htons(len);
+        header[2] = (htons(len) >> 8) & 0xFF;
+        header[3] = (htons(len) >> 0) & 0xFF;
         headerlen += 1 + sizeof(uint16_t);
-    } else {
+
+    } else if (len <= 0x7FFFFFFFFFFFFFFF) {
+
         header[1] = 127;
-        *(uint64_t*)(&header[2]) = htonll(len);
+        header[2] = (htonll(len) >> 56) & 0xFF;
+        header[3] = (htonll(len) >> 48) & 0xFF;
+        header[4] = (htonll(len) >> 40) & 0xFF;
+        header[5] = (htonll(len) >> 32) & 0xFF;
+        header[6] = (htonll(len) >> 24) & 0xFF;
+        header[7] = (htonll(len) >> 16) & 0xFF;
+        header[8] = (htonll(len) >> 8)  & 0xFF;
+        header[9] = (htonll(len) >> 0)  & 0xFF;
         headerlen += 1 + sizeof(uint64_t);
+
+    } else {
+        // Too long
+        return -1;
     }
 
     // Send the header
@@ -437,7 +463,7 @@ ssize_t WSTransport::send(int sockfd, const char* buf, size_t len) {
 
     // Send the payload
     rv = send_complete(sockfd, buf, len);
-    if (rv != len) {
+    if (rv != (ssize_t)len) {
         return -1;
     }
     sent += rv;
@@ -579,7 +605,7 @@ ssize_t WSTransport::recv_frame(int sockfd, char* buf, size_t len) {
  */
 ssize_t WSTransport::recv_complete(int sockfd, char* buf, size_t len) {
 
-    ssize_t received = 0;
+    size_t received = 0;
     while (received < len) {
 
         ssize_t rv = ::recv(sockfd, buf + received, len - received, 0);
@@ -606,7 +632,7 @@ ssize_t WSTransport::recv_complete(int sockfd, char* buf, size_t len) {
  */
 ssize_t WSTransport::send_complete(int sockfd, const char* buf, size_t len) {
 
-    ssize_t sent = 0;
+    size_t sent = 0;
     while (sent < len) {
 
         ssize_t rv = ::send(sockfd, buf + sent, len - sent, 0);
@@ -644,7 +670,7 @@ int WSTransport::handle_control_frame(int sockfd, char* buf, size_t len) {
         if (send_complete(sockfd, buf, 2) == -1) {
             return -1;
         }
-        close(sockfd);
+        ::close(sockfd);
         return 1;
 
     case OP_PING:

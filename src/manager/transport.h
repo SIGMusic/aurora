@@ -25,7 +25,7 @@ public:
     /**
      * Initializes a transporter and begins listening for connections.
      *
-     * @return     0 on success, or -1 on error
+     * @return     the server's socket on success, or -1 on error
      */
     virtual int init() = 0;
 
@@ -80,13 +80,29 @@ public:
     virtual ssize_t send(int sockfd, const char* buf, size_t len) = 0;
 
     /**
-     * Closes the socket.
-     *
-     * @param[in]  sockfd    The client's socket
+     * Closes the server socket.
      *
      * @return     0 on success, or -1 on error
      */
-    virtual int close(int sockfd) {
-        return ::close(sockfd);
+    virtual int close() {
+        return ::close(serverfd);
     }
+
+    /**
+     * Checks if the socket is open
+     *
+     * @return     nonzero if open, 0 if closed
+     */
+    virtual int is_open(int sockfd) {
+        int err;
+        socklen_t len = sizeof(err);
+        if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &err, &len)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+protected:
+    int serverfd;
 };

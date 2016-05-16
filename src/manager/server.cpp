@@ -1,76 +1,72 @@
 /**
  * SIGMusic Lights 2016
- * Websocket server class
+ * Socket server class
  */
 
 #include <string>
 #include <iostream>
-#include <algorithm>
-#include <arpa/inet.h>
+#include <sstream>
 #include "server.h"
 #include "common.h"
+#include "wstransport.h"
 
-
-using websocketpp::connection_hdl;
-using namespace websocketpp::frame;
+using std::string;
 using std::cout;
 using std::endl;
-using std::string;
-using std::vector;
-
-
-#define WS_PROTOCOL_NAME        "nlcp" // Networked Lights Control Protocol
-#define WS_PORT                 7446
-
-
-ws_server * Server::ws;
-
-struct shared* Server::s;
 
 
 Server::Server() {
 
-    ws = new ws_server();
-    ws->set_message_handler(&onMessage);
-    ws->set_validate_handler(&shouldConnect);
 }
 
 void Server::run(struct shared* s) {
-    
-    Server::s = s;
 
-    ws->init_asio();
-    ws->listen(WS_PORT);
-    ws->start_accept();
+    this->s = s;
 
-    ws->run();
-}
+    Transport* ws = new WSTransport();
 
-void Server::onMessage(connection_hdl client, ws_server::message_ptr msg) {
-    processMessage(client, msg->get_payload());
-}
+    int serverfd_ws = ws->init();
 
-bool Server::shouldConnect(connection_hdl client) {
-
-    // Get the connection so we can get info about it
-    ws_server::connection_ptr connection = ws->get_con_from_hdl(client);
-
-    // Figure out if the client knows the protocol
-    vector<string> p = connection->get_requested_subprotocols();
-    if (std::find(p.begin(), p.end(), WS_PROTOCOL_NAME) != p.end()) {
-        // Tell the client we're going to use this protocol
-        connection->select_subprotocol(WS_PROTOCOL_NAME);
-        return true;
-    } else {
-        return false;
+    while (1) {
+        int clientfd = ws->accept(NULL, NULL);
+        if (!fork()) {
+            ws->close();
+            handleClient(ws, clientfd);
+            exit(EXIT_SUCCESS);
+        }
     }
 }
 
-void Server::processMessage(connection_hdl client, const std::string message) {
+void Server::handleClient(Transport* t, int clientfd) {
+
+    if (t->connect(clientfd)) {
+        fprintf(stderr, "handshake failure\n");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Connected\n");
+
+    char buf[2000];
+    while (t->is_open(clientfd)) {
+
+        int recvlen = t->recv(clientfd, buf, 2000);
+
+        if (recvlen != -1) {
+            std::string message = std::string(buf, recvlen);
+            processMessage(t, clientfd, message);
+        }
+    }
+
+    printf("Closed\n");
+}
+
+void Server::processMessage(Transport* t, int clientfd, const std::string message) {
+
+    std::cout << message << std::endl;
 
     if (!message.compare(0, 4, "ping")) {
         // Echo the message - useful for measuring roundtrip latency
-        ws->send(client, message, opcode::text);
+        t->send(clientfd, message.c_str(), message.length());
 
     } else {
         
@@ -93,8 +89,9 @@ void Server::processMessage(connection_hdl client, const std::string message) {
 
                 // One or more arguments were invalid
                 char errorBuffer[50];
-                sprintf(errorBuffer, "Error: invalid arguments for ID %d", id);
-                ws->send(client, errorBuffer, opcode::text);
+                snprintf(errorBuffer, sizeof(errorBuffer),
+                    "Error: invalid arguments for ID %d", id);
+                t->send(clientfd, errorBuffer, 50);
                 break;
             }
             

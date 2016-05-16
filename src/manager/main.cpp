@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
         exit(EX_OSERR);
     }
 
-    // Fork off the websocket server
+    // Fork off the socket server
     int server_pid = fork();
     if (server_pid == -1) {
         perror("fork");
@@ -53,7 +53,15 @@ int main(int argc, char** argv) {
     }
 
     // Wait on all the children
-    while (wait(NULL) != -1);
+    errno = 0;
+    while (wait(NULL)) {
+        if (errno == ECHILD) {
+            break;
+        }
+    }
 
     exit(EXIT_FAILURE); // Should not get here
+
+    // // Orphan the children so that they are adopted by init
+    // exit(EXIT_SUCCESS);
 }

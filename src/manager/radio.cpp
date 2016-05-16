@@ -20,6 +20,7 @@ using std::endl;
 #define CSN_PIN                 RPI_V2_GPIO_P1_24 // Radio chip select pin
 
 // Cap on the number of light updates per second
+// TODO: read this from a config file
 #define MAX_FPS         120
 
 
@@ -47,16 +48,11 @@ Radio::Radio() {
 #endif
 }
 
-void ignoreSignal(int signal) {
-    return;
-}
-
 void Radio::run(struct shared* s) {
     
     Radio::s = s;
 
     timer_t timer;
-    struct sigaction sa;
     struct itimerspec its;
 
     // Create the timer
@@ -65,10 +61,15 @@ void Radio::run(struct shared* s) {
         exit(1);
     }
 
-    // Stop SIGALRM from killing the thread
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = ignoreSignal;
-    sigaction(SIGALRM, &sa, NULL);
+    // Block all signals from killing the thread except SIGINT
+    sigset_t blocked_set;
+    sigfillset(&blocked_set);
+    sigdelset(&blocked_set, SIGINT);
+
+    if (sigprocmask(SIG_SETMASK, &blocked_set, NULL)) {
+        perror("sigprocmask");
+        exit(1);
+    }
 
     // Calculate the timer interval
     double period = 1.0/MAX_FPS;
@@ -83,14 +84,14 @@ void Radio::run(struct shared* s) {
         exit(1);
     }
 
-    sigset_t set;
-    sigemptyset(&set);
-    sigaddset(&set, SIGALRM);
+    sigset_t sigalrm_set;
+    sigemptyset(&sigalrm_set);
+    sigaddset(&sigalrm_set, SIGALRM);
 
     // Wait for the timer to go off
     while (1) {
         int sig;
-        sigwait(&set, &sig);
+        sigwait(&sigalrm_set, &sig);
         transmitFrame();
     }
 }
