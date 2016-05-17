@@ -6,9 +6,13 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <pthread.h>
+#include <sys/wait.h>
+#include <sysexits.h>
 #include "server.h"
 #include "common.h"
 #include "wstransport.h"
+#include "udptransport.h"
 
 using std::string;
 using std::cout;
@@ -23,25 +27,78 @@ void Server::run(struct shared* s) {
 
     this->s = s;
 
-    Transport* ws = new WSTransport();
+    // Fork off the websocket transporter
+    int ws_pid = fork();
+    if (ws_pid == -1) {
+        perror("fork");
+        exit(EX_OSERR);
+    } else if (ws_pid == 0) {
+        Transport* ws = new WSTransport();
+        acceptLoop(ws);
+        exit(EXIT_FAILURE); // Should not get here
+    }
 
-    int serverfd_ws = ws->init();
+    // Fork off the UDP transporter
+    int udp_pid = fork();
+    if (udp_pid == -1) {
+        perror("fork");
+        exit(EX_OSERR);
+    } else if (udp_pid == 0) {
+        Transport* udp = new UDPTransport();
+        acceptLoop(udp);
+        exit(EXIT_FAILURE); // Should not get here
+    }
 
-    while (1) {
-        int clientfd = ws->accept(NULL, NULL);
-        if (!fork()) {
-            ws->close();
-            handleClient(ws, clientfd);
-            exit(EXIT_SUCCESS);
+    // Wait on all the children
+    errno = 0;
+    while (wait(NULL)) {
+        if (errno == ECHILD) {
+            break;
         }
     }
 }
 
-void Server::handleClient(Transport* t, int clientfd) {
+void Server::acceptLoop(Transport* t) {
+
+    if (t->init() == -1) {
+        exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+        
+        int clientfd = t->accept(NULL, NULL);
+        
+        // Set up a struct to pass the parameters around
+        struct threadargs* arg = new struct threadargs();
+        arg->transport = t;
+        arg->clientfd = clientfd;
+        arg->_this = this;
+        
+        pthread_t pid;
+
+        if (pthread_create(&pid, NULL, &Server::handleClient, arg)) {
+            perror("pthread_create");
+            continue;
+        }
+
+        if (pthread_detach(pid)) {
+            perror("pthread_detach");
+            continue;
+        }
+    }
+}
+
+void* Server::handleClient(void* arg) {
+
+    // Ugly parameter passing to thread
+    Transport* t = ((struct threadargs*)arg)->transport;
+    int clientfd = ((struct threadargs*)arg)->clientfd;
+    Server* _this = (Server*)((struct threadargs*)arg)->_this;
+    delete (struct threadargs*)arg;
 
     if (t->connect(clientfd)) {
         fprintf(stderr, "handshake failure\n");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     printf("Connected\n");
@@ -53,11 +110,12 @@ void Server::handleClient(Transport* t, int clientfd) {
 
         if (recvlen != -1) {
             std::string message = std::string(buf, recvlen);
-            processMessage(t, clientfd, message);
+            _this->processMessage(t, clientfd, message);
         }
     }
 
     printf("Closed\n");
+    return NULL;
 }
 
 void Server::processMessage(Transport* t, int clientfd, const std::string message) {

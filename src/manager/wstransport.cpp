@@ -71,7 +71,6 @@ int WSTransport::init() {
 
     // Adapted from Beej's Guide
     struct addrinfo hints, *servinfo, *p;
-    int yes = 1;
     int rv;
 
     memset(&hints, 0, sizeof hints);
@@ -80,28 +79,21 @@ int WSTransport::init() {
     hints.ai_flags = AI_PASSIVE; // use my IP
 
     if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        fprintf(stderr, "WSTransport: getaddrinfo: %s\n", gai_strerror(rv));
         return -1;
     }
 
     // loop through all the results and bind to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next) {
+    for (p = servinfo; p != NULL; p = p->ai_next) {
         if ((serverfd = ::socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
-            perror("socket");
+            perror("WSTransport: socket");
             continue;
-        }
-
-        if (setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-                sizeof(int)) == -1) {
-            perror("setsockopt");
-            freeaddrinfo(servinfo);
-            return -1;
         }
 
         if (::bind(serverfd, p->ai_addr, p->ai_addrlen) == -1) {
             ::close(serverfd);
-            perror("bind");
+            perror("WSTransport: bind");
             continue;
         }
 
@@ -111,12 +103,12 @@ int WSTransport::init() {
     freeaddrinfo(servinfo); // all done with this structure
 
     if (p == NULL)  {
-        fprintf(stderr, "server: failed to bind\n");
+        fprintf(stderr, "WSTransport: failed to bind\n");
         return -1;
     }
 
     if (::listen(serverfd, BACKLOG) == -1) {
-        perror("listen");
+        perror("WSTransport: listen");
         return -1;
     }
 
@@ -127,7 +119,7 @@ int WSTransport::accept(struct sockaddr *addr, socklen_t *addrlen) {
 
     int fd = ::accept(serverfd, addr, addrlen);
     if (fd == -1) {
-        perror("accept");
+        perror("WSTransport: accept");
         return -1;
     }
 
@@ -143,7 +135,7 @@ int WSTransport::connect(int sockfd) {
     char* buf = NULL;
     int recvlen = recv_headers(sockfd, buf);
     if (recvlen == -1) {
-        perror("recv");
+        perror("WSTransport: recv");
         bad_request = 1;
     }
 
@@ -495,7 +487,7 @@ ssize_t WSTransport::recv_headers(int sockfd, char*& buf) {
         ssize_t rv = ::recv(sockfd, recvbuf, sizeof(recvbuf) - 1, 0);
 
         if (rv == -1) {
-            perror("recv");
+            perror("WSTransport: recv");
             return -1;
         }
 
@@ -611,7 +603,7 @@ ssize_t WSTransport::recv_complete(int sockfd, char* buf, size_t len) {
         ssize_t rv = ::recv(sockfd, buf + received, len - received, 0);
 
         if (rv == -1) {
-            perror("recv");
+            perror("WSTransport: recv");
             return -1;
         }
 
@@ -638,7 +630,7 @@ ssize_t WSTransport::send_complete(int sockfd, const char* buf, size_t len) {
         ssize_t rv = ::send(sockfd, buf + sent, len - sent, 0);
 
         if (rv == -1) {
-            perror("send");
+            perror("WSTransport: send");
             return -1;
         }
 
