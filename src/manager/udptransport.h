@@ -12,6 +12,7 @@
 #include <queue>
 #include <utility>
 #include <sys/socket.h>
+#include <pthread.h>
 
 class UDPTransport: public Transport {
 public:
@@ -28,7 +29,10 @@ public:
 private:
     typedef std::pair<std::vector<char>, uint16_t> connection_type;
     static std::map<connection_type, int> connections;
+    static pthread_mutex_t con_mutex;
+
     static std::map<int, std::queue<std::vector<char>>> received_datagrams;
+    static pthread_mutex_t dg_mutex;
 
     connection_type extract_address_port(struct sockaddr *sa);
 };

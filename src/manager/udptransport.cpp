@@ -21,9 +21,11 @@
 
 // Maps <client_addr, client_port> to fake_sockfd
 std::map<UDPTransport::connection_type, int> UDPTransport::connections;
+pthread_mutex_t UDPTransport::con_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Maps fake_sockfd to a vector of all pending incoming datagrams
 std::map<int, std::queue<std::vector<char>>> UDPTransport::received_datagrams;
+pthread_mutex_t UDPTransport::dg_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 UDPTransport::UDPTransport(): Transport() {
@@ -88,18 +90,25 @@ int UDPTransport::accept(struct sockaddr *addr, socklen_t *addrlen) {
     connection_type id;
     struct sockaddr_storage my_addr;
     socklen_t my_addrlen = sizeof(my_addr);
-    do {
+    
+    while (1) {
+        
         char c;
-
         while (recvfrom(serverfd, &c, sizeof(c), MSG_PEEK,
-                (struct sockaddr*)&my_addr, &my_addrlen) != sizeof(c));
+            (struct sockaddr*)&my_addr, &my_addrlen) != sizeof(c));
 
         id = extract_address_port((struct sockaddr*)&my_addr);
 
-    } while (connections.find(id) != connections.end()); // Ignore existing clients
-
-    // Add the entry to the table
-    connections[id] = next_fake_fd;
+        // Ignore existing clients
+        pthread_mutex_lock(&con_mutex);
+        if (connections.find(id) == connections.end()) { 
+            // Add the entry to the table
+            connections[id] = next_fake_fd;
+            pthread_mutex_unlock(&con_mutex);
+            break;
+        }
+        pthread_mutex_unlock(&con_mutex);
+    }
 
     if (addr != NULL) {
         memcpy(addr, &my_addr, *addrlen);
@@ -125,15 +134,20 @@ int UDPTransport::disconnect(int sockfd) {
     // TODO: add closing handshake
 
     // Remove any outstanding received datagrams
+    pthread_mutex_lock(&dg_mutex);
     received_datagrams.erase(sockfd);
+    pthread_mutex_unlock(&dg_mutex);
 
     // Remove it from the connections
+    pthread_mutex_lock(&con_mutex);
     for (auto it = connections.begin(); it != connections.end(); it++) {
         if (it->second == sockfd) {
             connections.erase(it);
+            pthread_mutex_unlock(&con_mutex);
             return 0;
         }
     }
+    pthread_mutex_unlock(&con_mutex);
 
     // Couldn't find any matching connection
     return -1;
@@ -143,32 +157,43 @@ ssize_t UDPTransport::recv(int sockfd, char* buf, size_t len) {
 
     ssize_t received;
 
-    // Check whether any existing messages are available
-    if (!received_datagrams[sockfd].empty()) {
-        std::vector<char> dg = received_datagrams[sockfd].front();
-        received_datagrams[sockfd].pop();
-        std::copy(dg.begin(), dg.end(), buf);
-        return dg.size();
-    }
-
     while (1) {
 
+        // Check whether any existing messages are available
+        pthread_mutex_lock(&dg_mutex);
+        if (!received_datagrams[sockfd].empty()) {
+            std::vector<char> dg = received_datagrams[sockfd].front();
+            received_datagrams[sockfd].pop();
+            std::copy(dg.begin(), dg.end(), buf);
+            pthread_mutex_unlock(&dg_mutex);
+            return dg.size();
+        }
+        pthread_mutex_unlock(&dg_mutex);
+
+        // Try to receive new message
         struct sockaddr addr;
         socklen_t addrlen = sizeof(addr);
 
-        received = recvfrom(serverfd, buf, len, 0, &addr, &addrlen);
+        received = recvfrom(serverfd, buf, len, MSG_DONTWAIT, &addr, &addrlen);
         if (received == -1) {
-            perror("UDPTransport: recvfrom");
-            return -1;
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                continue;
+            } else {
+                perror("UDPTransport: recvfrom");
+                return -1;
+            }
         }
 
         // Figure out if the connection is for the right address or not
         connection_type id = extract_address_port(&addr);
+        
+        pthread_mutex_lock(&con_mutex);
         auto it = connections.find(id);
         if (it == connections.end()) {
             // Ignore message from unconnected client
             continue;
         }
+        pthread_mutex_unlock(&con_mutex);
 
         int fd = it->second;
         if (fd == sockfd) {
@@ -177,7 +202,10 @@ ssize_t UDPTransport::recv(int sockfd, char* buf, size_t len) {
         } else {
             // The datagram was for a different client, so store it
             std::vector<char> dg(buf, buf + received);
+            
+            pthread_mutex_lock(&dg_mutex);
             received_datagrams[fd].push(dg);
+            pthread_mutex_unlock(&dg_mutex);
         }
     }
 
@@ -189,6 +217,7 @@ ssize_t UDPTransport::send(int sockfd, const char* buf, size_t len) {
     connection_type id;
     bool found = false;
 
+    pthread_mutex_lock(&con_mutex);
     for (auto it = connections.begin(); it != connections.end(); it++) {
         if (it->second == sockfd) {
             id = it->first;
@@ -196,6 +225,7 @@ ssize_t UDPTransport::send(int sockfd, const char* buf, size_t len) {
             break;
         }
     }
+    pthread_mutex_unlock(&con_mutex);
 
     if (!found) {
         // Client is not connected
@@ -239,13 +269,17 @@ ssize_t UDPTransport::send(int sockfd, const char* buf, size_t len) {
 
 int UDPTransport::is_open(int sockfd) {
 
+    int found = 0;
+
+    pthread_mutex_lock(&con_mutex);
     for (auto it = connections.begin(); it != connections.end(); it++) {
         if (it->second == sockfd) {
-            return 1;
+            found = 1;
         }
     }
+    pthread_mutex_unlock(&con_mutex);
 
-    return 0;
+    return found;
 }
 
 /**
