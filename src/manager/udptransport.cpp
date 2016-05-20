@@ -14,6 +14,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <algorithm>
+#include <errno.h>
 
 
 #define PORT             "7447" // the port users will be connecting to
@@ -43,7 +44,8 @@ int UDPTransport::init() {
     int rv;
 
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
+    // Force IPv4 or else client will not know which version to use
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
 
@@ -171,10 +173,10 @@ ssize_t UDPTransport::recv(int sockfd, char* buf, size_t len) {
         pthread_mutex_unlock(&dg_mutex);
 
         // Try to receive new message
-        struct sockaddr addr;
+        struct sockaddr_storage addr;
         socklen_t addrlen = sizeof(addr);
 
-        received = recvfrom(serverfd, buf, len, MSG_DONTWAIT, &addr, &addrlen);
+        received = recvfrom(serverfd, buf, len, MSG_DONTWAIT, (struct sockaddr*)&addr, &addrlen);
         if (received == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 continue;
@@ -185,7 +187,7 @@ ssize_t UDPTransport::recv(int sockfd, char* buf, size_t len) {
         }
 
         // Figure out if the connection is for the right address or not
-        connection_type id = extract_address_port(&addr);
+        connection_type id = extract_address_port((struct sockaddr*)&addr);
         
         pthread_mutex_lock(&con_mutex);
         auto it = connections.find(id);
