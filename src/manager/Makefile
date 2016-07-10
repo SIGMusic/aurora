@@ -8,7 +8,7 @@ OBJS=main.o server.o radio.o wstransport.o udptransport.o
 # Check if Raspberry Pi
 ifneq (,$(findstring arm, $(shell uname -m)))
 	# Add the recommended compiler flags for the Raspberry Pi
-	CXXFLAGS+=-Ofast -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s
+	CXXFLAGS+=-O0 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s
 endif
 
 all: $(EXE)
