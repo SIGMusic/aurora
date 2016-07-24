@@ -7,8 +7,9 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <unistd.h>
+
+#include <network.h>
 #include "radio.h"
-#include "../network.h"
 
 
 using std::cout;

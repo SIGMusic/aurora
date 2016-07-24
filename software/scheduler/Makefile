@@ -1,9 +1,9 @@
 CXX=g++
-CXXFLAGS=-std=c++11 -Wall -I/opt/local/include
+CXXFLAGS=-std=c++11 -Wall -I../../include -I/opt/local/include
 LDLIBS=-lpthread -lrt -lssl -lcrypto -lrf24-bcm
 LD=g++
-EXE=manager
-OBJS=main.o server.o radio.o wstransport.o udptransport.o
+EXE=scheduler
+OBJS=main.o radio.o scheduler.o
 
 # Check if Raspberry Pi
 ifneq (,$(findstring arm, $(shell uname -m)))
@@ -16,19 +16,13 @@ all: $(EXE)
 $(EXE): $(OBJS)
 	$(LD) $(LDLIBS) -o $(EXE) $^
 
-main.o: main.cpp server.h radio.h common.h
+main.o: main.cpp radio.h scheduler.h
 	${CXX} -c ${CXXFLAGS} $< -o $@
 
-server.o: server.cpp server.h common.h transport.h wstransport.h udptransport.h
+radio.o: radio.cpp radio.h
 	${CXX} -c ${CXXFLAGS} $< -o $@
 
-radio.o: radio.cpp radio.h ../network.h common.h
-	${CXX} -c ${CXXFLAGS} $< -o $@
-
-wstransport.o: wstransport.cpp wstransport.h transport.h
-	${CXX} -c ${CXXFLAGS} $< -o $@
-
-udptransport.o: udptransport.cpp udptransport.h transport.h
+scheduler.o: scheduler.cpp scheduler.h
 	${CXX} -c ${CXXFLAGS} $< -o $@
 
 .PHONY: all clean debug

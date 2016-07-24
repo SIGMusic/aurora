@@ -8,7 +8,8 @@
 #include <cstdint>
 #include <RF24/RF24.h>
 #include <semaphore.h>
-#include "common.h"
+
+#include <common.h>
 
 class Radio {
 public:

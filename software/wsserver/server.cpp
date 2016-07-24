@@ -9,10 +9,10 @@
 #include <pthread.h>
 #include <sys/wait.h>
 #include <sysexits.h>
+ 
+#include <common.h>
 #include "server.h"
-#include "common.h"
 #include "wstransport.h"
-#include "udptransport.h"
 
 using std::string;
 using std::cout;
@@ -35,17 +35,6 @@ void Server::run(struct shared* s) {
     } else if (ws_pid == 0) {
         Transport* ws = new WSTransport();
         acceptLoop(ws);
-        exit(EXIT_FAILURE); // Should not get here
-    }
-
-    // Fork off the UDP transporter
-    int udp_pid = fork();
-    if (udp_pid == -1) {
-        perror("fork");
-        exit(EX_OSERR);
-    } else if (udp_pid == 0) {
-        Transport* udp = new UDPTransport();
-        acceptLoop(udp);
         exit(EXIT_FAILURE); // Should not get here
     }
 

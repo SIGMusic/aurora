@@ -5,6 +5,7 @@
 
 #pragma once
 #include <semaphore.h>
+#include <cstdint>
 
 // Number of possible endpoint IDs
 #define NUM_IDS         256

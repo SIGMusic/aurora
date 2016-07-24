@@ -8,14 +8,14 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 #include <sysexits.h>
-#include "server.h"
+#include <unistd.h>
+
+#include <common.h>
 #include "radio.h"
-#include "common.h"
 
 
 int main(int argc, char** argv) {
 
-    Server server;
     Radio radio;
 
     // Map a shared array to store the colors
@@ -30,16 +30,6 @@ int main(int argc, char** argv) {
     if (sem_init(&s->colors_sem, 1, 1)) {
         perror("sem_init");
         exit(EX_OSERR);
-    }
-
-    // Fork off the socket server
-    int server_pid = fork();
-    if (server_pid == -1) {
-        perror("fork");
-        exit(EX_OSERR);
-    } else if (server_pid == 0) {
-        server.run(s);
-        exit(EXIT_FAILURE); // Should not get here
     }
 
     // Fork off the radio controller
