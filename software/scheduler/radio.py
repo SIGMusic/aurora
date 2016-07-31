@@ -25,7 +25,11 @@ MAX_FPS = 120
 def RF_ADDRESS(endpoint):
     """Return a 40-bit nRF address."""
     assert 0 <= endpoint < 256, "endpoint {0} is not between 0 and 255".format(endpoint)
-    return (0x5349474D00 | endpoint)
+    address_header = "SIGM"
+    return int("0x" +
+               "".join(["%0.2x" % ord(i) for i in address_header]) +
+               "%0.2x" % endpoint,
+               16)
 
 
 class RadioNetwork:
