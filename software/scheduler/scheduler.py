@@ -28,6 +28,11 @@ class Scheduler:
         pass
 
     def insertJob(self, client, duration, weight):
-        """Add a job to the list."""
+        """Add a job to the list. Return the job's ID."""
+        # TODO
+        return 0
+
+    def removeJob(self, client, id):
+        """Remove a job from the list."""
         # TODO
         pass
