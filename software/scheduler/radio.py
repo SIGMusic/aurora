@@ -28,7 +28,8 @@ MAX_FPS = 1
 
 def RF_ADDRESS(endpoint):
     """Return a 40-bit nRF address."""
-    assert 0 <= endpoint < 256, "endpoint {0} is not between 0 and 255".format(endpoint)
+    if not 0 <= endpoint < 256:
+        raise ValueError
     address_header = "SIGM"
     return int("0x" +
                "".join(["%0.2x" % ord(i) for i in address_header]) +
