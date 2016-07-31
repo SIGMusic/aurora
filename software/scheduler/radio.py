@@ -1,9 +1,13 @@
 """Define various attributes and functions of the radio network."""
 
 import signal
+import threading
+from datetime import datetime
+
 from RF24 import *
 
 # TODO: share with scheduler, remove dummy data
+colorsLock = threading.Lock()
 colors = [(10, 10, 10), (20, 20, 20), (30, 30, 30), (40, 40, 40),
           (50, 50, 50), (60, 60, 60), (70, 70, 70), (80, 80, 80)]
 
@@ -19,7 +23,7 @@ CSN_PIN = RPI_V2_GPIO_P1_24  # Chip Select pin
 
 # Cap on the number of light updates per second
 # TODO: read this from a config file
-MAX_FPS = 120
+MAX_FPS = 1
 
 
 def RF_ADDRESS(endpoint):
@@ -80,8 +84,12 @@ class RadioNetwork:
 
     def transmitFrame(self, signum, frame):
         """Transmit the color of each light."""
-        # TODO: mutex
+        colorsLock.acquire()
+        print(datetime.now())
         for i in range(self.numLights):
-            msg = bytearray(colors[i])
-            self._radio.openWritingPipe(RF_ADDRESS(i))
-            self._radio.write(msg)
+            # For now, just print values instead of transmitting
+            print(colors[i])
+            # msg = bytearray(colors[i])
+            # self._radio.openWritingPipe(RF_ADDRESS(i))
+            # self._radio.write(msg)
+        colorsLock.release()
