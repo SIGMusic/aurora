@@ -1,5 +1,6 @@
 """Define various attributes and functions of the radio network."""
 
+import signal
 from RF24 import *
 
 # TODO: share with scheduler, remove dummy data
@@ -15,6 +16,10 @@ BASE_STATION_ID = 0
 # Radio GPIO pins
 CE_PIN = RPI_V2_GPIO_P1_15  # Chip Enable pin
 CSN_PIN = RPI_V2_GPIO_P1_24  # Chip Select pin
+
+# Cap on the number of light updates per second
+# TODO: read this from a config file
+MAX_FPS = 120
 
 
 def RF_ADDRESS(endpoint):
@@ -42,35 +47,37 @@ class RadioNetwork:
 
     def __init__(self):
         """Initialize the network interface."""
-        self.__radio = RF24(CE_PIN, CSN_PIN)
+        self._radio = RF24(CE_PIN, CSN_PIN)
 
-        self.__radio.begin()
-        self.__radio.setDataRate(RF24_250KBPS)  # 250kbps should be plenty
-        self.__radio.setPALevel(RF24_PA_LOW)  # Higher power doesn't work on cheap eBay radios
-        self.__radio.setRetries(0, 0)
-        self.__radio.setAutoAck(False)
-        self.__radio.setCRCLength(RF24_CRC_16)
-        self.__radio.payloadSize = 3
-        self.__radio.setChannel(RF_CHANNEL)
-        self.__radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID))
+        self._radio.begin()
+        # 250kbps should be plenty. Lower speed decreases error rate.
+        self._radio.setDataRate(RF24_250KBPS)
+        # Higher power doesn't work on cheap eBay radios
+        self._radio.setPALevel(RF24_PA_LOW)
+        self._radio.setRetries(0, 0)
+        self._radio.setAutoAck(False)
+        self._radio.setCRCLength(RF24_CRC_16)
+        self._radio.payloadSize = 3
+        self._radio.setChannel(RF_CHANNEL)
+        self._radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID))
 
         if __debug__:
-            self.__radio.printDetails()
+            self._radio.printDetails()
 
     def start(self):
         """Start periodically transmitting frames."""
-        # TODO
-        self.transmitFrame()
+        # TODO: use sigwait loop to avoid locking mutex in signal handler
+        signal.signal(signal.SIGALRM, self.transmitFrame)
+        signal.setitimer(signal.ITIMER_REAL, 1.0/MAX_FPS, 1.0/MAX_FPS)
 
     def stop(self):
         """Stop periodically transmitting frames."""
-        # TODO
-        pass
+        signal.setitimer(signal.ITIMER_REAL, 0)
 
-    def transmitFrame(self):
+    def transmitFrame(self, signum, frame):
         """Transmit the color of each light."""
+        # TODO: mutex
         for i in range(self.numLights):
             msg = bytearray(colors[i])
-            print("Writing {0} to light {1}".format(colors[i], i))
-            self.__radio.openWritingPipe(RF_ADDRESS(i))
-            self.__radio.write(msg)
+            self._radio.openWritingPipe(RF_ADDRESS(i))
+            self._radio.write(msg)

@@ -1,5 +1,6 @@
 class Scheduler:
-    """Schedule and run incoming jobs according to Weighted Fair Queueing.
+    """Schedule and run incoming jobs according to Weighted Fair
+    Queueing.
 
     Given a limited resource (the radio network) and potentially
     unbounded demand (connected clients' animations), a scheduler is
@@ -10,9 +11,9 @@ class Scheduler:
     In this case, the radio represents the processor and each animation
     represents a packet. For this to be feasible, each animation must
     specify a duration to serve as the packet length. This restriction
-    prevents clients from running infinitely but also guarantees
-    atomicity of animations. Clients wishing to use long-running
-    animations can instead schedule multiple shorter animations.
+    prevents clients from running infinite animations but also
+    guarantees their atomicity. Clients wishing to use infinite
+    animations can instead schedule multiple discrete animations.
 
     """
 
@@ -22,7 +23,7 @@ class Scheduler:
         pass
 
     def start(self):
-        """Start scheduling jobs for the radio"""
+        """Start scheduling jobs for the radio."""
         # TODO
         pass
 
