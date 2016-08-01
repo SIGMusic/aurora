@@ -6,10 +6,12 @@ from datetime import datetime
 
 from RF24 import *
 
-# TODO: share with scheduler, remove dummy data
-colorsLock = threading.Lock()
-colors = [(10, 10, 10), (20, 20, 20), (30, 30, 30), (40, 40, 40),
-          (50, 50, 50), (60, 60, 60), (70, 70, 70), (80, 80, 80)]
+
+# TODO: have Scheduler keep track of one lock per job, then set
+# colors_lock to be the job lock when it's time for it to run.
+colors = []
+colors_lock = threading.Lock()
+colors_lock_lock = threading.Lock()
 
 # The hardcoded RF channel (for now)
 RF_CHANNEL = 49
@@ -26,18 +28,8 @@ CSN_PIN = RPI_V2_GPIO_P1_24  # Chip Select pin
 MAX_FPS = 1
 
 
-def RF_ADDRESS(endpoint):
-    """Return a 40-bit nRF address."""
-    if not 0 <= endpoint < 256:
-        raise ValueError
-    address_header = "SIGM"
-    return int("0x" +
-               "".join(["%0.2x" % ord(i) for i in address_header]) +
-               "%0.2x" % endpoint,
-               16)
-
-
 class RadioNetwork:
+
     """Manage network operations on the radio.
 
     Each light is programmed with a unique 1-byte ID. Each has an
@@ -52,7 +44,7 @@ class RadioNetwork:
 
     """
 
-    numLights = 8
+    num_lights = 8
 
     def __init__(self):
         """Initialize the network interface."""
@@ -68,7 +60,7 @@ class RadioNetwork:
         self._radio.setCRCLength(RF24_CRC_16)
         self._radio.payloadSize = 3
         self._radio.setChannel(RF_CHANNEL)
-        self._radio.openReadingPipe(1, RF_ADDRESS(BASE_STATION_ID))
+        self._radio.openReadingPipe(1, self.rf_address(BASE_STATION_ID))
 
         if __debug__:
             self._radio.printDetails()
@@ -76,21 +68,37 @@ class RadioNetwork:
     def start(self):
         """Start periodically transmitting frames."""
         # TODO: use sigwait loop to avoid locking mutex in signal handler
-        signal.signal(signal.SIGALRM, self.transmitFrame)
+        signal.signal(signal.SIGALRM, self.transmit_frame)
         signal.setitimer(signal.ITIMER_REAL, 1.0/MAX_FPS, 1.0/MAX_FPS)
 
     def stop(self):
         """Stop periodically transmitting frames."""
         signal.setitimer(signal.ITIMER_REAL, 0)
 
-    def transmitFrame(self, signum, frame):
+    def transmit_frame(self, signum, frame):
         """Transmit the color of each light."""
-        colorsLock.acquire()
+        colors_lock_lock.acquire()
+        colors_lock.acquire()
         print(datetime.now())
-        for i in range(self.numLights):
+        for i in range(self.num_lights):
             # For now, just print values instead of transmitting
-            print(colors[i])
-            # msg = bytearray(colors[i])
-            # self._radio.openWritingPipe(RF_ADDRESS(i))
+            try:
+                rgb = colors[i]
+            except IndexError:
+                rgb = (0, 0, 0)
+            print(rgb)
+            # msg = bytearray(rgb)
+            # self._radio.openWritingPipe(rf_address(i))
             # self._radio.write(msg)
-        colorsLock.release()
+        colors_lock.release()
+        colors_lock_lock.release()
+
+    def rf_address(self, endpoint):
+        """Return a 40-bit nRF address."""
+        if not 0 <= endpoint < 256:
+            raise ValueError
+        address_header = "SIGM"
+        return int("0x"
+                   + "".join(["%0.2x" % ord(i) for i in address_header])
+                   + "%0.2x" % endpoint,
+                   16)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
 from radio import RadioNetwork
 from scheduler import Scheduler
 
-def main(argv):
+
+def main():
     """Run the radio scheduler interface."""
     net = RadioNetwork()
     net.start()
@@ -17,4 +17,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

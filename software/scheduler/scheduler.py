@@ -1,10 +1,19 @@
+import threading
+import sched
+import time
+import random
+
+from radio import colors, colors_lock, colors_lock_lock
+
+
 class Scheduler:
+
     """Schedule and run incoming jobs according to Weighted Fair
     Queueing.
 
-    Given a limited resource (the radio network) and potentially
-    unbounded demand (connected clients' animations), a scheduler is
-    necessary to arbitrate access to the resource.
+    Given a limited resource (the radio network) and unlimited demand
+    (connected clients' animations), a scheduler is necessary to
+    arbitrate access to the resource.
 
     This class implements Weighted Fair Queueing. WFQ is a
     packet-based approximation of Generalized Processor Sharing.
@@ -17,6 +26,13 @@ class Scheduler:
 
     """
 
+    _jobs = {}
+    _jobs_sem = threading.Semaphore(value=0)
+
+    _sched = sched.scheduler()
+
+    _next_id = random.randint(1000, 10000)
+
     def __init__(self):
         """Initialize data structures needed by the scheduler."""
         # TODO
@@ -25,14 +41,45 @@ class Scheduler:
     def start(self):
         """Start scheduling jobs for the radio."""
         # TODO
+        self._jobs_sem.acquire()
         pass
 
-    def insertJob(self, client, duration, weight):
-        """Add a job to the list. Return the job's ID."""
-        # TODO
-        return 0
+    def insert_job(self, client, duration, weight):
+        """Add a job to the list.
+        Return the job's ID and the colors lock."""
+        job_id = self._next_id
+        self._next_id += random.randint(1, 10)
+        lock = threading.Lock()
+        lock.acquire()
+        self._jobs[job_id] = (client, duration, weight, lock)
+        self._jobs_sem.release()
+        return (job_id, lock)
 
-    def removeJob(self, client, id):
+    def remove_job(self, client, job_id):
         """Remove a job from the list."""
+        # TODO
+        if self._jobs_sem.acquire(blocking=False) is False:
+            raise RuntimeError("No jobs queued")
+        del self._jobs[job_id]
+
+    def _start_next_job(self):
+        # Get the next job to run
+        # TODO: actually calculate the next job
+        self._jobs_sem.acquire()
+        job_id, job = self._jobs.popitem()
+
+        # Stop the current job
+        radio.colors_lock_lock.acquire()
+        radio.colors_lock.acquire()
+        # Switch to the new job
+        client, duration, weight, lock = job
+        radio.colors_lock = lock
+        radio.colors_lock_lock.release()
+
+        # Schedule the end of the job
+        self._sched.enter(duration, 1, _start_next_job)
+        # Let the new job run
+        lock.release()
+        # Notify the client it can start
         # TODO
         pass
