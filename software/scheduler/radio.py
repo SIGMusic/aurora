@@ -38,12 +38,12 @@ class RadioNetwork:
     Each light is programmed with a unique 1-byte ID. Each has an
     nRF24L01+ radio module configured to listen on an address
     corresponding to its ID: the ASCII characters 'SIGM' followed by
-    the ID. The Raspberry Pi base station also has an nRF24L01+ and
-    follows the same address pattern with an ID of 0.
+    the one-byte endpoint ID. The Raspberry Pi base station also has an
+    nRF24L01+ and follows the same address pattern with an ID of 0.
 
     The base station transmits an RGB value to each light, in order of
     ID, at a configurable frame rate. These messages are sent
-    unreliably for minimal latency.
+    without acknowledgement for minimal latency.
 
     """
 

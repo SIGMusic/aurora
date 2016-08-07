@@ -24,9 +24,14 @@ class Scheduler:
     guarantees their atomicity. Clients wishing to use infinite
     animations can instead schedule multiple discrete animations.
 
+    The way this class gatekeeps the radio is by assigning a unique
+    lock to each job. The color data is protected by the unique lock,
+    which is changed out every time a new job runs.
+
     """
 
     _jobs = {}
+    _jobs_lock = threading.Lock()
     _jobs_sem = threading.Semaphore(value=0)
 
     _sched = sched.scheduler()
@@ -40,20 +45,18 @@ class Scheduler:
 
     def start(self):
         """Start scheduling jobs for the radio."""
-        # TODO
-        self._jobs_sem.acquire()
-        pass
+        # TODO: start thread
+        self._start_next_job()
 
     def insert_job(self, client, duration, weight):
-        """Add a job to the list.
-        Return the job's ID and the colors lock."""
+        """Add a job to the list. Return the job's ID."""
         job_id = self._next_id
         self._next_id += random.randint(1, 10)
-        lock = threading.Lock()
-        lock.acquire()
-        self._jobs[job_id] = (client, duration, weight, lock)
+        self._jobs_lock.acquire()
+        self._jobs[job_id] = (client, duration, weight)
         self._jobs_sem.release()
-        return (job_id, lock)
+        self._jobs_lock.release()
+        return job_id
 
     def remove_job(self, client, job_id):
         """Remove a job from the list."""
@@ -62,17 +65,29 @@ class Scheduler:
             raise RuntimeError("No jobs queued")
         del self._jobs[job_id]
 
-    def _start_next_job(self):
-        # Get the next job to run
+    def _get_next_job(self):
         # TODO: actually calculate the next job
-        self._jobs_sem.acquire()
+        self._jobs_lock.acquire()
         job_id, job = self._jobs.popitem()
+        self._jobs_lock.release()
+        return (job_id, job)
+
+    def _start_next_job(self):
+        # Wait for a job to be added
+        self._jobs_sem.acquire()
+        
+        job_id, job = self._get_next_job()
+        client, duration, weight = job
+        # TODO: use a Manager so it can be shared across processes
+        new_lock = threading.Lock()
+        new_lock.acquire()
+        # TODO: notify the server of the new job and its lock
+        pass
 
         # Stop the current job
         radio.colors_lock_lock.acquire()
         radio.colors_lock.acquire()
         # Switch to the new job
-        client, duration, weight, lock = job
         radio.colors_lock = lock
         radio.colors_lock_lock.release()
 
