@@ -4,11 +4,13 @@ import signal
 import threading
 from datetime import datetime
 
-from RF24 import *
+try:
+    from RF24 import *
+    RF = True
+except ImportError:
+    RF = False
 
 
-# TODO: have Scheduler keep track of one lock per job, then set
-# colors_lock to be the job lock when it's time for it to run.
 colors = []
 colors_lock = threading.Lock()
 colors_lock_lock = threading.Lock()
@@ -19,9 +21,10 @@ RF_CHANNEL = 49
 # The endpoint ID of the base station
 BASE_STATION_ID = 0
 
-# Radio GPIO pins
-CE_PIN = RPI_V2_GPIO_P1_15  # Chip Enable pin
-CSN_PIN = RPI_V2_GPIO_P1_24  # Chip Select pin
+if RF:
+    # Radio GPIO pins
+    CE_PIN = RPI_V2_GPIO_P1_15  # Chip Enable pin
+    CSN_PIN = RPI_V2_GPIO_P1_24  # Chip Select pin
 
 # Cap on the number of light updates per second
 # TODO: read this from a config file
@@ -48,22 +51,23 @@ class RadioNetwork:
 
     def __init__(self):
         """Initialize the network interface."""
-        self._radio = RF24(CE_PIN, CSN_PIN)
+        if RF:
+            self._radio = RF24(CE_PIN, CSN_PIN)
 
-        self._radio.begin()
-        # 250kbps should be plenty. Lower speed decreases error rate.
-        self._radio.setDataRate(RF24_250KBPS)
-        # Higher power doesn't work on cheap eBay radios
-        self._radio.setPALevel(RF24_PA_LOW)
-        self._radio.setRetries(0, 0)
-        self._radio.setAutoAck(False)
-        self._radio.setCRCLength(RF24_CRC_16)
-        self._radio.payloadSize = 3
-        self._radio.setChannel(RF_CHANNEL)
-        self._radio.openReadingPipe(1, self.rf_address(BASE_STATION_ID))
+            self._radio.begin()
+            # 250kbps should be plenty. Lower speed decreases error rate.
+            self._radio.setDataRate(RF24_250KBPS)
+            # Higher power doesn't work on cheap eBay radios
+            self._radio.setPALevel(RF24_PA_LOW)
+            self._radio.setRetries(0, 0)
+            self._radio.setAutoAck(False)
+            self._radio.setCRCLength(RF24_CRC_16)
+            self._radio.payloadSize = 3
+            self._radio.setChannel(RF_CHANNEL)
+            self._radio.openReadingPipe(1, self.rf_address(BASE_STATION_ID))
 
-        if __debug__:
-            self._radio.printDetails()
+            if __debug__:
+                self._radio.printDetails()
 
     def start(self):
         """Start periodically transmitting frames."""
@@ -87,9 +91,10 @@ class RadioNetwork:
             except IndexError:
                 rgb = (0, 0, 0)
             print(rgb)
-            # msg = bytearray(rgb)
-            # self._radio.openWritingPipe(rf_address(i))
-            # self._radio.write(msg)
+            if RF:
+                msg = bytearray(rgb)
+                self._radio.openWritingPipe(rf_address(i))
+                self._radio.write(msg)
         colors_lock.release()
         colors_lock_lock.release()
 
