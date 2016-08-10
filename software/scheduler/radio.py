@@ -2,6 +2,7 @@
 
 import signal
 import threading
+import logging
 from datetime import datetime
 
 try:
@@ -51,6 +52,7 @@ class RadioNetwork:
 
     def __init__(self):
         """Initialize the network interface."""
+        self._logger = logging.getLogger(__name__)
         if RF:
             self._radio = RF24(CE_PIN, CSN_PIN)
 
@@ -83,14 +85,13 @@ class RadioNetwork:
         """Transmit the color of each light."""
         colors_lock_lock.acquire()
         colors_lock.acquire()
-        print(datetime.now())
         for i in range(self.num_lights):
             # For now, just print values instead of transmitting
             try:
                 rgb = colors[i]
             except IndexError:
                 rgb = (0, 0, 0)
-            print(rgb)
+            self._logger.debug(rgb)
             if RF:
                 msg = bytearray(rgb)
                 self._radio.openWritingPipe(rf_address(i))
