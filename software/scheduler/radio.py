@@ -12,7 +12,7 @@ except ImportError:
     RF = False
 
 
-colors = []
+colors = [None]
 colors_lock = threading.Lock()
 colors_lock_lock = threading.Lock()
 
@@ -85,13 +85,13 @@ class RadioNetwork:
         """Transmit the color of each light."""
         colors_lock_lock.acquire()
         colors_lock.acquire()
-        for i in range(self.num_lights):
+        for i in range(1, self.num_lights+1):
             # For now, just print values instead of transmitting
             try:
                 rgb = colors[i]
             except IndexError:
                 rgb = (0, 0, 0)
-            self._logger.debug(rgb)
+            self._logger.debug("Light %d: %s" % (i, "#%02x%02x%02x" % rgb))
             if RF:
                 msg = bytearray(rgb)
                 self._radio.openWritingPipe(rf_address(i))
