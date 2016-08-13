@@ -10,13 +10,14 @@ from scheduler import Scheduler
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--logging", default=logging.WARNING,
-                    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+parser.add_argument("--loglevel", default="WARNING",
+                    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL",
+                             "debug", "info", "warning", "error", "critical"],
                     help="how verbose of messages to log")
 args = parser.parse_args()
 
-logging.basicConfig(level=getattr(logging, args.logging.upper()),
-                    format="%(asctime)s (%(levelname)s) %(filename)s:%(lineno)d: %(message)s")
+logging.basicConfig(level=args.loglevel.upper(),
+                    format="%(asctime)s [%(levelname)s] %(message)s")
 
 logger = logging.getLogger(__name__)
 
