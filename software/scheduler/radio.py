@@ -1,5 +1,3 @@
-"""Define various attributes and functions of the radio network."""
-
 import signal
 import threading
 import logging
@@ -66,7 +64,7 @@ class RadioNetwork:
             self._radio.setCRCLength(RF24_CRC_16)
             self._radio.payloadSize = 3
             self._radio.setChannel(RF_CHANNEL)
-            self._radio.openReadingPipe(1, self.rf_address(BASE_STATION_ID))
+            self._radio.openReadingPipe(1, self._rf_address(BASE_STATION_ID))
 
             if __debug__:
                 self._radio.printDetails()
@@ -94,12 +92,12 @@ class RadioNetwork:
             self._logger.debug("Light %d: %s" % (i, "#%02x%02x%02x" % rgb))
             if RF:
                 msg = bytearray(rgb)
-                self._radio.openWritingPipe(rf_address(i))
+                self._radio.openWritingPipe(_rf_address(i))
                 self._radio.write(msg)
         colors_lock.release()
         colors_lock_lock.release()
 
-    def rf_address(self, endpoint):
+    def _rf_address(self, endpoint):
         """Return a 40-bit nRF address."""
         if not 0 <= endpoint < 256:
             raise ValueError
