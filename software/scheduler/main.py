@@ -28,12 +28,12 @@ def main():
     net.start()
 
     sched = Scheduler()
-    sched_thread = threading.Thread(target=sched, name="Scheduler")
-    sched_thread.start()
+    sched.start()
 
-    sleep(2)
-    job_id = sched.insert_job(None, 15, None)
-    logger.info("Scheduled job %d", job_id)
+    sleep(1.5)
+    job_id = sched.insert_job(None, 5, None)
+    sleep(0.75)
+    job_id = sched.insert_job(None, 8, None)
 
     while True:
         pass

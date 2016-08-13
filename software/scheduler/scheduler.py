@@ -1,6 +1,5 @@
 import threading
 import logging
-import sched
 import time
 import random
 
@@ -37,23 +36,32 @@ class Scheduler:
         self._jobs = {}
         self._jobs_lock = threading.Lock()
         self._jobs_sem = threading.Semaphore(value=0)
-        self._sched = sched.scheduler()
-        self._next_id = random.randint(1000, 10000)
+        self._next_id = 0
         self._current_job = None
+        self._sched_thread = threading.Thread(target=self, name="Scheduler")
+
+    def start(self):
+        """Start scheduling jobs."""
+        self._sched_thread.start()
+
+    def stop(self):
+        """Stop scheduling jobs."""
+        self._sched_thread.stop()
 
     def __call__(self):
         """Start scheduling jobs for the radio."""
-        self._start_next_job()
+        while True:
+            self._run_next_job()
 
     def insert_job(self, client, duration, weight):
         """Add a job to the list. Return the job's ID."""
         job_id = self._next_id
-        self._next_id += random.randint(1, 10)
+        self._next_id += 1
         self._jobs_lock.acquire()
         self._jobs[job_id] = (client, duration, weight)
+        self._logger.info("Inserted job %d", job_id)
         self._jobs_sem.release()
         self._jobs_lock.release()
-        self._logger.info("Inserted job %d", job_id)
         return job_id
 
     def remove_job(self, client, job_id):
@@ -69,13 +77,11 @@ class Scheduler:
         self._jobs_lock.release()
         return (job_id, job)
 
-    def _start_next_job(self):
+    def _run_next_job(self):
         # Wait for a job to be added
-        if self._current_job != None:
-            self._logger.info("Job %d expired.", self._current_job[0])
-        self._logger.info("Waiting on next job to arrive...")
-        self._jobs_sem.acquire()
-        self._logger.info("Done waiting for a job.")
+        if self._jobs_sem.acquire(blocking=False) == False:
+            self._logger.info("Waiting on next job to arrive...")
+            self._jobs_sem.acquire()
 
         job_id, job = self._get_next_job()
         client, duration, weight = job
@@ -94,17 +100,17 @@ class Scheduler:
         radio.colors_lock_lock.acquire()
         radio.colors_lock.acquire()
         if self._current_job != None:
-            self._logger.info("Done.")
+            self._logger.info("Stopped.")
         # Switch to the new job
         radio.colors_lock = new_lock
-        self._current_job = job
+        self._current_job = (job_id, job)
         radio.colors_lock_lock.release()
 
-        # Schedule the end of the job
-        self._sched.enter(duration, 1, self._start_next_job)
         # Let the new job run
         new_lock.release()
-        # Notify the client it can start
-        # TODO
+        # TODO: notify the client it can start
         pass
         self._logger.info("Job %d is now running.", job_id)
+        # Wait for the end of the job
+        time.sleep(duration)
+        self._logger.info("Job %d expired.", job_id)
