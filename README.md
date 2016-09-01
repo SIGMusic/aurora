@@ -1,4 +1,4 @@
-aurora
+Aurora
 ======
 
 *Wirelessly networked RGB floodlights*
