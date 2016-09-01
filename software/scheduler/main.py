@@ -31,9 +31,11 @@ def main():
     sched.start()
 
     sleep(1.5)
-    job_id = sched.insert_job(None, 5, None)
+    sched.register_client(1000, 1)
+    job_id = sched.insert_job(1000, 5.0)
     sleep(0.75)
-    job_id = sched.insert_job(None, 8, None)
+    sched.register_client(1001, 1)
+    job_id = sched.insert_job(1001, 8.0)
 
     while True:
         pass

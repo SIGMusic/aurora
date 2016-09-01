@@ -33,6 +33,8 @@ class Scheduler:
     def __init__(self):
         """Initialize data structures needed by the scheduler."""
         self._logger = logging.getLogger(__name__)
+        self._clients = {}
+        self._clients_lock = threading.Lock()
         self._jobs = {}
         self._jobs_lock = threading.Lock()
         self._jobs_sem = threading.Semaphore(value=0)
@@ -53,12 +55,22 @@ class Scheduler:
         while True:
             self._run_next_job()
 
-    def insert_job(self, client, duration, weight):
+    def register_client(self, client, weight):
+        """Register a new client that has not been serviced yet."""
+        self._clients_lock.acquire()
+        self._clients[client] = (0, weight)
+        self._clients_lock.release()
+
+        self._jobs_lock.acquire()
+        self._jobs[client] = {}
+        self._jobs_lock.release()
+
+    def insert_job(self, client, duration):
         """Add a job to the list. Return the job's ID."""
         job_id = self._next_id
         self._next_id += 1
         self._jobs_lock.acquire()
-        self._jobs[job_id] = (client, duration, weight)
+        self._jobs[client][job_id] = duration
         self._logger.info("Inserted job %d", job_id)
         self._jobs_sem.release()
         self._jobs_lock.release()
@@ -73,9 +85,13 @@ class Scheduler:
     def _get_next_job(self):
         # TODO: actually calculate the next job
         self._jobs_lock.acquire()
-        job_id, job = self._jobs.popitem()
+        while True:
+            client, queue = self._jobs.popitem()
+            if len(queue) != 0:
+                break
+        job_id, duration = queue.popitem()
         self._jobs_lock.release()
-        return (job_id, job)
+        return (job_id, duration)
 
     def _run_next_job(self):
         # Wait for a job to be added
@@ -83,8 +99,7 @@ class Scheduler:
             self._logger.info("Waiting on next job to arrive...")
             self._jobs_sem.acquire()
 
-        job_id, job = self._get_next_job()
-        client, duration, weight = job
+        job_id, duration = self._get_next_job()
         self._logger.info("Next job to run is %d", job_id)
         # TODO: use a Manager so it can be shared across processes
         new_lock = threading.Lock()
@@ -96,14 +111,14 @@ class Scheduler:
 
         # Stop the current job
         if self._current_job != None:
-            self._logger.info("Stopping job %d...", self._current_job[0])
+            self._logger.info("Stopping job %d...", self._current_job)
         radio.colors_lock_lock.acquire()
         radio.colors_lock.acquire()
         if self._current_job != None:
             self._logger.info("Stopped.")
         # Switch to the new job
         radio.colors_lock = new_lock
-        self._current_job = (job_id, job)
+        self._current_job = job_id
         radio.colors_lock_lock.release()
 
         # Let the new job run
