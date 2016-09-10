@@ -39,3 +39,5 @@ eagle.epf
 *.o
 
 *.pyc
+
+.DS_Store
